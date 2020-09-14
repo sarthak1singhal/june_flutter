@@ -1,4 +1,4 @@
-package com.elysion.qvid
+package com.elysion.june
 
 import io.flutter.embedding.android.FlutterActivity
 

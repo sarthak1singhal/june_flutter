@@ -68,7 +68,7 @@ class _HomeBodyState extends State<HomeBody> {
                     indicator: BoxDecoration(color: transparentColor),
                     tabs: tabs,
                   ),
-                  Positioned.directional(
+                 /* Positioned.directional(
                     textDirection: Directionality.of(context),
                     top: 14,
                     start: 84,
@@ -76,7 +76,7 @@ class _HomeBodyState extends State<HomeBody> {
                       backgroundColor: mainColor,
                       radius: 3,
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ),

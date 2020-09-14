@@ -5,6 +5,7 @@ import 'package:qvid/Components/profile_page_button.dart';
 import 'package:qvid/Components/row_item.dart';
 import 'package:qvid/Components/sliver_app_delegate.dart';
 import 'package:qvid/Components/tab_grid.dart';
+import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
@@ -27,10 +28,35 @@ class MyProfileBody extends StatefulWidget {
 
 class _MyProfileBodyState extends State<MyProfileBody> {
   final key = UniqueKey();
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+
+
+
+  getData(){
+
+  }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     var locale = AppLocalizations.of(context);
-    return Padding(
+
+    if(Variables.token == null)
+      {
+        return(Container());
+      }
+
+    return  Padding(
       padding: EdgeInsets.only(bottom: 64.0),
       child: Scaffold(
         backgroundColor: darkColor,
@@ -93,10 +119,12 @@ class _MyProfileBodyState extends State<MyProfileBody> {
                       title: Column(
                         children: <Widget>[
                           Spacer(flex: 10),
+
+
                           CircleAvatar(
                             radius: 28.0,
                             backgroundImage:
-                                AssetImage('assets/images/user.webp'),
+                            AssetImage('assets/images/user.webp'),
                           ),
                           Spacer(),
                           Text(
@@ -109,6 +137,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
                                 fontSize: 10, color: disabledTextColor),
                           ),
                           Spacer(),
+/*
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
@@ -131,6 +160,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
                               ),
                             ],
                           ),
+*/
                           Spacer(),
                           Text(
                             locale.comment5,
@@ -140,7 +170,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
                           Spacer(),
                           ProfilePageButton(
                             locale.editProfile,
-                            () {
+                                () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -214,5 +244,6 @@ class _MyProfileBodyState extends State<MyProfileBody> {
         ),
       ),
     );
+
   }
 }

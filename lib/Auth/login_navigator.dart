@@ -15,6 +15,8 @@ class LoginRoutes {
 }
 
 class LoginNavigator extends StatelessWidget {
+  String comingFromClass;
+  LoginNavigator(this.comingFromClass);
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -32,7 +34,7 @@ class LoginNavigator extends StatelessWidget {
           WidgetBuilder builder;
           switch (settings.name) {
             case LoginRoutes.loginRoot:
-              builder = (BuildContext _) => LoginPage();
+              builder = (BuildContext _) => LoginPage(comingFromClass);
               break;
             case LoginRoutes.registration:
               builder = (BuildContext _) => RegisterPage();

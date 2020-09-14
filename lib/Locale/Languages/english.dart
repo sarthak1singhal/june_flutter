@@ -1,6 +1,6 @@
 Map<String, String> english() {
   return {
-    'youWillNeed': 'You\'ll need a Qvid account\nto continue',
+    'youWillNeed': 'You\'ll need a June account\nto continue',
     'enterPhone': 'Enter phone number',
     'continueText': 'Continue',
     'orContinueWith': 'Or Continue with',
@@ -58,7 +58,7 @@ Map<String, String> english() {
     'logout': 'Logout',
     'comment5':
         'Content creater and food lover.\nLove to make food making videos via this app',
-    'editProfile': 'Edit profile',
+    'editProfile': 'QvidEdit profile',
     'liked': 'Liked',
     'delete': 'Delete',
     'changeProfilePic': 'Change Profile Pic',

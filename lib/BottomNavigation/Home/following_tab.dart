@@ -3,6 +3,7 @@ import 'package:qvid/Auth/login_navigator.dart';
 import 'package:qvid/BottomNavigation/Home/comment_sheet.dart';
 import 'package:qvid/Components/custom_button.dart';
 import 'package:qvid/Components/rotated_image.dart';
+import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -33,13 +34,16 @@ class FollowingTabBody extends StatefulWidget {
   FollowingTabBody(this.videos, this.images, this.isFollowing, this.variable);
 
   @override
-  _FollowingTabBodyState createState() => _FollowingTabBodyState();
+  FollowingTabBodyState  createState() => FollowingTabBodyState ();
 }
 
-class _FollowingTabBodyState extends State<FollowingTabBody> {
+class FollowingTabBodyState extends State<FollowingTabBody> {
   PageController _pageController;
   int current = 0;
   bool isOnPageTurning = false;
+  PersistentBottomSheetController _controller;
+  bool _open = false;
+  GlobalKey<ScaffoldState> _key = GlobalKey();
 
   void scrollListener() {
     if (isOnPageTurning &&
@@ -64,8 +68,17 @@ class _FollowingTabBodyState extends State<FollowingTabBody> {
     _pageController.addListener(scrollListener);
   }
 
+  static var c;
+
+  static closeSheet()
+  {
+     Navigator.pop(c);
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    c = context;
     return PageView.builder(
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.vertical,
@@ -80,10 +93,11 @@ class _FollowingTabBodyState extends State<FollowingTabBody> {
           isFollowing: widget.isFollowing,
         );
       },
-      onPageChanged: widget.variable == null
+      onPageChanged: Variables.token == null
           ? (i) async {
               if (i == 2) {
                 await showModalBottomSheet(
+
                   shape: OutlineInputBorder(
                       borderSide: BorderSide(color: transparentColor),
                       borderRadius:
@@ -94,7 +108,7 @@ class _FollowingTabBodyState extends State<FollowingTabBody> {
                   builder: (context) {
                     return Container(
                         height: MediaQuery.of(context).size.width * 1.2,
-                        child: LoginNavigator());
+                        child: LoginNavigator("following"));
                   },
                 );
               }
