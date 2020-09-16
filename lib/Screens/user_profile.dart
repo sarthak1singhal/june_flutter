@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+   import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
 import 'package:qvid/Components/profile_page_button.dart';

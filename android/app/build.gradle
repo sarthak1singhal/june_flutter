@@ -39,10 +39,20 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.elysion.june"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+    }
+    ext {
+        flutterFFmpegPackage  = "min-lts"
+        flutterFFmpegPackage  = "min-gpl-lts"
+        flutterFFmpegPackage  = "https-lts"
+        flutterFFmpegPackage  = "https-gpl-lts"
+        flutterFFmpegPackage  = "audio-lts"
+        flutterFFmpegPackage  = "video-lts"
+        flutterFFmpegPackage  = "full-lts"
+        flutterFFmpegPackage  = "full-gpl-lts"
     }
 
     buildTypes {
