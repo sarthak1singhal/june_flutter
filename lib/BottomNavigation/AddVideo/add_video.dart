@@ -1,8 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flashlight/flashlight.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -24,13 +28,16 @@ class _AddVideoState extends State<AddVideo> {
   bool  _lightFlag= false;
   String fileName="";
 
+  bool isRecordingStarted = false;
+  int _start = 30;
 
+  Timer _timer;
   @override
   void initState() {
     super.initState();
 
     getCamera();
-initFlashlight();
+    initFlashlight();
 
 
   }
@@ -46,82 +53,163 @@ initFlashlight();
           children: <Widget>[
 
           controller==null?Container():!controller.value.isInitialized?Container():CameraPreview(controller),
-            IconButton(
-              icon: Icon(
-                Icons.close,
-                color: secondaryColor,
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-             Text(fileName),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
 
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: secondaryColor,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                _start!=30 && _timer.isActive? Padding(
+                  padding: const EdgeInsets.only(right:8.0),
+                  child: RaisedButton(
+                    onPressed: (){},
+                    textColor: Colors.white,
+                    color: Colors.red,
+                    padding: const EdgeInsets.all(8.0),
+                    child: new Text(
+                      "Next",
+                    ),
+                  ),
+                ):Container(),
+
+              ],
+            ),
              Align(
                child: Padding(
                  padding: const EdgeInsets.all(8.0),
-                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    GestureDetector(
-                      child: Icon(
-                        Icons.music_note,
-                        color: secondaryColor,
-                      ),
-                      onTap: () async{
-                        FilePickerResult result = await FilePicker.platform.pickFiles(
-                          type: FileType.audio,
-                        );
-                        print(result);
+                 child: Column(
+                   mainAxisAlignment: MainAxisAlignment.end,
+                   children: [
 
-                    }
-                    ),
-                    GestureDetector(
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundColor: videoCall,
-                        child: Icon(
-                          Icons.fiber_manual_record,
-                          color: secondaryColor,
-                          size: 30,
+                     Text("${_start.toString()}sec",style: TextStyle(fontSize: 30),),
+                     SizedBox(height: 20),
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        GestureDetector(
+                          child: Icon(
+                            Icons.music_note,
+                            color: secondaryColor,
+                          ),
+                          onTap: () async{
+                            FilePickerResult result = await FilePicker.platform.pickFiles(
+                              type: FileType.audio,
+                            );
+                            setState(() {
+                              fileName = result.files[0].name;
+                            });
+
+                            print(result);
+
+                        }
                         ),
-                      ),
-                      onTap: () => Navigator.pushNamed(
-                          context, PageRoutes.addVideoFilterPage),
-                    ),
-                    GestureDetector(
-                      child: Icon(
-                        Icons.perm_media,
-                        color: secondaryColor,
-                      ),
+                        GestureDetector(
+                          child: CircleAvatar(
+                            radius: 30,
+                            child: Icon(
+                              Icons.fiber_manual_record,
+                              color: isRecordingStarted?Colors.green:Colors.red,
+                              size: 30,
+                            ),
+                          ),
+                          onTap: () async {
 
-                      onTap: () async{
+                            if(!isRecordingStarted) {
+                              final directory = await getApplicationDocumentsDirectory();
+                              String fileName = "outputjune${DateTime.now()
+                                  .toIso8601String()}.mp4";
+                              File file = new File(directory.path + "/" + fileName);
+                              await controller.prepareForVideoRecording();
+                              controller.startVideoRecording(file.path);
+                              isRecordingStarted = !isRecordingStarted;
 
-                        FilePickerResult result = await FilePicker.platform.pickFiles(
-                          type: FileType.video,
-                        );
-                        print(result);
+                              const oneSec = const Duration(seconds: 1);
+                              _timer = new Timer.periodic(
+                                oneSec,
+                                    (Timer timer) => setState(
+                                      () {
+                                    if (_start < 1) {
+
+                                      timer.cancel();
+                                    } else {
+                                      _start = _start - 1;
+
+                                      timer.tick;
 
 
-                      }
-                    ),
 
-                  ],
+                                    }
+                                  },
+                                ),
+                              );
+
+setState(() {
+
+});
+                            }
+                            else
+                              {
+                                controller.stopVideoRecording();
+                                isRecordingStarted = !isRecordingStarted;
+                                _timer.cancel();
+
+                              }
+
+                          },
+                        ),
+                        GestureDetector(
+                          child: Icon(
+                            Icons.perm_media,
+                            color: secondaryColor,
+                          ),
+
+                          onTap: () async{
+
+                            FilePickerResult result = await FilePicker.platform.pickFiles(
+                              type: FileType.video,
+                            );
+                            setState(() {
+                              fileName = result.files[0].name;
+                            });
+                            print(result);
+
+
+                          }
+                        ),
+
+                      ],
             ),
+                   ],
+                 ),
                ),
                alignment: Alignment.bottomCenter,
              ),
             Align(child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
+              padding: const EdgeInsets.only(left:20.0,right: 20,top: 50),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  GestureDetector(child: Icon(Icons.camera_alt,color: Colors.white,),onTap: (){
-                    if(isFront) {
-                      changeCamera(cameras[0]);
-                    }
-                    else{
-                      changeCamera(cameras[1]);
-                    }
-                  }),
-                  IconButton(icon: Icon(Icons.flash_off,color: Colors.white,), onPressed: null)
+                  Expanded(child: Text(fileName)),
+                  Column(
+                    children: [
+                      GestureDetector(child: Icon(Icons.camera_alt,color: Colors.white,),onTap: (){
+                        if(isFront) {
+                          changeCamera(cameras[0]);
+                        }
+                        else{
+                          changeCamera(cameras[1]);
+                        }
+                      }),
+                      IconButton(icon: Icon(Icons.flash_off,color: Colors.white,), onPressed: null)
+                    ],
+                  ),
                 ],
               ),
             ),alignment: Alignment.topRight,)
