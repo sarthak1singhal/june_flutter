@@ -12,6 +12,7 @@ import 'package:qvid/BottomNavigation/AddVideo/post_info.dart';
 import 'package:qvid/BottomNavigation/Explore/search_users.dart';
 import 'package:qvid/BottomNavigation/MyProfile/tnc.dart';
 import 'package:qvid/Chat/chat_page.dart';
+import 'package:qvid/Screens/review_screen.dart';
 import 'package:qvid/Screens/user_profile.dart';
 
 class PageRoutes {
@@ -29,6 +30,7 @@ class PageRoutes {
   static const String morePage = 'more_page';
   static const String videoOptionPage = 'video_option_page';
   static const String verifiedBadgePage = 'verified_badge_page';
+  static const String reviewPage = 'review_page';
 
   Map<String, WidgetBuilder> routes() {
     return {
@@ -46,6 +48,7 @@ class PageRoutes {
       morePage: (context) => MorePage(),
       videoOptionPage: (context) => VideoOptionPage(),
       verifiedBadgePage: (context) => BadgeRequest(),
+      reviewPage: (context) => ReviewScreen(),
     };
   }
 }

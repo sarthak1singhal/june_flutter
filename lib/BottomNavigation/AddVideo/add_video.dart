@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
+import 'package:qvid/Screens/review_screen.dart';
 import 'package:qvid/Theme/colors.dart';
 // Import package
 
@@ -30,8 +31,10 @@ class _AddVideoState extends State<AddVideo> {
 
   bool isRecordingStarted = false;
   int _start = 30;
-
   Timer _timer;
+
+  List<String> list = List();
+  String audioPath = "";
   @override
   void initState() {
     super.initState();
@@ -52,7 +55,7 @@ class _AddVideoState extends State<AddVideo> {
           overflow: Overflow.visible,
           children: <Widget>[
 
-          controller==null?Container():!controller.value.isInitialized?Container():CameraPreview(controller),
+            controller==null?Container():!controller.value.isInitialized?Container():CameraPreview(controller),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +71,17 @@ class _AddVideoState extends State<AddVideo> {
                 _start!=30 && _timer.isActive? Padding(
                   padding: const EdgeInsets.only(right:8.0),
                   child: RaisedButton(
-                    onPressed: (){},
+                    onPressed: (){
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ReviewScreen(
+                              listVideo: list,
+                              audioPath: audioPath,
+                            )),
+                      );
+                    },
                     textColor: Colors.white,
                     color: Colors.red,
                     padding: const EdgeInsets.all(8.0),
@@ -80,34 +93,34 @@ class _AddVideoState extends State<AddVideo> {
 
               ],
             ),
-             Align(
-               child: Padding(
-                 padding: const EdgeInsets.all(8.0),
-                 child: Column(
-                   mainAxisAlignment: MainAxisAlignment.end,
-                   children: [
+            Align(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
 
-                     Text("${_start.toString()}sec",style: TextStyle(fontSize: 30),),
-                     SizedBox(height: 20),
-                     Row(
+                    Text("${_start.toString()}sec",style: TextStyle(fontSize: 30),),
+                    SizedBox(height: 20),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         GestureDetector(
-                          child: Icon(
-                            Icons.music_note,
-                            color: secondaryColor,
-                          ),
-                          onTap: () async{
-                            FilePickerResult result = await FilePicker.platform.pickFiles(
-                              type: FileType.audio,
-                            );
-                            setState(() {
-                              fileName = result.files[0].name;
-                            });
+                            child: Icon(
+                              Icons.music_note,
+                              color: secondaryColor,
+                            ),
+                            onTap: () async{
+                              FilePickerResult result = await FilePicker.platform.pickFiles(
+                                type: FileType.audio,
+                              );
+                              audioPath = result.files[0].path;
+                              setState(() {
+                                fileName = result.files[0].name;
+                              });
 
-                            print(result);
-
-                        }
+                              print(result);
+                            }
                         ),
                         GestureDetector(
                           child: CircleAvatar(
@@ -135,61 +148,60 @@ class _AddVideoState extends State<AddVideo> {
                                     (Timer timer) => setState(
                                       () {
                                     if (_start < 1) {
-
+                                      controller.stopVideoRecording();
+                                      isRecordingStarted = !isRecordingStarted;
                                       timer.cancel();
                                     } else {
                                       _start = _start - 1;
-
                                       timer.tick;
-
-
-
                                     }
                                   },
                                 ),
                               );
 
-setState(() {
+                              list.add(file.path);
 
-});
+                              setState(() {
+
+                              });
                             }
                             else
-                              {
-                                controller.stopVideoRecording();
-                                isRecordingStarted = !isRecordingStarted;
-                                _timer.cancel();
+                            {
+                              controller.stopVideoRecording();
+                              isRecordingStarted = !isRecordingStarted;
+                              _timer.cancel();
 
-                              }
+                            }
 
                           },
                         ),
                         GestureDetector(
-                          child: Icon(
-                            Icons.perm_media,
-                            color: secondaryColor,
-                          ),
+                            child: Icon(
+                              Icons.perm_media,
+                              color: secondaryColor,
+                            ),
 
-                          onTap: () async{
+                            onTap: () async{
 
-                            FilePickerResult result = await FilePicker.platform.pickFiles(
-                              type: FileType.video,
-                            );
-                            setState(() {
-                              fileName = result.files[0].name;
-                            });
-                            print(result);
+                              FilePickerResult result = await FilePicker.platform.pickFiles(
+                                type: FileType.video,
+                              );
+                              setState(() {
+                                fileName = result.files[0].name;
+                              });
+                              print(result);
 
 
-                          }
+                            }
                         ),
 
                       ],
+                    ),
+                  ],
+                ),
+              ),
+              alignment: Alignment.bottomCenter,
             ),
-                   ],
-                 ),
-               ),
-               alignment: Alignment.bottomCenter,
-             ),
             Align(child: Padding(
               padding: const EdgeInsets.only(left:20.0,right: 20,top: 50),
               child: Row(
