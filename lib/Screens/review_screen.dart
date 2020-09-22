@@ -37,6 +37,7 @@ class ReviewState extends State<ReviewScreen> {
   TextEditingController _textController = TextEditingController();
   var focusNode = new FocusNode();
   bool showTextfield = false;
+  List<String> _listtempts = List();
   @override
   void initState() {
     mergeVideo();
@@ -64,7 +65,6 @@ class ReviewState extends State<ReviewScreen> {
     final size = MediaQuery.of(context).size;
     final deviceRatio = size.width / size.height;
 
-    // TODO: implement build
     return Scaffold(
       body: Stack(
         children: [
@@ -87,33 +87,32 @@ class ReviewState extends State<ReviewScreen> {
             },
           ),
           Container(
-             child: Positioned(
-               left: offset.dx,
-               top: offset.dy,
-               child: GestureDetector(
-              onPanUpdate: (details) {
-                setState(() {
-                  offset = Offset(
-                      offset.dx + details.delta.dx, offset.dy + details.delta.dy);
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: Text(lableFloating,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 28.0,
-                          color: Colors.red)),
-                ),
-              )),
-        ),
-      ),
+            child: Positioned(
+              left: offset.dx,
+              top: offset.dy,
+              child: GestureDetector(
+                  onPanUpdate: (details) {
+                    setState(() {
+                      offset = Offset(offset.dx + details.delta.dx,
+                          offset.dy + details.delta.dy);
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Text(lableFloating,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 28.0,
+                              color: Colors.red)),
+                    ),
+                  )),
+            ),
+          ),
           Align(
             child: GestureDetector(
               child: Container(
-
                 child: Text(
                   "Add Text",
                   style: TextStyle(color: Colors.black),
@@ -121,13 +120,12 @@ class ReviewState extends State<ReviewScreen> {
                 padding: EdgeInsets.all(8.0),
                 color: Colors.white,
               ),
-              onTap: (){
+              onTap: () {
                 FocusScope.of(context).requestFocus(focusNode);
                 setState(() {
                   showTextfield = !showTextfield;
                 });
               },
-
             ),
             alignment: Alignment.bottomCenter,
           ),
@@ -135,23 +133,18 @@ class ReviewState extends State<ReviewScreen> {
             child: Align(
               child: TextField(
                 controller: _textController,
-                  focusNode: focusNode,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder()
-                  ),
-                onChanged: (data){
+                focusNode: focusNode,
+                decoration: InputDecoration(border: OutlineInputBorder()),
+                onChanged: (data) {
                   setState(() {
                     lableFloating = data;
                   });
                 },
-                onSubmitted: (data){
+                onSubmitted: (data) {
                   setState(() {
                     showTextfield = !showTextfield;
                   });
-
-
                 },
-
               ),
               alignment: Alignment.bottomCenter,
             ),
@@ -182,46 +175,52 @@ class ReviewState extends State<ReviewScreen> {
   }
 
   void mergeVideo() {
-    getApplicationDocumentsDirectory().then((value) {
+    getApplicationDocumentsDirectory().then((value) async {
       String fileName =
           "outputjunemerge${DateTime.now().toIso8601String()}.mp4";
+
       fileMerged = new File(value.path + "/" + fileName);
+
       finalFileWithAudio = new File(value.path +
           "/" +
           "outputjunewithaudio${DateTime.now().toIso8601String()}.mp4");
-      String s1 =
-          "-i ${widget.listVideo[0]} -c copy -bsf:v h264_mp4toannexb -f mpegts ${value.path + "/" + "intermediate1.ts"}";
-      String s2 =
-          "-i ${widget.listVideo[1]} -c copy -bsf:v h264_mp4toannexb -f mpegts ${value.path + "/" + "intermediate2.ts"}";
-      String s3 = "-i " +
-          '"concat:${value.path + "/" + "intermediate1.ts"}|${value.path + "/" + "intermediate2.ts"}"' +
+
+      for (int i = 0; i < widget.listVideo.length; i++) {
+        String s =
+            "-i ${widget.listVideo[i]} -c copy -bsf:v h264_mp4toannexb -f mpegts ${value.path + "/" + "intermediate$i.ts"}";
+        _listtempts.add(s);
+      }
+
+      for (int i = 0; i < widget.listVideo.length; i++) {
+        int code  = await _flutterFFmpeg.execute(_listtempts[i]);
+        print(code);
+      }
+
+      String concat = null;
+      for (int i = 0; i < widget.listVideo.length; i++) {
+        if (concat == null)
+          concat = value.path + "/" + "intermediate$i.ts" + "|";
+        else {
+          if (i == widget.listVideo.length - 1)
+            concat = concat + value.path + "/" + "intermediate$i.ts";
+          else {
+            concat = concat + value.path + "/" + "intermediate$i.ts" + "|";
+          }
+        }
+      }
+
+      String mergefileCommand = "-i " +
+          '"concat:$concat"' +
           " -c copy -bsf:a aac_adtstoasc ${fileMerged.path}";
-      String mixiAudioCommand =
-          " -i ${fileMerged.path} -i ${widget.audioPath} -c copy -map 0:v:0 -map 1:a:0 ${finalFileWithAudio.path}";
 
-      _flutterFFmpeg.execute(s1).then((value) {
+      _flutterFFmpeg.execute(mergefileCommand).then((value) {
         print(value);
-        _flutterFFmpeg.execute(s2).then((value) {
-          print(value);
-          _flutterFFmpeg.execute(s3).then((value) {
-            print(value);
-            _flutterFFmpeg.execute(mixiAudioCommand).then((value) {
-              print(value);
-              final FlutterFFprobe _flutterFFprobe = new FlutterFFprobe();
-              _flutterFFprobe
-                  .getMediaInformation(fileMerged.absolute.path)
-                  .then((info) {
-                print(info);
+        String mixiAudioCommand =
+            " -i ${fileMerged.path} -i ${widget.audioPath} -c copy -map 0:v:0 -map 1:a:0 ${finalFileWithAudio.path}";
 
-                int duration =
-                    info.getAllProperties()['streams'][0]['duration_ts'];
-              }).catchError((e) {
-                Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text(e.toString())));
-              });
-            });
-          });
-        });
+        _flutterFFmpeg.execute(mixiAudioCommand).then((value) {
+          print(value);
+      });
       });
     });
   }

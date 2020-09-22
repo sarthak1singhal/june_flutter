@@ -73,7 +73,6 @@ class _AddVideoState extends State<AddVideo> {
                   padding: const EdgeInsets.only(right:8.0),
                   child: RaisedButton(
                     onPressed: (){
-
                       Navigator.push(
                         context,
                         MaterialPageRoute(
