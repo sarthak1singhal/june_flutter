@@ -11,6 +11,7 @@ import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Screens/review_screen.dart';
 import 'package:qvid/Theme/colors.dart';
+import 'package:path/path.dart' as path;
 // Import package
 
 class AddVideo extends StatefulWidget {
@@ -115,6 +116,21 @@ class _AddVideoState extends State<AddVideo> {
                                 type: FileType.audio,
                               );
                               audioPath = result.files[0].path;
+
+
+                              File picture = File(audioPath);
+
+                              String dir = path.dirname(picture.path);
+                              String newPath = path.join(dir, 'test.mp3');
+                              print('NewPath: ${newPath}');
+                              picture.renameSync(newPath);
+
+
+                              audioPath = newPath;
+
+
+                              File(audioPath).existsSync();
+
                               setState(() {
                                 fileName = result.files[0].name;
                               });
