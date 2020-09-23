@@ -69,16 +69,18 @@ class _AddVideoState extends State<AddVideo> {
                   ),
                   onPressed: () => Navigator.pop(context),
                 ),
-                _start!=30 && _timer.isActive? Padding(
+                _start!=30 ? Padding(
                   padding: const EdgeInsets.only(right:8.0),
                   child: RaisedButton(
                     onPressed: (){
-                      Navigator.push(
+                      controller?.dispose();
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => ReviewScreen(
                               listVideo: list,
                               audioPath: audioPath,
+                              duration: 30-_start,
                             )),
                       );
                     },
@@ -140,6 +142,8 @@ class _AddVideoState extends State<AddVideo> {
                         GestureDetector(
                           child: CircleAvatar(
                             radius: 30,
+                            backgroundColor: isRecordingStarted?Colors.green:Colors.red,
+                            foregroundColor:  isRecordingStarted?Colors.green:Colors.red,
                             child: Icon(
                               Icons.fiber_manual_record,
                               color: isRecordingStarted?Colors.green:Colors.red,
@@ -185,6 +189,9 @@ class _AddVideoState extends State<AddVideo> {
                               controller.stopVideoRecording();
                               isRecordingStarted = !isRecordingStarted;
                               _timer.cancel();
+                              setState(() {
+
+                              });
 
                             }
 
@@ -198,16 +205,14 @@ class _AddVideoState extends State<AddVideo> {
 
                             onTap: () async{
 
-                              FilePickerResult result = await FilePicker.platform.pickFiles(
-                                type: FileType.video,
-                              );
-                              setState(() {
-                                fileName = result.files[0].name;
-                              });
-                              print(result);
-
-
-                            }
+//                              FilePickerResult result = await FilePicker.platform.pickFiles(
+//                                type: FileType.video,
+//                              );
+//                              setState(() {
+//                                fileName = result.files[0].name;
+//                              });
+//                              print(result);
+                               }
                         ),
 
                       ],

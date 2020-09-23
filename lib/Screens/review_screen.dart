@@ -11,7 +11,8 @@ import 'package:video_player/video_player.dart';
 class ReviewScreen extends StatefulWidget {
   List<String> listVideo;
   String audioPath;
-  ReviewScreen({this.listVideo, this.audioPath}) {}
+  int duration ;
+  ReviewScreen({this.listVideo, this.audioPath,this.duration}) {}
 
   @override
   State<StatefulWidget> createState() {
@@ -31,24 +32,20 @@ class ReviewState extends State<ReviewScreen> {
 
   File fileMerged = null;
   File finalFileWithAudio = null;
-  Offset offset = Offset.zero;
+  Offset offset = Offset(0.0, 50.0);
+  Offset offsetSec = Offset(0.0, 100.0);
   Future<void> _initializeVideoPlayerFuture;
   String lableFloating = "";
   TextEditingController _textController = TextEditingController();
   var focusNode = new FocusNode();
   bool showTextfield = false;
+  bool showImage = false;
   List<String> _listtempts = List();
+
+  File finalfilecutAudio;
   @override
   void initState() {
     mergeVideo();
-
-    File file = File(widget.listVideo[0]);
-
-    _controller = VideoPlayerController.file(file);
-    _controller.setLooping(true);
-
-    _initializeVideoPlayerFuture = _controller.initialize();
-
     super.initState();
   }
 
@@ -56,6 +53,18 @@ class ReviewState extends State<ReviewScreen> {
   void dispose() {
     // Ensure disposing of the VideoPlayerController to free up resources.
     _controller.dispose();
+
+
+    getApplicationDocumentsDirectory().then((value){
+      for (int i = 0; i < widget.listVideo.length; i++) {
+        String s ="${value.path + "/" + "intermediate$i.ts"}";
+        File file = File(s);
+        file.deleteSync();
+        print("file deleted");
+      }
+
+    });
+
 
     super.dispose();
   }
@@ -74,11 +83,8 @@ class ReviewState extends State<ReviewScreen> {
               if (snapshot.connectionState == ConnectionState.done) {
                 // If the VideoPlayerController has finished initialization, use
                 // the data it provides to limit the aspect ratio of the VideoPlayer.
-                return AspectRatio(
-                  aspectRatio: deviceRatio,
-                  // Use the VideoPlayer widget to display the video.
-                  child: VideoPlayer(_controller),
-                );
+                return RotatedBox(quarterTurns: 1,
+                child: VideoPlayer(_controller));
               } else {
                 // If the VideoPlayerController is still initializing, show a
                 // loading spinner.
@@ -86,70 +92,131 @@ class ReviewState extends State<ReviewScreen> {
               }
             },
           ),
+      Container(
+        child: Positioned(
+          left: offset.dx,
+          top: offset.dy,
+          child: GestureDetector(
+              onPanUpdate: (details) {
+                setState(() {
+                  offset = Offset(
+                      offset.dx + details.delta.dx, offset.dy + details.delta.dy);
+                });
+              },
+              child: SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text("$lableFloating",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 28.0,
+                            color: Colors.red)),
+                  ),
+                ),
+              )),
+        ),
+      ),
           Container(
             child: Positioned(
-              left: offset.dx,
-              top: offset.dy,
+              left: offsetSec.dx,
+              top: offsetSec.dy,
               child: GestureDetector(
                   onPanUpdate: (details) {
                     setState(() {
-                      offset = Offset(offset.dx + details.delta.dx,
-                          offset.dy + details.delta.dy);
+                      offsetSec = Offset(
+                          offsetSec.dx + details.delta.dx, offsetSec.dy + details.delta.dy);
                     });
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Text(lableFloating,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 28.0,
-                              color: Colors.red)),
+                    child:  Visibility(
+                      child: Align(
+                        child: Container(
+                          height: 100,
+                          width: 100,
+                          color: Colors.white,
+                          child: Center(child: Text("Add Image Here?",style: TextStyle(color: Colors.black,),textAlign: TextAlign.center,)),
+
+                        ),
+                        alignment: Alignment.center,
+                      ),
+                      visible: showImage,
                     ),
                   )),
             ),
           ),
           Align(
-            child: GestureDetector(
-              child: Container(
-                child: Text(
-                  "Add Text",
-                  style: TextStyle(color: Colors.black),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+
+                GestureDetector(
+                  child: Container(
+                    child: Text(
+                      !showImage?"Add Image":"Hide Image",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    color: Colors.white,
+                  ),
+                  onTap: () {
+                    setState(() {
+                      showImage = !showImage;
+                    });
+                  },
                 ),
-                padding: EdgeInsets.all(8.0),
-                color: Colors.white,
-              ),
-              onTap: () {
-                FocusScope.of(context).requestFocus(focusNode);
-                setState(() {
-                  showTextfield = !showTextfield;
-                });
-              },
+
+                SizedBox(height: 20,),
+                GestureDetector(
+                  child: Container(
+                    child: Text(
+                      "Add Text",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    color: Colors.white,
+                  ),
+                  onTap: () {
+                    FocusScope.of(context).requestFocus(focusNode);
+                    setState(() {
+                      showTextfield = !showTextfield;
+                    });
+                  },
+                ),
+                SizedBox(height: 20,),
+                Visibility(
+                  child: Align(
+                    child: TextField(
+                      controller: _textController,
+                      focusNode: focusNode,
+                      decoration: InputDecoration(border: OutlineInputBorder()),
+                      onChanged: (data) {
+                        setState(() {
+                          lableFloating = data;
+                        });
+                      },
+                      onSubmitted: (data) {
+                        setState(() {
+                          showTextfield = !showTextfield;
+                        });
+                      },
+                    ),
+                    alignment: Alignment.bottomCenter,
+                  ),
+                  visible: showTextfield,
+                ),
+
+
+
+              ],
             ),
             alignment: Alignment.bottomCenter,
           ),
-          Visibility(
-            child: Align(
-              child: TextField(
-                controller: _textController,
-                focusNode: focusNode,
-                decoration: InputDecoration(border: OutlineInputBorder()),
-                onChanged: (data) {
-                  setState(() {
-                    lableFloating = data;
-                  });
-                },
-                onSubmitted: (data) {
-                  setState(() {
-                    showTextfield = !showTextfield;
-                  });
-                },
-              ),
-              alignment: Alignment.bottomCenter,
-            ),
-            visible: showTextfield,
-          ),
+
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -167,9 +234,21 @@ class ReviewState extends State<ReviewScreen> {
           });
         },
         // Display the correct icon depending on the state of the player.
-        child: Icon(
-          _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        ),
+//        child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,),
+      child:   FutureBuilder(
+        future: _initializeVideoPlayerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            // If the VideoPlayerController has finished initialization, use
+            // the data it provides to limit the aspect ratio of the VideoPlayer.
+            return Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,);
+          } else {
+            // If the VideoPlayerController is still initializing, show a
+            // loading spinner.
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
       ),
     );
   }
@@ -185,6 +264,12 @@ class ReviewState extends State<ReviewScreen> {
           "/" +
           "outputjunewithaudio${DateTime.now().toIso8601String()}.mp4");
 
+
+       finalfilecutAudio = new File(value.path +
+          "/" +
+          "outputjunecuthaudio${DateTime.now().toIso8601String()}.mp3");
+
+
       for (int i = 0; i < widget.listVideo.length; i++) {
         String s =
             "-i ${widget.listVideo[i]} -c copy -bsf:v h264_mp4toannexb -f mpegts ${value.path + "/" + "intermediate$i.ts"}";
@@ -193,7 +278,7 @@ class ReviewState extends State<ReviewScreen> {
 
       for (int i = 0; i < widget.listVideo.length; i++) {
         int code  = await _flutterFFmpeg.execute(_listtempts[i]);
-        print(code);
+        print("June---->creating temp file$code");
       }
 
       String concat = null;
@@ -211,17 +296,45 @@ class ReviewState extends State<ReviewScreen> {
 
       String mergefileCommand = "-i " +
           '"concat:$concat"' +
-          " -c copy -bsf:a aac_adtstoasc ${fileMerged.path}";
+          " -c copy -bsf:a aac_adtstoasc ${fileMerged.path}";  // command for merging video
 
-      _flutterFFmpeg.execute(mergefileCommand).then((value) {
-        print(value);
-        String mixiAudioCommand =
-            " -i ${fileMerged.path} -i ${widget.audioPath} -c copy -map 0:v:0 -map 1:a:0 ${finalFileWithAudio.path}";
+      _flutterFFmpeg.execute(mergefileCommand).then((value) async {
+        print("June---->video merge $value");
 
-        _flutterFFmpeg.execute(mixiAudioCommand).then((value) {
-          print(value);
-      });
+
+        if(widget.audioPath.isNotEmpty) {
+          String cutAudioCommand = " -i ${widget.audioPath} -ss 00:00:00 -t ${widget.duration} -acodec copy ${finalfilecutAudio.path}"; // command for cut audio
+
+
+          int code = await _flutterFFmpeg.execute(cutAudioCommand);
+          print("June---->cut audio $code");
+
+          String mixiAudioCommand =
+              " -i ${fileMerged.path} -i ${finalfilecutAudio
+              .path} -c copy -map 0:v:0 -map 1:a:0 ${finalFileWithAudio
+              .path}"; // command for mixing audio with merged video
+
+          _flutterFFmpeg.execute(mixiAudioCommand).then((value) {
+            print("June---->audio merge$value");
+            _controller = VideoPlayerController.file(finalFileWithAudio);
+            _controller.setLooping(true);
+            _initializeVideoPlayerFuture = _controller.initialize();
+            setState(() {});
+          });
+        }
+        else {
+          _controller = VideoPlayerController.file(fileMerged);
+          _controller.setLooping(true);
+          _initializeVideoPlayerFuture = _controller.initialize();
+          setState(() {});
+        }
+
+
+
       });
     });
+
   }
+
+
 }
