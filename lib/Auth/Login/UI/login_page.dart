@@ -33,7 +33,9 @@ class LoginBody extends StatefulWidget {
 }
 
 class _LoginBodyState extends State<LoginBody> {
+  final _formKey = GlobalKey<FormState>();
 
+  String number = "";
 
 
   @override
@@ -70,72 +72,87 @@ class _LoginBodyState extends State<LoginBody> {
               Container(width: 15,)
             ],
           ),
-          Spacer(),
-          EntryField(
-            label: AppLocalizations.of(context).enterPhone,
+        //  Spacer(),
+          Form(
+            key: _formKey,
+            child: TextFormField(
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).enterPhone
+              ),
+              onChanged: (s){
+                number = s;
+              },
+            )
           ),
           CustomButton(
             onPressed: () =>
                 Navigator.pushNamed(context, LoginRoutes.registration),
           ),
-          Spacer(flex: 8),
-          Text(
-            AppLocalizations.of(context).orContinueWith,
-            textAlign: TextAlign.center,
-          ),
-          Spacer(),
-          CustomButton(
-            icon: Image.asset(
-              'assets/icons/ic_fb.png',
-              height: 20,
+      //    Spacer(flex: 8),
+
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                Text(
+                  AppLocalizations.of(context).orContinueWith,
+                  textAlign: TextAlign.center,
+                ),
+                Spacer(),
+                CustomButton(
+                  icon: Image.asset(
+                    'assets/icons/ic_fb.png',
+                    height: 20,
+                  ),
+                  text: '   ${AppLocalizations.of(context).facebookAccount}',
+                  color: fbColor,
+                  onPressed: () async {
+                    final facebookLogin = FacebookLogin();
+                    final result = await facebookLogin.logIn(['email']);
+                    dynamic profile = "";
+                    // print(result.accessToken.token);
+                    if(result.accessToken.isValid()) {
+                      final token = result.accessToken.token;
+                      final graphResponse = await http.get(
+                          'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,gender,email&access_token=${token}');
+                      profile = jsonDecode(graphResponse.body);
+                    }
+
+
+                    switch (result.status) {
+                      case FacebookLoginStatus.loggedIn:
+
+                        signup(result.accessToken.userId, profile["first_name"], profile["last_name"],
+                            "https://graph.facebook.com/"+result.accessToken.userId+"/picture?width=500&width=500",
+                            "facebook",
+                            "m"
+                        );
+                        break;
+                      case FacebookLoginStatus.cancelledByUser:
+
+                        Functions.showToast("Login cancellled by the user");
+
+                        break;
+                      case FacebookLoginStatus.error:
+                        Functions.showToast("Some error occured");
+
+                        break;
+                    }
+                  },
+                ),
+                CustomButton(
+                  icon: Image.asset(
+                    'assets/icons/ic_ggl.png',
+                    height: 20,
+                  ),
+                  text: '   ${AppLocalizations.of(context).googleAccount}',
+                  color: secondaryColor,
+                  textColor: darkColor,
+                  onPressed: () =>
+                      Navigator.pushNamed(context, LoginRoutes.socialLogin),
+                ),
+              ],
             ),
-            text: '   ${AppLocalizations.of(context).facebookAccount}',
-            color: fbColor,
-            onPressed: () async {
-              final facebookLogin = FacebookLogin();
-              final result = await facebookLogin.logIn(['email']);
-              dynamic profile = "";
-             // print(result.accessToken.token);
-              if(result.accessToken.isValid()) {
-                final token = result.accessToken.token;
-                final graphResponse = await http.get(
-                    'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,gender,email&access_token=${token}');
-                profile = jsonDecode(graphResponse.body);
-               }
-
-
-              switch (result.status) {
-                case FacebookLoginStatus.loggedIn:
-
-                  signup(result.accessToken.userId, profile["first_name"], profile["last_name"],
-                      "https://graph.facebook.com/"+result.accessToken.userId+"/picture?width=500&width=500",
-                    "facebook",
-                    "m"
-                  );
-                  break;
-                case FacebookLoginStatus.cancelledByUser:
-
-                  Functions.showToast("Login cancellled by the user");
-
-                  break;
-                case FacebookLoginStatus.error:
-                  Functions.showToast("Some error occured");
-
-                  break;
-              }
-            },
-          ),
-          CustomButton(
-            icon: Image.asset(
-              'assets/icons/ic_ggl.png',
-              height: 20,
-            ),
-            text: '   ${AppLocalizations.of(context).googleAccount}',
-            color: secondaryColor,
-            textColor: darkColor,
-            onPressed: () =>
-                Navigator.pushNamed(context, LoginRoutes.socialLogin),
-          ),
+          )
         ],
       ),
     );
@@ -200,7 +217,7 @@ class _LoginBodyState extends State<LoginBody> {
         preferences.setString(Variables.u_nameString, data["username"]);
         preferences.setString(Variables.genderString, data["gender"]);
         preferences.setString(Variables.u_picString, data["profile_pic"]);
-        preferences.setString(Variables.api_tokenString, data["tokon"]);
+        preferences.setString(Variables.tokenString, data["tokon"]);
         preferences.setString(Variables.content_languageString, data["content_language"]);
         preferences.setBool(Variables.isloginString, true);
 

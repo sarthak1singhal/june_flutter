@@ -51,10 +51,6 @@ class _MyProfileBodyState extends State<MyProfileBody> {
   Widget build(BuildContext context) {
     var locale = AppLocalizations.of(context);
 
-    if(Variables.token == null)
-      {
-        return(Container());
-      }
 
     return  Padding(
       padding: EdgeInsets.only(bottom: 64.0),

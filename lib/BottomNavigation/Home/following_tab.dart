@@ -78,6 +78,7 @@ class FollowingTabBodyState extends State<FollowingTabBody> {
 
   @override
   Widget build(BuildContext context) {
+    print("SSS");
     c = context;
     return PageView.builder(
       physics: BouncingScrollPhysics(),
@@ -93,12 +94,11 @@ class FollowingTabBodyState extends State<FollowingTabBody> {
           isFollowing: widget.isFollowing,
         );
       },
-      onPageChanged: Variables.token == null
+/*      onPageChanged: Variables.token == null
           ? (i) async {
               if (i == 2) {
                 await showModalBottomSheet(
-
-                  shape: OutlineInputBorder(
+                   shape: OutlineInputBorder(
                       borderSide: BorderSide(color: transparentColor),
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(16.0))),
@@ -107,13 +107,13 @@ class FollowingTabBodyState extends State<FollowingTabBody> {
                   isDismissible: false,
                   builder: (context) {
                     return Container(
-                        height: MediaQuery.of(context).size.width * 1.2,
+                        height: MediaQuery.of(context).size.width * 1.5,
                         child: LoginNavigator("following"));
                   },
                 );
               }
             }
-          : null,
+          : null,*/
       itemCount: widget.videos.length,
     );
   }
