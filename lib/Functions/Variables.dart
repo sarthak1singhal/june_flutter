@@ -7,27 +7,33 @@ class Variables{
 
    static final String device="android";
    static final String pref_nameString="pref_name";
-   static final String u_idString="u_id";
-   static final String u_nameString="u_name";
-   static final String u_picString="u_pic";
+   //static final String u_idString="u_id";
+   //static final String u_nameString="u_name";
+   static final String picString="u_pic";
    static final String f_nameString="f_name";
    static final String l_nameString="l_name";
    static final String genderString="u_gender";
-   static final String isloginString="is_login";
+   static final String usernameString="username";
+   static final String emailString="email";
    static final String device_tokenString="device_token";
    static final String tokenString="token";
    static final String refreshTokenString="refresh_token";
    static final String content_languageString="content_language";
    static final String device_idString="device_id";
+   static final String fbid_String="fb_id";
 
 
 
    static String user_id;
-   static String user_name;
-   static String user_pic;
-   static String token;
    static String username;
+   static String user_pic;
+   static String email;
+   static String token;
+   static String refreshToken;
+   static String f_name;
+   static String l_name;
    static String language;
+   static String fb_id;
 
 
 
@@ -48,6 +54,7 @@ class Variables{
 
 
     static final String SignUp = "signup";
+    static final String login_fb = "login-fb";
     static final String uploadVideo =domain+"uploadVideo";
     static final String showAllVideos =domain+"showAllVideos";
    static final String showMyAllVideos=domain+"showMyAllVideos";
@@ -77,14 +84,13 @@ class Variables{
    static final String selectedLanguage = "selected_language";
 
 
-
-
   static final String loginUrl = "login";
+  static final String isUsernameOrEmailExist = "isEmailorUsernameExist";
    //username or email and password
        //if account exist, login
        //else show error
 
-  static final String verifyOTP = "signup";//creates an account
+  static final String signup = "signup";//creates an account
   static final String sendOTP = "send-otp";//verify user account details and sends otp to mail
 
   static final String checkEmailExist = "isEmailExist";//check if email exist

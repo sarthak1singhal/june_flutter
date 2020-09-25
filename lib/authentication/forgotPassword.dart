@@ -96,25 +96,39 @@ class _MyHomePageState extends State<Verify> {
 
 
         var res = await  Functions.unsignPostReq(Variables.loginUrl, jsonEncode({
+
           "otp" : currentText,
 
         }));
 
         var s = jsonDecode(res.body);
-        print(s);
-
 
         if(s["isError"])
         {
-          if(s["message"]!=null){
 
-            Functions.showSnackBar(_scaffoldKey, s["message"].toString());
+          String p = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
 
+          RegExp regExp = new RegExp(p);
+
+          if(Functions.isNullEmptyOrFalse(s["email"])) {
+
+            if (regExp.hasMatch(s["email"])){
+
+
+
+            }
+            else if(s["message"]!=null){
+
+              Functions.showSnackBar(_scaffoldKey, s["message"].toString());
+
+            }
           }
+
+
+
+
         }else{
 
-
-          //SAVE LOGIN DATA HERE
 
 
 

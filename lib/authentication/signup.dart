@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -5,13 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
+import 'package:qvid/authentication/verifyOTP.dart';
 
 class Signup extends StatefulWidget {
 
 
   final int screen;
+  final String email;
 
-  Signup(this.screen) ;
+  Signup(this.screen,this.email) ;
 
   @override
 
@@ -28,12 +32,10 @@ class _MyHomePageState extends State<Signup> {
 
   String s_name = "";
   String username = '';
-  String email= '';
+  String number= '';
 
   String password = "";
   bool isLoading = false;
-
-  String type = "influencer";
 
   int screen = 0; //0 for email/phone and password. 1 for first name and last name.
 
@@ -50,11 +52,97 @@ class _MyHomePageState extends State<Signup> {
 
   signUp() async {
 
-    if (_formKey.currentState.validate()) {
+    if(_formKey.currentState.validate())
+    {
+      isLoading = true;
+
+      setState(() {
+
+      });
+      try{
+
+
+        var res = await  Functions.unsignPostReq(Variables.sendOTP, jsonEncode({
+          "number" : number.trim(),
+          "email" : widget.email,
+          "full_name" : s_name.trim(),
+          "password" : password.trim(),
+          //  "password" : password.trim(),
+
+
+        }));
+
+
+        print(res.body);
+
+        var s = jsonDecode(res.body);
+        print(s);
+
+
+        if(s["isError"])
+        {
+          if(s["message"]!=null){
+
+            Functions.showSnackBar(_scaffoldKey, s["message"].toString());
+
+          }
+
+          isLoading = false;
+          setState(() {
+
+          });
+
+
+        }else{
+
+          isLoading = false;
+          setState(() {
+
+          });
+          var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyOTP(email:widget.email, password: password,
+          f_name: s_name,number: number,hash: s["key"]
+          )));
+
+
+          if(isLoggedIn!=null)
+            {
+              if(isLoggedIn){
+                Navigator.pop(context,true);
+
+                return;
+              }
+            }
 
 
 
-     }
+        }
+
+
+
+
+
+
+
+
+
+      }catch(e)
+      {
+        setState(() {
+          isLoading = false;
+
+        });
+        Functions.showSnackBar(_scaffoldKey, "Some connection error occured");
+        var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyOTP(email:widget.email, password: password,
+          f_name: s_name,number: number,
+        )));
+        debugPrint(e);
+
+      }
+
+
+
+    }
+
   }
 
   @override
@@ -102,6 +190,7 @@ Spacer(flex: 1,),
                           "Create",
                           style: TextStyle(
                               fontSize: 32,
+                              color: LocalColors.textColorDark,
                               fontFamily: Variables.fontName,
                               fontWeight: FontWeight.w700),
                         ),
@@ -109,6 +198,8 @@ Spacer(flex: 1,),
                           "Account",
                           style: TextStyle(
                               fontSize: 32,
+
+                              color: LocalColors.textColorDark,
                               fontFamily: Variables.fontName,
                               fontWeight: FontWeight.w700),
                         ),
@@ -116,6 +207,8 @@ Spacer(),
 
 
                          TextFormField(
+
+                           enabled: !isLoading,
                            textCapitalization: TextCapitalization.words,
                           decoration: InputDecoration(
 
@@ -134,7 +227,7 @@ Spacer(),
                               return "Enter a valid name";
                             }
 
-                            if (s.length < 4)
+                            if (s.length < 3)
                               return "Enter a valid name";
 
                             return null;
@@ -143,10 +236,12 @@ Spacer(),
                         Spacer(),
 
                          TextFormField(
-                          keyboardType: TextInputType.emailAddress,
+
+                           enabled: !isLoading,
+                          keyboardType: TextInputType.numberWithOptions(decimal: false,signed: false),
                           decoration: InputDecoration(
 
-                              labelText: "Email Address",
+                              labelText: "Mobile Number",
                               labelStyle: TextStyle(color: Colors.black54, fontFamily: Variables.fontName),
 
                               contentPadding: EdgeInsets.only(left: 7, right: 7)
@@ -155,20 +250,28 @@ Spacer(),
                           ),
 
                           onChanged: (s) {
-                            email = s;
+                            number = s;
                           },
                           validator: (s) {
                             if (s.isEmpty) {
 
-                                return "Enter a email address";
+                                return null;
                             }
 
-                            String p = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                            if(s.length<12 || s.length>8)
+                            return "Enter a valid mobile number";
+                            RegExp _numeric = RegExp(r'^-?[0-9]+$');
 
-                            RegExp regExp = new RegExp(p);
+                        if(!_numeric.hasMatch(s)){
+                          return "Enter a valid mobile number";
+                        }
 
-                           if(!regExp.hasMatch(s))
-                             return "Enter a valid email address";
+                        //    String p = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+
+                        //    RegExp regExp = new RegExp(p);
+
+                        //   if(!regExp.hasMatch(s))
+                          //   return "Enter a valid email address";
 
 
                             return null;
@@ -179,6 +282,8 @@ Spacer(),
 
 
                         TextFormField(
+
+                          enabled: !isLoading,
                           obscureText: true,
                           decoration: InputDecoration(
 
@@ -197,7 +302,7 @@ Spacer(),
                             if (s.isEmpty) {
                               return "Enter a valid password";
                             }
-                            if (s.length < 5)
+                            if (s.length < 8)
                               return "Password length is short";
                             return null;
                           },
@@ -236,13 +341,14 @@ Spacer(),
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Container(),
-                        /*    Text(
+                            Text(
                               "Sign Up", style: TextStyle(
                               fontSize: 27,
+                              color: LocalColors.textColorDark,
                               fontWeight: FontWeight.w600,
                               fontFamily: Variables.fontName,
                             ),
-                            ),*/
+                            ),
                             Spacer(),
                             Stack(
                               children: <Widget>[

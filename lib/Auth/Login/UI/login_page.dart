@@ -178,7 +178,7 @@ class _LoginBodyState extends State<LoginBody> {
       });
 
       var res = await  Functions.unsignPostReq(Variables.SignUp, jsonEncode({
-        "fb_id": id,
+        //"fb_id": id,
         "first_name" : f_name,
         "last_name" : l_name,
         "profile_pic" : picture,
@@ -211,15 +211,14 @@ class _LoginBodyState extends State<LoginBody> {
         var data = map["msg"][0];
         SharedPreferences preferences = await SharedPreferences.getInstance();
 
-        preferences.setString(Variables.u_idString, data["fb_id"]);
+      //  preferences.setString(Variables.u_idString, data["fb_id"]);
         preferences.setString(Variables.f_nameString, Functions.capitalizeFirst(data["first_name"]));
         preferences.setString(Variables.l_nameString, Functions.capitalizeFirst(data["last_name"]));
-        preferences.setString(Variables.u_nameString, data["username"]);
+        preferences.setString(Variables.username, data["username"]);
         preferences.setString(Variables.genderString, data["gender"]);
-        preferences.setString(Variables.u_picString, data["profile_pic"]);
+        preferences.setString(Variables.picString, data["profile_pic"]);
         preferences.setString(Variables.tokenString, data["tokon"]);
         preferences.setString(Variables.content_languageString, data["content_language"]);
-        preferences.setBool(Variables.isloginString, true);
 
 
         print(data["tokon"]);
@@ -229,7 +228,8 @@ class _LoginBodyState extends State<LoginBody> {
         Variables.language = data["content_language"];
         Variables.username= data["username"];
         Variables.user_pic= data["profile_pic"];
-        Variables.user_name= Functions.capitalizeFirst(data["first_name"]) +" "+ Functions.capitalizeFirst(data["last_name"]);
+        Variables.f_name= Functions.capitalizeFirst(data["first_name"]) ;
+        Variables.l_name= Functions.capitalizeFirst(data["last_name"]);
 
 
         if(widget.comingFromClass=="following") {

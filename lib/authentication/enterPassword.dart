@@ -11,73 +11,60 @@ import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Theme/colors.dart';
+import 'package:qvid/authentication/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-class VerifyOTP extends StatefulWidget {
+import 'forgotPassword.dart';
 
-  final String email, number, f_name, password, hash;
+class EnterPassword extends StatefulWidget {
 
-  const VerifyOTP({Key key, @required this.email, @required this.number, @required this.f_name, @required this.password, @required this.hash}) : super(key: key);
+  final String email;
+
+  const EnterPassword({Key key, this.email}) : super(key: key);
 
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<VerifyOTP> {
+class _MyHomePageState extends State<EnterPassword> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   @override
   void initState(){
     super.initState();
-    _errorController = StreamController<ErrorAnimationType>();
-
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent, //top bar color
-      statusBarIconBrightness: Brightness.dark, //top bar icons
-
-    ));
-
-
-    hash = widget.hash;
-
 
 
 
   }
-  String hash;
+
+
+
+
 
 
 
   @override
   dispose(){
-    _errorController.close();
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: LocalColors.backgroundLight, //top bar color
-      statusBarIconBrightness: Brightness.dark, //top bar icons
+      statusBarColor: Colors.transparent, //top bar color
+      statusBarIconBrightness: Brightness.light, //top bar icons
 
     ));
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+
     super.dispose();
   }
 
   final _formKey = GlobalKey<FormState>();
 
 
+  String number = '', password = "";
 
   bool isLoading = false;
 
 
-  verifyOtp() async{
+  signIn() async{
 
     if(_formKey.currentState.validate())
     {
@@ -89,47 +76,43 @@ class _MyHomePageState extends State<VerifyOTP> {
       try{
 
 
-        var res = await  Functions.unsignPostReq(Variables.signup, jsonEncode({
+        var res = await  Functions.unsignPostReq(Variables.loginUrl, jsonEncode({
+          "email" : number.trim(),
+          //  "password" : password.trim(),
 
-          "otp" : currentText,
-          "key" : hash,
-          "full_name" : widget.f_name,
-          "password" : widget.password,
-          "email" : widget.email,
-          "number" : widget.number
+
         }));
 
+
+        print(res.body);
+
         var s = jsonDecode(res.body);
+        print(s);
+
 
         if(s["isError"])
         {
 
-          if(s["message"]!=null){
+   if(s["message"]!=null){
 
               Functions.showSnackBar(_scaffoldKey, s["message"].toString());
 
-            }
 
-
-
+          }
         }else{
 
 
           SharedPreferences preferences = await SharedPreferences.getInstance();
           if(!Functions.isNullEmptyOrFalse(s["first_name"]))
-            {
-
-              preferences.setString(Variables.f_nameString, s["first_name"]);
-              Variables.f_name = s["first_name"];
-            }     if(!Functions.isNullEmptyOrFalse(s["last_name"]))
-            {
-
-              preferences.setString(Variables.l_nameString, s["last_name"]);
-              Variables.l_name = s["last_name"];
-            }
-
-
-
+          {
+            preferences.setString(Variables.f_nameString, s["first_name"]);
+            Variables.f_name = s["first_name"];
+          }
+          if(!Functions.isNullEmptyOrFalse(s["last_name"]))
+          {
+            preferences.setString(Variables.l_nameString, s["last_name"]);
+            Variables.l_name = s["last_name"];
+          }
           if(!Functions.isNullEmptyOrFalse(s["email"]))
           {
             preferences.setString(Variables.emailString, s["email"]);
@@ -144,20 +127,12 @@ class _MyHomePageState extends State<VerifyOTP> {
           {
             preferences.setString(Variables.refreshTokenString, s["refresh"]);
             Variables.refreshToken= s["refresh"];
-          } if(!Functions.isNullEmptyOrFalse(s["uid"]))
+          }
+          if(!Functions.isNullEmptyOrFalse(s["uid"]))
           {
             preferences.setString(Variables.fbid_String, s["uid"]);
             Variables.fb_id= s["uid"];
           }
-
-
-
-
-
-
-
-
-
           if(!s["isUsername"])
           {
             preferences.setString(Variables.usernameString, s["username"]);
@@ -165,7 +140,7 @@ class _MyHomePageState extends State<VerifyOTP> {
           }
 
 
-          Navigator.pop(context, true);
+
 
         }
 
@@ -185,11 +160,11 @@ class _MyHomePageState extends State<VerifyOTP> {
 
       }catch(e)
       {
-        isLoading = false;
-        Functions.showSnackBar(_scaffoldKey, "Some connection error occured");
         setState(() {
+          isLoading = false;
 
         });
+        Functions.showSnackBar(_scaffoldKey, "Some connection error occured");
         debugPrint(e);
 
       }
@@ -201,6 +176,7 @@ class _MyHomePageState extends State<VerifyOTP> {
 
   }
 
+  String hash = "";
 
 
 
@@ -208,13 +184,11 @@ class _MyHomePageState extends State<VerifyOTP> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: LocalColors.backgroundLight,
       appBar: AppBar(
-
-        leading: Functions.backButton(context, function: (){
-          Navigator.pop(context,false);
-        }),
+        leading: Functions.backButton(context),
       ),
       key: _scaffoldKey,
 
@@ -225,73 +199,7 @@ class _MyHomePageState extends State<VerifyOTP> {
 
 
 
-  resendOTP() async{
-    try{
 
-
-      var res = await  Functions.unsignPostReq(Variables.sendOTP, jsonEncode({
-        "number" : widget.number.trim(),
-        "email" : widget.email,
-        "full_name" : widget.f_name.trim(),
-        "password" : widget.password.trim(),
-        //  "password" : password.trim(),
-
-
-      }));
-
-
-      print(res.body);
-
-      var s = jsonDecode(res.body);
-      print(s);
-
-
-      if(s["isError"])
-      {
-        if(s["message"]!=null){
-
-          Functions.showSnackBar(_scaffoldKey, s["message"].toString());
-
-        }
-
-        isLoading = false;
-        setState(() {
-
-        });
-
-
-      }else{
-
-        isLoading = false;
-        setState(() {
-
-        });
-
-        hash= s["key"];
-
-
-
-      }
-
-
-
-
-
-
-
-
-
-    }catch(e)
-    {
-      setState(() {
-        isLoading = false;
-
-      });
-
-      debugPrint(e);
-
-    }
-  }
 
 
 
@@ -315,79 +223,84 @@ class _MyHomePageState extends State<VerifyOTP> {
 //                  mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
 
-                    Text("Verify OTP", style: TextStyle(fontSize: 32, color: LocalColors.textColorDark, fontFamily: Variables.fontName, fontWeight: FontWeight.w700),),
-                    Container(height: 18,),
-                    Text("Check your mail ${widget.email}", style: TextStyle(fontSize: 18,color: LocalColors.textColorLight, fontFamily: Variables.fontName, fontWeight: FontWeight.w400),),
+                    Text("Welcome", style: TextStyle(fontSize: 32, color: LocalColors.textColorDark, fontFamily: Variables.fontName, fontWeight: FontWeight.w700),),
+                    Text("Back!", style: TextStyle(fontSize: 32, color: LocalColors.textColorDark, fontFamily: Variables.fontName, fontWeight: FontWeight.w700),),
 
                     Spacer(),
-                    PinCodeTextField(
-                      textInputType: TextInputType.numberWithOptions(decimal: false, signed: false),
-                      length: 4,
-                      obsecureText: false,
-                      animationType: AnimationType.fade,
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.underline,
-                        fieldHeight: 50,
-                        fieldWidth: 40,
-                        activeFillColor: Colors.white,
+                    TextFormField(
+                      decoration: InputDecoration(
+
+                          labelText: "Password",
+                          labelStyle: TextStyle(color: Colors.black54, fontFamily: Variables.fontName),
+
+                          contentPadding: EdgeInsets.only(left: 7, right: 7)
+                        //fillColor: Colors.green
+
                       ),
-                      animationDuration: Duration(milliseconds: 200),
-                      backgroundColor: Colors.white,
-                      enableActiveFill: false,
-
-                      errorAnimationController: _errorController,
-                      controller: textEditingController,
-                      onCompleted: (v) {
-
-                        verifyOtp();
-                        //  print(textEditingController.text);
+                      onChanged: (s){
+                        number = s;
                       },
-                      onChanged: (value) {
-                        //print(value);
+                      validator: (s){
+                        if(s.isEmpty){
+                          return "Enter Password";
+                        }
+                        if(s.trim().length==0){
+                          return "Enter valid Password";
+                        }
+                        if(s.trim().length<8)
+                          {
+                            return "Enter valid Password";
+                          }
+                        
+                        //if(s.length<9 || s.length>11)
+                        //return "Enter a valid mobile number";
+                        //RegExp _numeric = RegExp(r'^-?[0-9]+$');
+/*
+                        if(!_numeric.hasMatch(s)){
+                          return "Enter a valid mobile number";
+                        }*/
 
-                        if(!isOtpRight)
-                          setState(() {
-                            isOtpRight = true;
-                          });
-
-                        currentText = value;
-
+                        return null;
                       },
-                      beforeTextPaste: (text) {
-                        // print("Allowing to paste $text");
-                        return true;
-                      },
+
                     ),
+                    Spacer(),
+                    /*         TextFormField(
+                      decoration: InputDecoration(
 
-                    Spacer()                      ,
-                    FlatButton(
-                      child:RichText(
-                        text: TextSpan(
-                          text: "Didn't Receive Mail? "  ,
-                          style: TextStyle(
-                            color: LocalColors.textColorLight,
-                            fontSize: 14,
-                            fontFamily: Variables.fontName,
-                          ),
-                          children: <TextSpan>[
-                            TextSpan(text: ' Resend', style: TextStyle(fontFamily: Variables.fontName, color: LocalColors.secondaryColor,
-                              fontSize: 15,)),
-                          ],
-                        ),
+                          labelText: "Password",
+                          labelStyle: TextStyle(color: Colors.black54, fontFamily: Variables.fontName),
+
+                          contentPadding: EdgeInsets.only(left: 7, right: 7)
+                        //fillColor: Colors.green
+
                       ),
-                      padding: EdgeInsets.only(left: 5, right: 8),
-                      onPressed: (){
-
-                        resendOTP();
-                        //Navigator.push(context, MaterialPageRoute(builder: (context) =>  Login()));
-
+                      onChanged: (s){
+                        password = s;
                       },
+                      validator: (s){
+                        if(s.isEmpty){
+                          return "Enter password";
+                        }
+                        if(s.trim().length<8){
+                          return "Enter correct password";
+                        }
+                        //if(s.length<9 || s.length>11)
+                        //return "Enter a valid mobile number";
+                        //RegExp _numeric = RegExp(r'^-?[0-9]+$');
+*//*
+                        if(!_numeric.hasMatch(s)){
+                          return "Enter a valid mobile number";
+                        }*//*
+
+                        return null;
+                      },
+
                     ),
-
-                    Container(height: 20,),
                     Spacer()                      ,
+*/
 
-
+                    Container(height: 14,),
                     //  Container(height: 50,),
 
                     Row(
@@ -395,10 +308,11 @@ class _MyHomePageState extends State<VerifyOTP> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text(
-                          "Sign Up", style: TextStyle(
+                          "Sign in", style: TextStyle(
                           fontSize: 27,
                           fontWeight: FontWeight.w600,
                           fontFamily: Variables.fontName,
+                          color: LocalColors.textColorDark
                         ),
                         ),
                         //Spacer(),
@@ -439,7 +353,7 @@ class _MyHomePageState extends State<VerifyOTP> {
                               onPressed: (){
                                 FocusScope.of(context).requestFocus(new FocusNode());
 
-                                verifyOtp();
+                                signIn();
                               },
                             ),)
                           ],
@@ -469,19 +383,11 @@ class _MyHomePageState extends State<VerifyOTP> {
     );
   }
 
-  String currentText = "";
-
-  bool isVerifyingOtp = false;
-  bool isOtpRight = true;
-
-  StreamController<ErrorAnimationType> _errorController;
-  TextEditingController textEditingController = TextEditingController();
 
 
 
 
 
 
-  String errorText = "Invalid OTP";
 
 }

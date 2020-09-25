@@ -1,3 +1,5 @@
+   import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
@@ -5,6 +7,8 @@ import 'package:qvid/Components/profile_page_button.dart';
 import 'package:qvid/Components/row_item.dart';
 import 'package:qvid/Components/sliver_app_delegate.dart';
 import 'package:qvid/Components/tab_grid.dart';
+import 'package:qvid/Functions/Variables.dart';
+import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/BottomNavigation/MyProfile/followers.dart';
@@ -28,6 +32,8 @@ class _UserProfileBodyState extends State<UserProfileBody> {
 
   var followText;
   final key = UniqueKey();
+
+
 
   @override
   Widget build(BuildContext context) {

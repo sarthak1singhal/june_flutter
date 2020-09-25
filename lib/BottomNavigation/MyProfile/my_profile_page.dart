@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -6,6 +8,7 @@ import 'package:qvid/Components/row_item.dart';
 import 'package:qvid/Components/sliver_app_delegate.dart';
 import 'package:qvid/Components/tab_grid.dart';
 import 'package:qvid/Functions/Variables.dart';
+import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
@@ -29,21 +32,19 @@ class MyProfileBody extends StatefulWidget {
 class _MyProfileBodyState extends State<MyProfileBody> {
   final key = UniqueKey();
 
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
+    getData();
   }
-
 
 
   getData(){
 
+    var s = Functions.postReq(Variables.showMyAllVideos, json.encode({}), context);
+
   }
-
-
 
 
 

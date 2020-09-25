@@ -92,7 +92,7 @@ Map<String, String> english() {
     'alreadyLikedIt': 'Already liked it.',
     'report': 'Report',
     'block': 'Block',
-    'facebookAccount': 'Facebook Account',
+    'facebookAccount': 'Continue With Facebook',
     'googleAccount': 'Google Account',
     'sec': 'sec',
     'comment9': 'Yes, such a unique way of make a video.',

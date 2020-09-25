@@ -1,16 +1,6 @@
 name: qvid
 description: A new Flutter application.
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
 
 environment:
@@ -20,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  video_player: ^0.10.11+2
+  video_player:
   percent_indicator: ^2.1.5
   carousel_slider: ^2.1.0
   flutter_phoenix: ^0.1.0
@@ -33,7 +23,19 @@ dependencies:
   flutter_web_view:
   pin_code_fields:
   sliding_up_panel:
-  # The following adds the Cupertino Icons font to your application.
+  camera: ^0.5.8+5
+  flashlight: ^0.1.1
+  file_picker: ^2.0.0
+  flutter_ffmpeg: ^0.3.0
+#  flutter_ffmpeg:
+#    git:
+#      url: git://github.com/tanersener/flutter-ffmpeg.git
+#      ref: v0.1.1
+#      path: packages/flutter_ffmpeg_full-gpl_lts
+  path_provider: ^1.6.5
+  chewie: 0.9.10
+
+   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3
 

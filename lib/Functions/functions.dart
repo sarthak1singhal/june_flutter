@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_view/flutter_web_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:qvid/Functions/LocalColors.dart';
+import 'package:qvid/authentication/login.dart';
  import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Variables.dart';
@@ -12,21 +14,24 @@ import 'Variables.dart';
 class Functions {
 
 
-  static Future<http.Response> postReq(String secondUrl, String params) async {
+  static Future<http.Response> postReq(String secondUrl, String params, BuildContext context) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString(Variables.tokenString);
+    //String token = prefs.getString(Variables.tokenString);
 
-    if(token == null)
+    print("ABCD");
+    if(isNullEmptyOrFalse(Variables.token))
     {
+
+      var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
       print("SIGN IN");
-      return null;
+     // return null;
     }
     return http.post(
       Variables.domain + secondUrl,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'token' : token
+        'token' : Variables.token
       },
       body: params,
     );
@@ -70,7 +75,7 @@ class Functions {
     print(Variables.base_url + url);
     print(params);
     return http.post(
-      Variables.base_url + Variables.middle + url,
+      Variables.base_url + url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -120,46 +125,24 @@ class Functions {
 
 
 
-  static Widget backButton(context){
+  static Widget backButton(context, {Function function}){
     return
       IconButton(
-        icon: Icon(Icons.arrow_back_ios),
+        icon: Icon(Icons.arrow_back_ios,color: LocalColors.textColorDark,  size: 20,),
+        onPressed: function == null ? (){
+          Navigator.pop(context);
+        } : function,
+      );
+  }
+
+  static Widget backButton2(context){
+    return
+      IconButton(
+        icon: Icon(Icons.arrow_back_ios,color: LocalColors.textColorDark,  size: 20,),
         onPressed: (){
           Navigator.pop(context);
         },
       );
-
-
-    /*GestureDetector(
-
-      onTap: (){
-        Navigator.pop(context);
-
-      },
-      child: Stack(
-
-        children: <Widget>[
-          Positioned(
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: new BoxDecoration(
-                color: Colors.black12,
-                borderRadius: new BorderRadius.all(
-                    const Radius.circular(50.0)),
-              ),
-            ),
-            top: 12,
-            left: 12,
-          ),
-          Positioned(
-            child: Icon(Icons.clear),
-            top: 20,
-            left: 20,
-          )
-        ],
-      ),
-    );*/
   }
 
 
