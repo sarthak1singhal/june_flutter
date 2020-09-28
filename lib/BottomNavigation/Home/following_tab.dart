@@ -1,3 +1,5 @@
+import 'package:cached_video_player/cached_video_player.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/Auth/login_navigator.dart';
 import 'package:qvid/BottomNavigation/Home/comment_sheet.dart';
@@ -126,29 +128,47 @@ class VideoPage extends StatefulWidget {
   final int currentPageIndex;
   final bool isPaused;
   final bool isFollowing;
+  final String videoUrl;
 
   VideoPage(this.video, this.image,
-      {this.pageIndex, this.currentPageIndex, this.isPaused, this.isFollowing});
+      {this.pageIndex, this.currentPageIndex, this.isPaused, this.isFollowing, this.videoUrl});
 
   @override
   _VideoPageState createState() => _VideoPageState();
 }
 
 class _VideoPageState extends State<VideoPage> {
-  VideoPlayerController _controller;
+  CachedVideoPlayerController _controller;
   bool initialized = false;
   bool isLiked = false;
+
+
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset(widget.video)
+
+    _controller = CachedVideoPlayerController.network("https://multiplatform-f.akamaihd.net/i/multi/april11/sintel/sintel-hd_,512x288_450_b,640x360_700_b,768x432_1000_b,1024x576_1400_m,.mp4.csmil/master.m3u8", )
       ..initialize().then((value) {
+
+
         setState(() {
+          /*if (widget.pageIndex == widget.currentPageIndex &&
+              !widget.isPaused &&
+              initialized) {
+            _controller.play();
+          } else {
+            _controller.pause();
+          }*/
+          print("PLAYED");
           _controller.setLooping(true);
           initialized = true;
+          _controller.play();
+
         });
+
       });
+
   }
 
   @override
@@ -160,62 +180,72 @@ class _VideoPageState extends State<VideoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.pageIndex == widget.currentPageIndex &&
-        !widget.isPaused &&
-        initialized) {
-      _controller.play();
-    } else {
-      _controller.pause();
-    }
+  //  print(initialized);
+
     var locale = AppLocalizations.of(context);
-//    if (_controller.value.position == _controller.value.duration) {
-//      setState(() {
-//      });
-//    }
-    if (widget.pageIndex == 2) _controller.pause();
-    return Scaffold(
+
+     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Stack(
-        children: <Widget>[
-          GestureDetector(
+          children: <Widget>[
+
+
+            GestureDetector(
             onTap: () {
-              _controller.value.isPlaying
-                  ? _controller.pause()
-                  : _controller.play();
+               playPause();
             },
+              onDoubleTap: (){
+
+
+              },
             child: _controller.value.initialized
-                ? VideoPlayer(_controller)
+                ?
+
+
+                Container(
+                  color: Colors.transparent,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child:   Center(
+                    child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child:             CachedVideoPlayer(_controller)
+                      ,
+                    ),
+                  ),
+                )
+
                 : SizedBox.shrink(),
           ),
+
+    _controller.value.isPlaying ?          SizedBox.shrink(): GestureDetector(
+           child:
+         Center(
+               child: Container(
+                 height: 45,
+                 width: 45,
+                 child: Icon(Icons.play_arrow, size: 24, color: Colors.white54,),
+                 decoration: BoxDecoration(
+                     color: Colors.white24,
+                     borderRadius:BorderRadius.all( Radius.circular(30))
+                 ),
+               )
+           ),
+             onTap: (){
+
+             playPause();
+             },
+         ),
+
           Positioned.directional(
             textDirection: Directionality.of(context),
             end: -10.0,
             bottom: 80.0,
             child: Column(
               children: <Widget>[
-                InkWell(
-                  onTap: () {
-                    _controller.pause();
-                    Navigator.pushNamed(context, PageRoutes.userProfilePage);
-                  },
-                  child: CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/user.webp')),
-                ),
-                CustomButton(
-                  ImageIcon(
-                    AssetImage('assets/icons/ic_views.png'),
-                    color: secondaryColor,
-                  ),
-                  '1.2k',
-                ),
-                CustomButton(
-                    ImageIcon(
-                      AssetImage('assets/icons/ic_comment.png'),
-                      color: secondaryColor,
-                    ),
-                    '287', onPressed: () {
-                  commentSheet(context);
-                }),
+
+
+
                 CustomButton(
                   Icon(
                     isLiked ? Icons.favorite : Icons.favorite_border,
@@ -228,10 +258,18 @@ class _VideoPageState extends State<VideoPage> {
                     });
                   },
                 ),
-                Padding(
+                CustomButton(
+                    ImageIcon(
+                      AssetImage('assets/icons/ic_comment.png'),
+                      color: secondaryColor,
+                    ),
+                    '287', onPressed: () {
+                  commentSheet(context);
+                }),
+                /*Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: RotatedImage(widget.image),
-                ),
+                ),*/
               ],
             ),
           ),
@@ -250,26 +288,53 @@ class _VideoPageState extends State<VideoPage> {
                       )),
                 )
               : SizedBox.shrink(),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-                padding: EdgeInsets.only(bottom: 60.0),
-                child: LinearProgressIndicator(
-                    //minHeight: 1,
-                    )),
+
+
+          Positioned.directional(
+            textDirection: Directionality.of(context),
+            start: 12.0,
+            bottom: 120.0,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                InkWell(
+                  onTap: () {
+                    _controller.pause();
+                    Navigator.pushNamed(context, PageRoutes.userProfilePage);
+                  },
+                  child: Container(
+                    height: 30,
+                    width: 30,
+                    child: CircleAvatar(
+
+                        backgroundImage: AssetImage('assets/images/user.webp')),
+                  ),
+                ),
+                Container(width: 9,),
+                Container(height: 30,
+
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 4.5),
+                    child: Text(
+                        '@emiliwilliamson',
+                        style: Theme.of(context).textTheme.bodyText1.copyWith(
+                          fontSize: 14.0,)),
+                  ),)
+
+              ],
+            )
           ),
+
+
           Positioned.directional(
             textDirection: Directionality.of(context),
             start: 12.0,
             bottom: 72.0,
             child: RichText(
               text: TextSpan(children: [
-                TextSpan(
-                    text: '@emiliwilliamson\n',
-                    style: Theme.of(context).textTheme.bodyText1.copyWith(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5)),
+
                 TextSpan(text: locale.comment8),
                 TextSpan(
                     text: '  ${locale.seeMore}',
@@ -283,4 +348,17 @@ class _VideoPageState extends State<VideoPage> {
       ),
     );
   }
+
+  playPause(){
+    _controller.value.isPlaying
+        ? _controller.pause()
+        : _controller.play();
+
+    setState(() {
+
+    });
+
+  }
+
+
 }

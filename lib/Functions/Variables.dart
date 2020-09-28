@@ -12,6 +12,7 @@ class Variables{
    static final String picString="u_pic";
    static final String f_nameString="f_name";
    static final String l_nameString="l_name";
+   static final String blockString="isBlocked";
    static final String genderString="u_gender";
    static final String usernameString="username";
    static final String emailString="email";
@@ -24,7 +25,7 @@ class Variables{
 
 
 
-   static String user_id;
+   //static String user_id;
    static String username;
    static String user_pic;
    static String email;
@@ -48,40 +49,56 @@ class Variables{
   // public static String base_url="http://ec2-13-234-226-188.ap-south-1.compute.amazonaws.com/";
 
   // public static String domain=base_url+"index?p=";
-    static String domain=base_url+"index.php?p=";
-    static String middle= "index.php?p=";
+    static String domain=base_url+"index?p=";
+    static String middle= "index?p=";
 
 
 
     static final String SignUp = "signup";
     static final String login_fb = "login-fb";
+
     static final String uploadVideo =domain+"uploadVideo";
-    static final String showAllVideos =domain+"showAllVideos";
-   static final String showMyAllVideos=domain+"showMyAllVideos";
+    static final String showVideos =domain+"showAllVideos";
+
+    static final String showAllVideos = base_url+"showAllVideos"; //gives at max 20 video data
+  static final String showVideosBySound = base_url+"videos-by-sound"; //sound_id, offset, limit = 15.
+  static final String showVideoByHashtag = base_url+"videos-by-hashtag"; //hashtag (without #), offset, limit = 15.
+  static final String userData= base_url+"videos-by-user"; //fb_id, my_fb_id, offset, limit = 12.  If offset = 0, then user profile data is shown too
+  // else users new videos are shown
+
+
+   //static final String showMyAllVideos=domain+"showMyAllVideos";
    static final String likeDislikeVideo=domain+"likeDislikeVideo";
    static final String updateVideoView=domain+"updateVideoView";
    static final String reportVideo=domain+"reportVideo";
-   static final String allSounds=domain+"allSounds";
+
+   static final String allSounds=domain+"allSounds"; //to view or search sounds
    static final String fav_sound=domain+"fav_sound";
    static final String my_FavSound=domain+"my_FavSound";
-   static final String my_liked_video=domain+"my_liked_video";
    static final String follow_users=domain+"follow_users";
    static final String discover=domain+"discover";
-   static final String showVideoComments=domain+"showVideoComments";
-   static final String postComment=domain+"postComment";
    static final String edit_profile=domain+"edit_profile";
-   static final String get_user_data=domain+"get_user_data";
    static final String get_followers=domain+"get_followers";
    static final String get_followings=domain+"get_following";
-   static final String SearchByHashTag=domain+"searchByHashTag";
-   static final String sendPushNotification=domain+"sendPushNotification";
-   static final String uploadImage=domain+"uploadImage";
-   static final String DeleteVideo=domain+"DeleteVideo";
-   static final String search=domain+"search";
    static final String getNotifications=domain+"getNotifications";
    static final String getVerified=domain+"getVerified";
-   static final String updateLanguage = domain + "post_language";
-   static final String selectedLanguage = "selected_language";
+   static final String my_liked_video=domain+"my_liked_video";
+
+
+   static final String showVideoComments=domain+"showVideoComments"; //offset, video_id, limit = 15
+   static final String postComment=domain+"postComment";
+
+   //static final String get_user_data=domain+"get_user_data";
+   //static final String SearchByHashTag=domain+"searchByHashTag";
+   static final String sendPushNotification=domain+"sendPushNotification";
+   //static final String uploadImage=domain+"uploadImage";
+   static final String DeleteVideo=domain+"DeleteVideo";
+   static final String search=base_url+"search";
+   //static final String updateLanguage = domain + "post_language";
+   //static final String selectedLanguage = "selected_language";
+
+
+
 
 
   static final String loginUrl = "login";

@@ -16,6 +16,7 @@ import 'package:qvid/BottomNavigation/MyProfile/followers.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
 import 'package:qvid/BottomNavigation/MyProfile/following.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyProfilePage extends StatelessWidget {
   @override
@@ -40,11 +41,18 @@ class _MyProfileBodyState extends State<MyProfileBody> {
   }
 
 
-  getData(){
+  getData() async{
 
-    var s = Functions.postReq(Variables.showMyAllVideos, json.encode({}), context);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String fb_id = preferences.getString(Variables.fbid_String);
+    String url = Variables.userData + "&fb_id=" + fb_id+ "&my_fb_id=" + fb_id;
+    var s = await Functions.postReq(url, json.encode({
+      "fb_id" : fb_id,
+      "my_fb_id" : fb_id
 
-  }
+    }), context);
+
+   }
 
 
 

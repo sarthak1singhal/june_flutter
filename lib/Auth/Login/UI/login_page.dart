@@ -224,7 +224,7 @@ class _LoginBodyState extends State<LoginBody> {
         print(data["tokon"]);
 
         Variables.token = data["tokon"];
-        Variables.user_id = data["fb_id"];
+       // Variables.user_id = data["fb_id"];
         Variables.language = data["content_language"];
         Variables.username= data["username"];
         Variables.user_pic= data["profile_pic"];

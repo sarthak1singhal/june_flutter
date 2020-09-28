@@ -43,7 +43,7 @@ class PageRoutes {
       addVideoPage: (context) => AddVideo(),
       addVideoFilterPage: (context) => AddVideoFilter(),
       postInfoPage: (context) => PostInfo(),
-      userProfilePage: (context) => UserProfilePage(),
+      userProfilePage: (context) => UserProfilePage( ),
       chatPage: (context) => ChatPage(),
       morePage: (context) => MorePage(),
       videoOptionPage: (context) => VideoOptionPage(),

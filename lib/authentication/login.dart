@@ -515,8 +515,8 @@ Spacer(),
 
       var res = await  Functions.unsignPostReq(Variables.login_fb, jsonEncode({
         "fb_id": id,
-        "first_name" : f_name,
-        "last_name" : l_name,
+        "f_name" : f_name,
+        "l_name" : l_name,
         "profile_pic" : picture,
         "signup_type" : singnup_type,
         "gender" : "m",
@@ -527,6 +527,7 @@ Spacer(),
       }));
 
       var m = jsonDecode(res.body);
+      print(m);
       setState(() {
         isLoadingFacebook = false;
       });
@@ -545,27 +546,34 @@ Spacer(),
 
 
 //  {code: 200, msg: [{fb_id: 3180757235310807, username: Sarthak404876624, action: signup, profile_pic: https://graph.facebook.com/3180757235310807/picture?width=500&width=500, first_name: Sarthak, last_name: Singhal, signup_type: facebook, gender: m, tokon: 15987307172018395818}]}
-  parseData(var map) async{
+  parseData(var data) async{
 
-    if(map["code"].toString() == "200" )
+    if(data["isError"])
+      {
+        try{
+          Functions.showSnackBar(_scaffoldKey, data["message"]);
+
+        }catch(e){}
+        return;
+      }else
+    //if(map["code"].toString() == "200" )
     {
-      var data = map["msg"][0];
-      SharedPreferences preferences = await SharedPreferences.getInstance();
+       SharedPreferences preferences = await SharedPreferences.getInstance();
 
-      //  preferences.setString(Variables.u_idString, data["fb_id"]);
+      preferences.setString(Variables.fbid_String, data["uid"]);
       preferences.setString(Variables.f_nameString, Functions.capitalizeFirst(data["first_name"]));
       preferences.setString(Variables.l_nameString, Functions.capitalizeFirst(data["last_name"]));
       preferences.setString(Variables.username, data["username"]);
-      preferences.setString(Variables.genderString, data["gender"]);
+      //preferences.setString(Variables.genderString, data["gender"]);
       preferences.setString(Variables.picString, data["profile_pic"]);
       preferences.setString(Variables.tokenString, data["token"]);
+      preferences.setString(Variables.refreshTokenString, data["refresh"]);
       preferences.setString(Variables.content_languageString, data["content_language"]);
 
 
-      print(data["tokon"]);
-
       Variables.token = data["token"];
-      Variables.user_id = data["fb_id"];
+      Variables.refreshToken = data["refresh"];
+      Variables.fb_id = data["uid"];
       Variables.language = data["content_language"];
       Variables.username= data["username"];
       Variables.user_pic= data["profile_pic"];
@@ -573,6 +581,7 @@ Spacer(),
       Variables.l_name= Functions.capitalizeFirst(data["last_name"]);
 
 
+      Navigator.pop(context, true);
     }
 
   }

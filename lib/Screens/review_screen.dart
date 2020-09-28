@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:fitted_text_field_container/fitted_text_field_container.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
@@ -33,6 +34,8 @@ class ReviewState extends State<ReviewScreen> {
   File fileMerged = null;
   File finalFileWithAudio = null;
   Offset offset = Offset(0.0, 50.0);
+  Offset initialTextOffset = Offset(0.0, 50.0);
+  Offset offsetColorPicker = Offset(0.0, 50.0);
   Offset offsetSec = Offset(0.0, 100.0);
   Future<void> _initializeVideoPlayerFuture;
   String lableFloating = "";
@@ -69,168 +72,310 @@ class ReviewState extends State<ReviewScreen> {
     super.dispose();
   }
 
+  bool firstLoad = true;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final deviceRatio = size.width / size.height;
 
+    if(firstLoad)
+      {
+        firstLoad = false;
+        offset = Offset(size.width /2-10, size.height/5);
+        initialTextOffset = Offset(size.width/2, size.height/2 );
+      }
+
+
+
     return Scaffold(
-      body: Stack(
-        children: [
-          FutureBuilder(
-            future: _initializeVideoPlayerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                // If the VideoPlayerController has finished initialization, use
-                // the data it provides to limit the aspect ratio of the VideoPlayer.
-                return RotatedBox(quarterTurns: 1,
-                child: VideoPlayer(_controller));
-              } else {
-                // If the VideoPlayerController is still initializing, show a
-                // loading spinner.
-                return Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-          Container(
-        child: Positioned(
-          left: offset.dx,
-          top: offset.dy,
-          child: GestureDetector(
-              onPanUpdate: (details) {
-                setState(() {
-                  offset = Offset(
-                      offset.dx + details.delta.dx, offset.dy + details.delta.dy);
-                });
-              },
-              child: SizedBox(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: Text("$lableFloating",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 28.0,
-                            color: Colors.red)),
-                  ),
-                ),
-              )),
-        ),
-      ),
-          Container(
-            child: Positioned(
-              left: offsetSec.dx,
-              top: offsetSec.dy,
-              child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      offsetSec = Offset(
-                          offsetSec.dx + details.delta.dx, offsetSec.dy + details.delta.dy);
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child:  Visibility(
-                      child: Align(
-                        child: Container(
-                          height: 100,
-                          width: 100,
-                          color: Colors.white,
-                          child: Center(child: Text("Add Image Here?",style: TextStyle(color: Colors.black,),textAlign: TextAlign.center,)),
+      resizeToAvoidBottomInset : false,
+      body: FutureBuilder(
+        future: _initializeVideoPlayerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            // If the VideoPlayerController has finished initialization, use
+            // the data it provides to limit the aspect ratio of the VideoPlayer.
 
-                        ),
-                        alignment: Alignment.center,
-                      ),
-                      visible: showImage,
-                    ),
-                  )),
-            ),
-          ),
-          Align(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
+            return Stack(
               children: [
+                RotatedBox(quarterTurns: 1,
+                    child: VideoPlayer(_controller)),
 
 
-                GestureDetector(
-                  child: Container(
-                    child: Text(
-                      !showImage?"Add Image":"Hide Image",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    padding: EdgeInsets.all(8.0),
-                    color: Colors.white,
-                  ),
-                  onTap: () {
-                    setState(() {
-                      showImage = !showImage;
-                    });
-                  },
-                ),
 
-                SizedBox(height: 20,),
-                GestureDetector(
-                  child: Container(
-                    child: Text(
-                      "Add Text",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    padding: EdgeInsets.all(8.0),
-                    color: Colors.white,
+                Container(
+                  child: Positioned(
+                    left: offsetSec.dx,
+                    top: offsetSec.dy,
+                    child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            offsetSec = Offset(
+                                offsetSec.dx + details.delta.dx, offsetSec.dy + details.delta.dy);
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child:  Visibility(
+                            child: Align(
+                              child: Container(
+                                height: 100,
+                                width: 100,
+                                color: Colors.white,
+                                child: Center(child: Text("Add Image Here?",style: TextStyle(color: Colors.black,),textAlign: TextAlign.center,)),
+
+                              ),
+                              alignment: Alignment.center,
+                            ),
+                            visible: showImage,
+                          ),
+                        )),
                   ),
-                  onTap: () {
-                    FocusScope.of(context).requestFocus(focusNode);
-                    setState(() {
-                      showTextfield = !showTextfield;
-                    });
-                  },
-                ),
-                SizedBox(height: 20,),
-                Visibility(
-                  child: Align(
-                    child: TextField(
-                      controller: _textController,
-                      focusNode: focusNode,
-                      decoration: InputDecoration(border: OutlineInputBorder()),
-                      onChanged: (data) {
-                        setState(() {
-                          lableFloating = data;
-                        });
-                      },
-                      onSubmitted: (data) {
-                        setState(() {
-                          showTextfield = !showTextfield;
-                        });
-                      },
-                    ),
-                    alignment: Alignment.bottomCenter,
-                  ),
-                  visible: showTextfield,
                 ),
 
 
 
+
+                /*Container(
+                  //color: Colors.black26,
+                  child: Positioned(
+                    left: initialTextOffset.dx,
+                    top: initialTextOffset.dy,
+                    child: GestureDetector(
+                        onPanUpdate: (details) {
+                          setState(() {
+                            initialTextOffset = Offset(
+                                initialTextOffset.dx + details.delta.dx, initialTextOffset.dy + details.delta.dy);
+                          });
+                        },
+                        child: Container(
+                          color: Colors.transparent,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Center(
+                              child:
+                              Text("$lableFloating",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20.0,
+                                      color: Colors.red)),
+                            ),
+                          ),
+                        )),
+                  ),
+                ),
+*/
+
+
+
+
+
+
+                Positioned(
+                  bottom: 65,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: (){
+                      // Wrap the play or pause in a call to `setState`. This ensures the
+                      // correct icon is shown.
+                      setState(() {
+                        // If the video is playing, pause it.
+                        if (_controller.value.isPlaying) {
+                          _controller.pause();
+                        } else {
+                          // If the video is paused, play it.
+                          _controller.play();
+                        }
+                      });
+                    },
+                    child: Container(height: 44, width: 90,
+
+                      decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        color: Colors.black26,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10.0),
+                          topRight: Radius.zero,
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.zero,
+                        ),
+                      ),
+
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          Icon( _controller.value.isPlaying ? Icons.pause:Icons.play_arrow, size: 17, color: Colors.white,),
+                          Text(_controller.value.isPlaying ? "Pause":"Play", style: TextStyle(color: Colors.white),)
+                        ],)
+                      ,),
+                  ),
+                ),
+                MediaQuery.of(context).viewInsets.bottom >10 ?Container(
+                  color:Colors.black26,
+                ) : Positioned(top: 0,left: 0,child: Container(height: 0,width: 0,),),
+                MediaQuery.of(context).viewInsets.bottom >10 ? Positioned(
+                  top: 30,
+                  right: 7,
+                  child: FlatButton(
+                    child: Text("DONE", style: TextStyle(
+
+                    ), ),
+                    textColor: Colors.white,
+                    color: Colors.transparent,
+                    onPressed: (){
+
+                    },
+                  ),
+                ):Container(),
+                Container(
+                  //color: Colors.black26,
+                  child: Positioned(
+                    left: offset.dx - lableFloating.length*5.5,
+                    top: offset.dy,
+                    child: GestureDetector(
+                        child: FittedTextFieldContainer(
+                            calculator: FittedTextFieldCalculator.fitVisibleWithPadding(0, 14),
+                            decoration: BoxDecoration(
+                                color: lableFloating.length == 0 ? Colors.transparent:Colors.pink
+                            ),
+                            child:  TextField(
+                              textAlign: TextAlign.justify,
+                              autofocus: true,
+                              controller: _textController,
+                              focusNode: focusNode,
+
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 21,
+                                  color: Colors.white
+                              ),
+                              cursorWidth: 2,
+                              cursorColor: Colors.white,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.only(left: 20,),
+                                  border: InputBorder.none,
+                                  focusedBorder: InputBorder.none
+                              ),
+                              onChanged: (data) {
+                                lableFloating = data;
+
+                                // if(lableFloating.length<2)
+                                    {
+                                  setState(() {
+
+                                  });
+                                }
+
+
+                              },
+                              onSubmitted: (data) {
+                                setState(() {
+                                  showTextfield = !showTextfield;
+                                });
+                              },
+                            )
+                        )),
+                  ),
+                ),
+
+
+
+
+
+
+
+
+
+
+                Align(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+
+
+                      GestureDetector(
+                        child: Container(
+                          child: Text(
+                            !showImage?"Add Image":"Hide Image",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          padding: EdgeInsets.all(8.0),
+                          color: Colors.white,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            showImage = !showImage;
+                          });
+                        },
+                      ),
+
+                      SizedBox(height: 20,),
+                      GestureDetector(
+                        child: Container(
+                          child: Text(
+                            "Add Text",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          padding: EdgeInsets.all(8.0),
+                          color: Colors.white,
+                        ),
+                        onTap: () {
+                          focusNode.requestFocus(FocusNode());
+
+
+                          print(MediaQuery.of(context).viewInsets.bottom);
+                          print(size.height);
+                          offsetColorPicker = Offset(50, MediaQuery.of(context).viewInsets.bottom-200);
+
+                          _textController.text = "";
+                          lableFloating = "";
+                          setState(() {
+                            showTextfield = !showTextfield;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 20,),
+
+
+
+                    ],
+                  ),
+                  alignment: Alignment.bottomCenter,
+                ),
               ],
-            ),
-            alignment: Alignment.bottomCenter,
-          ),
-        ],
+            );
+
+
+
+
+
+
+            return RotatedBox(quarterTurns: 1,
+                child: VideoPlayer(_controller));
+          } else {
+            // If the VideoPlayerController is still initializing, show a
+            // loading spinner.
+            return Center(child: CircularProgressIndicator());
+          }
+        },
       ),
+
+
+
+
+
+
+
+
+
+
+/*
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Wrap the play or pause in a call to `setState`. This ensures the
-          // correct icon is shown.
-          setState(() {
-            // If the video is playing, pause it.
-            if (_controller.value.isPlaying) {
-              _controller.pause();
-            } else {
-              // If the video is paused, play it.
-              _controller.play();
-            }
-          });
+
         },
         // Display the correct icon depending on the state of the player.
 //        child: Icon(_controller.value.isPlaying ? Icons.pause : Icons.play_arrow,),
@@ -248,9 +393,26 @@ class ReviewState extends State<ReviewScreen> {
           }
         },
       ),
-      ),
+      ),*/
     );
   }
+
+
+
+
+
+
+  getTextLayouts(){
+
+  }
+
+
+
+
+
+
+
+
 
   void mergeVideo() {
     getApplicationDocumentsDirectory().then((value) async {
@@ -334,6 +496,23 @@ class ReviewState extends State<ReviewScreen> {
     });
 
   }
+
+
+}
+
+
+
+class TextList{
+  String key, text;
+  Color textColor, backgroundColor;
+  double left, right, top, bottom;
+  double containerHeight;
+  double containerWidth;
+  double containerRotation;
+
+
+
+
 
 
 }

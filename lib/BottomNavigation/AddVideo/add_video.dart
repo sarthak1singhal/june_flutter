@@ -6,12 +6,14 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flashlight/flashlight.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Screens/review_screen.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:path/path.dart' as path;
+import 'package:qvid/Uploader/FileUploader.dart';
 // Import package
 
 class AddVideo extends StatefulWidget {
@@ -39,7 +41,11 @@ class _AddVideoState extends State<AddVideo> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent, //top bar color
+      statusBarIconBrightness: Brightness.dark, //top bar icons
 
+    ));
     getCamera();
     initFlashlight();
 
@@ -203,6 +209,10 @@ class _AddVideoState extends State<AddVideo> {
 
                             onTap: () async{
 
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => FileUploader()),
+                              );
 //                              FilePickerResult result = await FilePicker.platform.pickFiles(
 //                                type: FileType.video,
 //                              );

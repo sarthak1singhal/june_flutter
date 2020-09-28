@@ -14,27 +14,38 @@ import 'Variables.dart';
 class Functions {
 
 
-  static Future<http.Response> postReq(String secondUrl, String params, BuildContext context) async {
+  static Future<http.Response> postReq(String secondUrl, String params, BuildContext context, {Map<String,String> urlParams}) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    //String token = prefs.getString(Variables.tokenString);
+    Variables.token = prefs.getString(Variables.tokenString);
+    Variables.refreshToken = prefs.getString(Variables.refreshTokenString);
 
-    print("ABCD");
+    print(Variables.token);
     if(isNullEmptyOrFalse(Variables.token))
     {
 
       var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
       print("SIGN IN");
+  //    print(Variables.token);
      // return null;
     }
-    return http.post(
-      Variables.domain + secondUrl,
+
+    print(secondUrl);
+     var res = await http.post(
+       secondUrl,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'token' : Variables.token
+        'token' : Variables.token,
+        'refresh_token' : Variables.refreshToken
       },
       body: params,
     );
+
+
+    print(res.body);
+
+
+    return res;
 
 
   }

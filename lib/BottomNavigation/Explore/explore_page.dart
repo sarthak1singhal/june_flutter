@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Explore/more_page.dart';
 import 'package:qvid/Components/thumb_list.dart';
+import 'package:qvid/Components/thumb_tile.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -61,17 +62,16 @@ class _ExploreBodyState extends State<ExploreBody> {
   ];
 
   int _current = 0;
+  double width = 0;
 
   @override
   Widget build(BuildContext context) {
+    width = MediaQuery.of(context).size.width;
     var locale = AppLocalizations.of(context);
     final List<TitleRow> titleRows = [
-      TitleRow(locale.danceLike, '159.8k', dance),
-      TitleRow(locale.laughOut, '108.9k', lol),
-      TitleRow(locale.followUr, '159.8k', food),
-      TitleRow(locale.danceLike, '159.8k', dance),
-      TitleRow(locale.laughOut, '108.9k', lol),
-      TitleRow(locale.followUr, '159.8k', food),
+      TitleRow(locale.danceLike, '159.8k', dance, width),
+      TitleRow(locale.laughOut, '108.9k', lol, width),
+      TitleRow(locale.followUr, '159.8k', food,  width),
     ];
     return Padding(
       padding: EdgeInsets.only(bottom: 60.0, top: 20.0),
@@ -157,8 +157,7 @@ class _ExploreBodyState extends State<ExploreBody> {
                   return Column(
                     children: <Widget>[
                       titleRows[index],
-                      thumbLists[index],
-                    ],
+                     ],
                   );
                 }),
           ],
@@ -172,48 +171,81 @@ class TitleRow extends StatelessWidget {
   final String title;
   final String subTitle;
   final List list;
+   final double screenWidth;
 
-  TitleRow(this.title, this.subTitle, this.list);
+  TitleRow(this.title, this.subTitle, this.list , this.screenWidth);
+
+
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-        leading: CircleAvatar(
-          backgroundColor: darkColor,
-          child: Text(
-            '#',
-            style: TextStyle(color: mainColor),
-          ),
-        ),
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.bodyText1,
-        ),
-        subtitle: Row(
-          children: <Widget>[
-            Text(
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        ListTile(
+            leading: CircleAvatar(
+              backgroundColor: darkColor,
+              child: Text(
+                '#',
+                style: TextStyle(color: mainColor),
+              ),
+            ),
+            title: Container(
+                height: 60,
+                child: Padding(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
+                  padding: EdgeInsets.only(top: 20),
+                )
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                /*  Text(
               subTitle + ' ' + AppLocalizations.of(context).video,
               style: Theme.of(context).textTheme.caption,
+            ),*/
+                //Spacer(),
+                Text(
+                  "${AppLocalizations.of(context).viewAll}",
+                  style: Theme.of(context).textTheme.caption,
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: secondaryColor,
+                  size: 10,
+                ),
+              ],
             ),
-            Spacer(),
-            Text(
-              "${AppLocalizations.of(context).viewAll}",
-              style: Theme.of(context).textTheme.caption,
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: secondaryColor,
-              size: 10,
-            ),
-          ],
-        ),
-        onTap: () => Navigator.push(
+            onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => MorePage(
-                        title: title,
-                        list: list,
-                      )),
-            ));
+                    title: title,
+                    list: list,
+                  )),
+            )),
+
+
+
+
+
+        Container(
+          margin: EdgeInsets.only(left: 8.0),
+          height: screenWidth / 3,
+          child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: list.length,
+              scrollDirection: Axis.horizontal,
+              physics: BouncingScrollPhysics(),
+              itemBuilder: (context, index) {
+                return ThumbTile(list[index]);
+              }),
+        )
+      ],
+    );
   }
 }
