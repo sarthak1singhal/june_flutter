@@ -7,8 +7,10 @@ import 'package:flashlight/flashlight.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Locale/locale.dart';
+import 'package:qvid/Model/MediaInfo.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Screens/review_screen.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -30,14 +32,21 @@ class _AddVideoState extends State<AddVideo> {
 
   bool _hasFlashlight;
   bool  _lightFlag= false;
+  double _MaxScaleZoom = 8;
   String fileName="";
 
   bool isRecordingStarted = false;
   int _start = 30;
   Timer _timer;
 
-  List<String> list = List();
+  List<MediaInfo> list = List();
   String audioPath = "";
+
+  double scale = 1.0;
+
+  double _progress = 0.0;
+
+  Directory directory;
   @override
   void initState() {
     super.initState();
@@ -49,6 +58,7 @@ class _AddVideoState extends State<AddVideo> {
     getCamera();
     initFlashlight();
 
+    initliaze();
 
   }
 
@@ -60,44 +70,49 @@ class _AddVideoState extends State<AddVideo> {
           overflow: Overflow.visible,
           children: <Widget>[
 
-            controller==null?Container():!controller.value.isInitialized?Container():CameraPreview(controller),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            controller==null?Container():!controller.value.isInitialized?Container():
+            InteractiveViewer(child: CameraPreview(controller),
+              maxScale: _MaxScaleZoom, ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
 
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    color: secondaryColor,
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                _start!=30 ? Padding(
-                  padding: const EdgeInsets.only(right:8.0),
-                  child: RaisedButton(
-                    onPressed: (){
-                      controller?.dispose();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ReviewScreen(
-                              listVideo: list,
-                              audioPath: audioPath,
-                              duration: 30-_start,
-                            )),
-                      );
-                    },
-                    textColor: Colors.white,
-                    color: Colors.red,
-                    padding: const EdgeInsets.all(8.0),
-                    child: new Text(
-                      "Next",
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: secondaryColor,
                     ),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                ):Container(),
+                  _start!=30 ? Padding(
+                    padding: const EdgeInsets.only(right:8.0),
+                    child: RaisedButton(
+                      onPressed: (){
+                        controller?.dispose();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ReviewScreen(
+                                listVideo: list,
+                                audioPath: audioPath,
+                                duration: 30-_start,
+                              )),
+                        );
+                      },
+                      textColor: Colors.white,
+                      color: Colors.red,
+                      padding: const EdgeInsets.all(8.0),
+                      child: new Text(
+                        "Next",
+                      ),
+                    ),
+                  ):Container(),
 
-              ],
+                ],
+              ),
             ),
             Align(
               child: Padding(
@@ -154,17 +169,14 @@ class _AddVideoState extends State<AddVideo> {
                               size: 30,
                             ),
                           ),
-                          onTap: () async {
+                          onTap: ()  {
 
                             if(!isRecordingStarted) {
-                              final directory = await getApplicationDocumentsDirectory();
                               String fileName = "outputjune${DateTime.now()
                                   .toIso8601String()}.mp4";
                               File file = new File(directory.path + "/" + fileName);
-                              await controller.prepareForVideoRecording();
                               controller.startVideoRecording(file.path);
                               isRecordingStarted = !isRecordingStarted;
-
                               const oneSec = const Duration(seconds: 1);
                               _timer = new Timer.periodic(
                                 oneSec,
@@ -177,12 +189,14 @@ class _AddVideoState extends State<AddVideo> {
                                     } else {
                                       _start = _start - 1;
                                       timer.tick;
+                                      _progress = 0.034+_progress;
                                     }
                                   },
                                 ),
                               );
 
-                              list.add(file.path);
+
+                              list.add(MediaInfo(-1, file.path));
 
                               setState(() {
 
@@ -190,6 +204,15 @@ class _AddVideoState extends State<AddVideo> {
                             }
                             else
                             {
+
+                              for(int i=0;i<list.length;i++)
+                                {
+                                  if(list[i].duration == -1)
+                                    {
+                                      list[i].duration = _start;
+                                    }
+                                }
+
                               controller.stopVideoRecording();
                               isRecordingStarted = !isRecordingStarted;
                               _timer.cancel();
@@ -201,6 +224,27 @@ class _AddVideoState extends State<AddVideo> {
 
                           },
                         ),
+//
+//                        IconButton(icon: Icon(Icons.delete_forever,color: Colors.white,), onPressed: (){
+//
+//                          for(int i =0;i<list.length;i++)
+//                            {
+//
+//                              if(i==list.length-1)
+//                                {
+//                                  int time  = list[i].duration;
+//                                  _start = _start- time ;
+//                                }
+//
+//
+//                            }
+//
+//                          list.removeLast();
+//                          setState(() {
+//
+//                          });
+//
+//                        }),
                         GestureDetector(
                             child: Icon(
                               Icons.perm_media,
@@ -252,7 +296,15 @@ class _AddVideoState extends State<AddVideo> {
                   ),
                 ],
               ),
-            ),alignment: Alignment.topRight,)
+            ),alignment: Alignment.topRight,),
+            Padding(
+              padding: const EdgeInsets.only(bottom:16.0,left: 8.0,right: 8.0,top: 8.0),
+              child: LinearProgressIndicator(
+                backgroundColor: Colors.white,
+                valueColor: new AlwaysStoppedAnimation<Color>(Colors.red),
+                value: _progress,
+              ),
+            ),
           ],
         ),
       ),
@@ -268,7 +320,7 @@ class _AddVideoState extends State<AddVideo> {
   }
   Future<void> getCamera() async {
     cameras = await availableCameras();
-    controller = CameraController(cameras[0], ResolutionPreset.high);
+    controller = CameraController(cameras[0], ResolutionPreset.medium);
     controller.initialize().then((_) {
       if (!mounted) {
         return;
@@ -278,7 +330,7 @@ class _AddVideoState extends State<AddVideo> {
   }
 
   Future<void> changeCamera(CameraDescription camera) async {
-    controller = CameraController(camera, ResolutionPreset.high);
+    controller = CameraController(camera, ResolutionPreset.medium);
     controller.initialize().then((_) {
       if (!mounted) {
 
@@ -295,5 +347,11 @@ class _AddVideoState extends State<AddVideo> {
   void dispose() {
     controller?.dispose();
     super.dispose();
+  }
+
+  Future<void> initliaze() async {
+
+     directory = await getApplicationDocumentsDirectory();
+     await controller.prepareForVideoRecording();
   }
 }
