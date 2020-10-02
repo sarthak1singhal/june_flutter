@@ -177,7 +177,7 @@ class _LoginBodyState extends State<LoginBody> {
         isLoading = true;
       });
 
-      var res = await  Functions.unsignPostReq(Variables.SignUp, jsonEncode({
+      var res = await  Functions.unsignPostReq(Variables.signup, jsonEncode({
         //"fb_id": id,
         "first_name" : f_name,
         "last_name" : l_name,

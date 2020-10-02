@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:qvid/Components/newScreenGrid.dart';
 import 'package:qvid/Components/tab_grid.dart';
 
 class MorePage extends StatelessWidget {
@@ -15,7 +16,7 @@ class MorePage extends StatelessWidget {
           appBar: AppBar(
             title: Text(title),
           ),
-          body: TabGrid(list)),
+          body: NewScreenGrid(list)),
     );
   }
 }

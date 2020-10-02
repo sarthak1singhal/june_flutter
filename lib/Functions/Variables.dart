@@ -54,46 +54,58 @@ class Variables{
 
 
 
-    static final String SignUp = "signup";
-    static final String login_fb = "login-fb";
 
     static final String uploadVideo =domain+"uploadVideo";
-    static final String showVideos =domain+"showAllVideos";
+   // static final String showVideos =domain+"showAllVideos";
 
-    static final String showAllVideos = base_url+"showAllVideos"; //gives at max 20 video data
-  static final String showVideosBySound = base_url+"videos-by-sound"; //sound_id, offset, limit = 15.
-  static final String showVideoByHashtag = base_url+"videos-by-hashtag"; //hashtag (without #), offset, limit = 15.
-  static final String userData= base_url+"videos-by-user"; //fb_id, my_fb_id, offset, limit = 12.  If offset = 0, then user profile data is shown too
+
+  //POST PARAMETERS
+  static final String home_videos = base_url+"showAllVideos"; //gives at max 20 video data
+  static final String showVideosBySound = base_url+"videos-by-sound"; //sound_id, offset, limit is set to 21.
+
+  static final String showVideoByHashtag = base_url+"videos-by-hashtag"; //hashtag (without #), offset, limit is set to 21.
+
+  static final String videosByUserId= base_url+"videos-by-user"; //fb_id, my_fb_id, offset, limit.  If offset = 0, then user profile data is shown too
   // else users new videos are shown
 
+  static final String my_liked_video=base_url+"my-liked-video"; //offset, limit. shows the videos liked by user
 
-   //static final String showMyAllVideos=domain+"showMyAllVideos";
-   static final String likeDislikeVideo=domain+"likeDislikeVideo";
-   static final String updateVideoView=domain+"updateVideoView";
-   static final String reportVideo=domain+"reportVideo";
+  static final String allSounds=base_url+"allSounds"; //offset to view or search sounds. if keyword == "" then it shows all sounds
+  //else shows searched shounds by keyword
+  //Parameters - keyword, offset. Limit is already set to 30
+  static final String search=base_url+"search";
+  static final String mark_unmark_sound_fav=base_url+"mark-s-fav"; //parameter- sound_id, fav(0 or 1, 0 for unfavourite, 1 for favourite)
+  static final String showVideoComments=base_url+"showVideoComments"; //offset, video_id, limit = 30
+  static final String my_FavSound=base_url+"my_FavSound"; //offset, limit is already set to 30
+  static final String follow_users=base_url+"follow-user";//other_userid, status (0 for unfollow, 1 for follow)
+  static final String edit_profile=base_url+"edit-profile"; //full_name, username, gender, bio
+  static final String get_followers=base_url+"get-followers";//fb_id, offset. Default limit is 40
+  static final String get_followings=base_url+"get-following";//fb_id, offset. Default limit is 40
+  static final String postComment=base_url+"post-comment";// video_id, comment
+  static final String likeDislikeVideo=base_url+"likeDislikeVideo";//action (0 for delete like, 1 for like), video_id
+  static final String reportVideo=base_url+"reportVideo"; //action, video_id
+  static final String DeleteVideo=base_url+"DeleteVideo";//video_id
+  static final String updateVideoView=base_url+"updateVideoView";//video_id
+  static final String getNotifications=base_url+"getNotifications"; //offset
 
-   static final String allSounds=domain+"allSounds"; //to view or search sounds
-   static final String fav_sound=domain+"fav_sound";
-   static final String my_FavSound=domain+"my_FavSound";
-   static final String follow_users=domain+"follow_users";
+
+  //TODO: static final String following_Videos = base_url+"following-videos"; //gives at max 20 video data
+  //TODO: static final String uploadProfileImg = base_url+"upload-prof"; //To update profile image
+  //TODO: Set username at the time of signup
+
+  //static final String showMyAllVideos=domain+"showMyAllVideos";
+
+
+//GET PARAMETERS
    static final String discover=domain+"discover";
-   static final String edit_profile=domain+"edit_profile";
-   static final String get_followers=domain+"get_followers";
-   static final String get_followings=domain+"get_following";
-   static final String getNotifications=domain+"getNotifications";
    static final String getVerified=domain+"getVerified";
-   static final String my_liked_video=domain+"my_liked_video";
 
 
-   static final String showVideoComments=domain+"showVideoComments"; //offset, video_id, limit = 15
-   static final String postComment=domain+"postComment";
 
    //static final String get_user_data=domain+"get_user_data";
    //static final String SearchByHashTag=domain+"searchByHashTag";
    static final String sendPushNotification=domain+"sendPushNotification";
    //static final String uploadImage=domain+"uploadImage";
-   static final String DeleteVideo=domain+"DeleteVideo";
-   static final String search=base_url+"search";
    //static final String updateLanguage = domain + "post_language";
    //static final String selectedLanguage = "selected_language";
 
@@ -102,6 +114,7 @@ class Variables{
 
 
   static final String loginUrl = "login";
+  static final String login_fb = "login-fb";
   static final String isUsernameOrEmailExist = "isEmailorUsernameExist";
    //username or email and password
        //if account exist, login

@@ -7,8 +7,11 @@ import 'package:http/http.dart' as http;
 import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/authentication/login.dart';
  import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+import 'package:qvid/Theme/colors.dart';
 
 import 'Variables.dart';
+import 'Videos.dart';
 
 
 class Functions {
@@ -26,7 +29,7 @@ class Functions {
 
       var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
       print("SIGN IN");
-  //    print(Variables.token);
+      print(Variables.token);
      // return null;
     }
 
@@ -40,6 +43,48 @@ class Functions {
       },
       body: params,
     );
+
+
+    if(res.statusCode == 403)
+    {
+      Navigator.of(context).popUntil(ModalRoute.withName('/'));
+
+      //  Navigator.pop(context);
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) =>  Login()));
+
+      prefs.setString(Variables.tokenString, "");
+      prefs.setString(Variables.refreshTokenString, "");
+      Variables.refreshToken = "";
+      Variables.token= "";
+
+      return null;
+    }
+
+
+
+    var l = res.headers["set-cookie"].split("HttpOnly,");
+    for(int i= 0; i< l.length; i++)
+    {
+
+
+      if(l[i].split("; ")[0].contains("access_token=")) {
+
+        prefs.setString(Variables.tokenString, l[i].split("; ")[0].replaceAll("access_token=", ""));
+        Variables.token = l[i].split("; ")[0].replaceAll("access_token=", "");
+
+
+      }
+      if(l[i].split("; ")[0].contains("refresh_token=")) {
+
+        prefs.setString(Variables.refreshTokenString, l[i].split("; ")[0].replaceAll("refresh_token=", ""));
+        Variables.refreshToken = l[i].split("; ")[0].replaceAll("refresh_token=", "");
+
+
+      }
+
+
+    }
 
 
     print(res.body);
@@ -97,8 +142,34 @@ class Functions {
 
 
   static Widget showLoader(){
-    return Center(child: Container(height: 50, width: 50, child: CircularProgressIndicator(),),);
+    return Center(child: Container(height: 40, width: 40, child: CircularProgressIndicator(
+      valueColor: new AlwaysStoppedAnimation<Color>(mainColor_transp),
+
+    ),),);
   }
+
+  static Widget showLoaderBottom(){
+    return Center(child: Container(height: 20, width: 20, child: CircularProgressIndicator(
+      valueColor: new AlwaysStoppedAnimation<Color>(Colors.white30),
+      strokeWidth: 2,
+
+    ),),);
+  }
+
+
+
+
+  static Widget showError(String message){
+    return Center(child: Container(height: 40, width: 40, child: Text(message),),);
+  }
+  static Widget profileImageLoadEffect(){
+    return Container(color: Colors.white, height: 20, width: 20,);
+  }
+ static Widget profileImageErrorEffect(){
+    return Container();
+  }
+
+
 
 
 
@@ -197,6 +268,64 @@ class Functions {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
       content: Text(message),
     ));
+  }
+
+
+  static getRedableNumber(numberToFormat)
+  {
+    String _formattedNumber;
+    if (numberToFormat is int) {
+      _formattedNumber = NumberFormat.compactCurrency(
+        decimalDigits: 0,
+        symbol: '', // if you want to add currency symbol then pass that in this else leave it empty.
+      ).format(numberToFormat);
+
+      _formattedNumber = _formattedNumber.substring(0, _formattedNumber.length-1) +" "+
+          _formattedNumber.substring(_formattedNumber.length-1, _formattedNumber.length);
+
+    }
+    else
+      _formattedNumber = numberToFormat;
+
+    return _formattedNumber;
+  }
+
+
+
+
+
+
+  static  List<Videos> parseVideoList(var data, List<Videos> list){
+
+
+
+    for(int i =0; i<data.length; i++)
+    {
+      var s = data["sound"];
+      Sounds sound ;
+      if(s==null)
+      {
+        sound = null;
+      }
+      else if(s["id"] == null)
+      {
+        sound = null;
+      }else{
+        sound = Sounds(s["id"] , s["audio_path"] , s["audio_path"], s["sound_name"], s["description"], s["thum"], s["section"], s["created"]);
+
+      }
+
+      list.add(Videos(data["id"], data["video"], data["thum"], data["fb_id"], data["user_info"]["first_name"]
+          , data["user_info"]["last_name"], data["user_info"]["profile_pic"], data["user_info"]["username"],
+          data["user_info"]["verified"], data["count"]["like_count"], data["count"]["video_comment_count"],
+          data["description"], data["created"], sound));
+    }
+
+
+
+
+    return list;
+
   }
 
 

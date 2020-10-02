@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
+import 'package:qvid/Components/newScreenGrid.dart';
 import 'package:qvid/Components/profile_page_button.dart';
 import 'package:qvid/Components/row_item.dart';
 import 'package:qvid/Components/sliver_app_delegate.dart';
@@ -59,7 +60,7 @@ class _UserProfileBodyState extends State<UserProfileBody> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String fb_id = preferences.getString(Variables.fbid_String);
 
-    var s = await Functions.postReq(Variables.userData, json.encode({
+    var s = await Functions.postReq(Variables.videosByUserId, json.encode({
       "fb_id": widget.userFb_id,
       "my_fb_id": fb_id
     }), context);
@@ -83,10 +84,7 @@ class _UserProfileBodyState extends State<UserProfileBody> {
 
   @override
   Widget build(BuildContext context) {
-    width = MediaQuery
-        .of(context)
-        .size
-        .width;
+    width = MediaQuery.of(context).size.width;
     var locale = AppLocalizations.of(context);
 
 
@@ -204,7 +202,7 @@ class _UserProfileBodyState extends State<UserProfileBody> {
                                              appBar: AppBar(
                                                title: Text('Liked'),
                                              ),
-                                             body: TabGrid(
+                                             body: NewScreenGrid(
                                                food,
                                              ),
                                            )),
@@ -242,8 +240,8 @@ class _UserProfileBodyState extends State<UserProfileBody> {
                       Expanded(
                         child: TabBarView(
                           children: <Widget>[
-                            TabGrid(dance),
-                            TabGrid(food + lol),
+                            TabGrid(dance, widget.userFb_id,1 ),
+                            TabGrid(food + lol,widget.userFb_id, 2),
                           ],
                         ),
                       )

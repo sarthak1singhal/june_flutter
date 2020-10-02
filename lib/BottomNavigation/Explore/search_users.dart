@@ -230,9 +230,11 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
 
           children: <Widget>[
             TabGrid(
-              dance,
+              dance,"",
+              3,
               onTap: () =>
                   Navigator.pushNamed(context, PageRoutes.videoOptionPage),
+
             ),
             ListView.builder(
                 physics: BouncingScrollPhysics(),

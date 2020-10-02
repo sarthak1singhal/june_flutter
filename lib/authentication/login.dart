@@ -105,7 +105,6 @@ class _MyHomePageState extends State<Login> {
         }));
 
 
-        print(res.body);
 
         var s = jsonDecode(res.body);
         print(s);
