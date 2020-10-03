@@ -4,7 +4,10 @@ import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
+import 'package:qvid/Components/newScreenGrid.dart';
+import 'package:qvid/Components/searchGrid.dart';
 import 'package:qvid/Functions/Variables.dart';
+import 'package:qvid/Functions/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
@@ -28,14 +31,12 @@ class SearchUsers extends StatefulWidget {
 
 class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderStateMixin,    AutomaticKeepAliveClientMixin<SearchUsers> {
   var _controller = TextEditingController();
-  List<User> names = [
-    User("Food Master", "@georgesmith", "assets/user/user1.png"),
-
-  ];
 
 
   bool isLoading = false;
 
+
+  List<Videos> videos = [];
 
 
 
@@ -119,6 +120,8 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
     if(reqTab == 0)
       {
 
+        videos = Functions.parseVideoList(data["msg"]);
+
       }
     if(reqTab==1)
       {
@@ -140,6 +143,12 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
     primaryTC = new TabController(length: 2, vsync: this);
     primaryTC.addListener(() {
 
+
+      if(prevText!=_controller.text)
+        {
+          prevText = _controller.text;
+          search(_controller.text);
+        }
 
 
      });
@@ -229,9 +238,8 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
           controller: primaryTC,
 
           children: <Widget>[
-            TabGrid(
-              dance,"",
-              3,
+            SearchGrid(
+              videos, _controller.text,
               onTap: () =>
                   Navigator.pushNamed(context, PageRoutes.videoOptionPage),
 
@@ -243,21 +251,25 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
                 itemBuilder: (context, index) {
                   return Column(
                     children: <Widget>[
-                      Divider(
-                        color: darkColor,
-                        height: 1.0,
-                        thickness: 1,
-                      ),
+
+                      Container(height: 5,),
+
                       ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: darkColor,
-                          backgroundImage: !Functions.isNullEmptyOrFalse(users[index]["profile_pic"])? NetworkImage(users[index]["profile_pic"]) : AssetImage(names[index].img),
+                        leading: Container(
+                          child: CircleAvatar(
+                            backgroundColor: darkColor,
+                            backgroundImage: !Functions.isNullEmptyOrFalse(users[index]["profile_pic"])? NetworkImage(users[index]["profile_pic"]) : Functions.defaultProfileImage(),
+                          ),
+                          height: 55,
+                          width: 55,
                         ),
-                        title: Text(
+                        title: Padding(padding: EdgeInsets.only(left: 5),child: Text(
                           Functions.capitalizeFirst(users[index]["first_name"]),
                           style: TextStyle(color: Colors.white),
+                        ),),
+                        subtitle: Padding(padding: EdgeInsets.only(left: 5,top: 4),
+                        child: Text(Functions.isNullEmptyOrFalse(users[index]["username"]) ? "" : users[index]["username"]),
                         ),
-                        subtitle: Text(Functions.isNullEmptyOrFalse(users[index]["username"]) ? "" : users[index]["username"]),
                         onTap: () async{
 
 

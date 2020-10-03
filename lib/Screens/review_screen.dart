@@ -7,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:qvid/Model/MediaInfo.dart';
 import 'package:video_player/video_player.dart';
 
 class ReviewScreen extends StatefulWidget {
-  List<String> listVideo;
+  List<MediaInfo> listVideo;
   String audioPath;
   int duration ;
   ReviewScreen({this.listVideo, this.audioPath,this.duration}) {}
@@ -235,47 +236,41 @@ class ReviewState extends State<ReviewScreen> {
                     left: offset.dx - lableFloating.length*5.5,
                     top: offset.dy,
                     child: GestureDetector(
-                        child: FittedTextFieldContainer(
-                            calculator: FittedTextFieldCalculator.fitVisibleWithPadding(0, 14),
-                            decoration: BoxDecoration(
-                                color: lableFloating.length == 0 ? Colors.transparent:Colors.pink
-                            ),
-                            child:  TextField(
-                              textAlign: TextAlign.justify,
-                              autofocus: true,
-                              controller: _textController,
-                              focusNode: focusNode,
+                        child: TextField(
+                          textAlign: TextAlign.justify,
+                          autofocus: true,
+                          controller: _textController,
+                          focusNode: focusNode,
 
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 21,
-                                  color: Colors.white
-                              ),
-                              cursorWidth: 2,
-                              cursorColor: Colors.white,
-                              decoration: InputDecoration(
-                                contentPadding: EdgeInsets.only(left: 20,),
-                                  border: InputBorder.none,
-                                  focusedBorder: InputBorder.none
-                              ),
-                              onChanged: (data) {
-                                lableFloating = data;
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 21,
+                              color: Colors.white
+                          ),
+                          cursorWidth: 2,
+                          cursorColor: Colors.white,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(left: 20,),
+                              border: InputBorder.none,
+                              focusedBorder: InputBorder.none
+                          ),
+                          onChanged: (data) {
+                            lableFloating = data;
 
-                                // if(lableFloating.length<2)
-                                    {
-                                  setState(() {
+                            // if(lableFloating.length<2)
+                                {
+                              setState(() {
 
-                                  });
-                                }
+                              });
+                            }
 
 
-                              },
-                              onSubmitted: (data) {
-                                setState(() {
-                                  showTextfield = !showTextfield;
-                                });
-                              },
-                            )
+                          },
+                          onSubmitted: (data) {
+                            setState(() {
+                              showTextfield = !showTextfield;
+                            });
+                          },
                         )),
                   ),
                 ),
@@ -433,7 +428,7 @@ class ReviewState extends State<ReviewScreen> {
 
       for (int i = 0; i < widget.listVideo.length; i++) {
         String s =
-            "-i ${widget.listVideo[i]} -c copy -bsf:v h264_mp4toannexb -f mpegts ${value.path + "/" + "intermediate$i.ts"}";
+            "-i ${widget.listVideo[i].filepath} -c copy -bsf:v h264_mp4toannexb -f mpegts ${value.path + "/" + "intermediate$i.ts"}";
         _listtempts.add(s);
       }
 

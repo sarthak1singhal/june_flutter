@@ -32,6 +32,9 @@ dependencies:
   sliding_up_panel:
   camera: ^0.5.8+5
   flashlight: ^0.1.1
+  linked_scroll_controller:
+  image_cropper:
+  dio:
   file_picker: ^2.0.0
   flutter_ffmpeg: ^0.3.0
 #  flutter_ffmpeg:

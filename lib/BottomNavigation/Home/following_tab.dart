@@ -6,6 +6,7 @@ import 'package:qvid/BottomNavigation/Home/comment_sheet.dart';
 import 'package:qvid/Components/custom_button.dart';
 import 'package:qvid/Components/rotated_image.dart';
 import 'package:qvid/Functions/Variables.dart';
+import 'package:qvid/Functions/Videos.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -16,9 +17,14 @@ class FollowingTabPage extends StatelessWidget {
   final List<String> images;
   final bool isFollowing;
 
+  List<Videos> list;
+  int index;
   final int variable;
+  final int type;  //1 userVideos, 2 for myLikedVideos, 3 for hashtag, 4 for bySound, 5 for searched, 6 homeVideos, 7 following
+  final String url;
+  final String tag;
 
-  FollowingTabPage(this.videos, this.images, this.isFollowing, {this.variable});
+  FollowingTabPage(this.list, this.index, this.type, this.url,  this.tag,this.videos,  this.images, this.isFollowing, {this.variable});
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +147,7 @@ class _VideoPageState extends State<VideoPage> {
   CachedVideoPlayerController _controller;
   bool initialized = false;
   bool isLiked = false;
+
 
 
 

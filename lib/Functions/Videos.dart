@@ -3,11 +3,12 @@ class Videos{
   String id, vid_url, thumb_url, fb_id, first_name, last_name, profile_pic, username;
   int verified, likeCount, commentCount;
   String  description, created;
-
+  int views;
+int isLiked;
   Sounds sound;
-  Videos(this.id, this.vid_url, this.thumb_url, this.fb_id, this.first_name,
+  Videos(this.id, this.vid_url, this.thumb_url, this.fb_id, this.isLiked, this.first_name,
       this.last_name, this.profile_pic, this.username, this.verified,
-      this.likeCount, this.commentCount, this.description, this.created, this.sound);
+      this.likeCount, this.commentCount, this.views,this.description, this.created, this.sound);
 
 
 }

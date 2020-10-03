@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_web_view/flutter_web_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/authentication/login.dart';
  import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +19,7 @@ import 'Videos.dart';
 class Functions {
 
 
-  static Future<http.Response> postReq(String secondUrl, String params, BuildContext context, {Map<String,String> urlParams}) async {
+  static Future<http.Response> postReq(String secondUrl, String params, BuildContext context, {Map<String,String> urlParams, bool isIdChange}) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Variables.token = prefs.getString(Variables.tokenString);
@@ -30,10 +32,24 @@ class Functions {
       var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
       print("SIGN IN");
       print(Variables.token);
+      if( isIdChange )
+        {
+          var m = jsonDecode(params);
+          m["fb_id"] = Variables.fb_id;
+          params = jsonEncode(m);
+        }
      // return null;
     }
 
     print(secondUrl);
+
+
+    HttpClient httpClient = new HttpClient()
+      ..badCertificateCallback =
+      ((X509Certificate cert, String host, int port) => true);
+    IOClient ioClient = new IOClient(httpClient);
+
+
      var res = await http.post(
        secondUrl,
       headers: <String, String>{
@@ -43,6 +59,7 @@ class Functions {
       },
       body: params,
     );
+    print(res.body);
 
 
     if(res.statusCode == 403)
@@ -87,7 +104,6 @@ class Functions {
     }
 
 
-    print(res.body);
 
 
     return res;
@@ -162,15 +178,34 @@ class Functions {
   static Widget showError(String message){
     return Center(child: Container(height: 40, width: 40, child: Text(message),),);
   }
+
+
   static Widget profileImageLoadEffect(){
-    return Container(color: Colors.white, height: 20, width: 20,);
+    return Container(color: Colors.white38, height: 20, width: 20,);
   }
- static Widget profileImageErrorEffect(){
+
+  static Widget profileImageErrorEffect(){
     return Container();
   }
 
 
+  static ImageProvider defaultProfileImage(){
+    return AssetImage("assets/user/user1.png");
+  }
 
+
+
+  static Widget noVideoByUser(BuildContext context){
+    return SliverToBoxAdapter(
+      child: Container(
+        height: MediaQuery.of(context).size.height/2,
+        width: 40,
+        child: Center(
+          child: Text("No videos", style: TextStyle(color: Colors.white54),),
+        ),
+      ),
+    );
+  }
 
 
   static   String capitalizeFirst(String s) {
@@ -216,6 +251,15 @@ class Functions {
         } : function,
       );
   }
+  static Widget backButtonMain(context, {Function function}){
+    return
+      IconButton(
+        icon: Icon(Icons.arrow_back_ios,color: Colors.white60,  size: 20,),
+        onPressed: function == null ? (){
+          Navigator.pop(context);
+        } : function,
+      );
+  }
 
   static Widget backButton2(context){
     return
@@ -231,8 +275,6 @@ class Functions {
 
   static openWebView(String url,Map<String, String> header) async{
     FlutterWebView flutterWebView = new FlutterWebView();
-
-
 
 
     flutterWebView.launch(
@@ -295,9 +337,13 @@ class Functions {
 
 
 
-  static  List<Videos> parseVideoList(var data, List<Videos> list){
+  static  List<Videos> parseVideoList(var data, {List<Videos> list}){
 
 
+    if(list == null)
+      {
+        list = [];
+      }
 
     for(int i =0; i<data.length; i++)
     {
@@ -315,10 +361,10 @@ class Functions {
 
       }
 
-      list.add(Videos(data["id"], data["video"], data["thum"], data["fb_id"], data["user_info"]["first_name"]
+      list.add(Videos(data["id"], data["video"], data["thum"], data["fb_id"], data["liked"], data["user_info"]["first_name"]
           , data["user_info"]["last_name"], data["user_info"]["profile_pic"], data["user_info"]["username"],
           data["user_info"]["verified"], data["count"]["like_count"], data["count"]["video_comment_count"],
-          data["description"], data["created"], sound));
+          data["count"]["view"],data["description"], data["created"], sound));
     }
 
 

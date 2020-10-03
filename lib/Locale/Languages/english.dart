@@ -41,7 +41,7 @@ Map<String, String> english() {
     'dayAgo': 'day ago',
     'writeYourComment': 'Write your comment',
     'search': 'Search',
-    'video': 'video',
+    'video': 'Videos',
     'viewAll': 'View all',
     'user': 'User',
     'commentOff': 'Comment off',

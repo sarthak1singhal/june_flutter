@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Home/following_tab.dart';
 import 'package:qvid/BottomNavigation/Home/home_page.dart';
@@ -15,29 +13,35 @@ class Grid {
 }
 
 
-class TabGrid extends StatefulWidget {
+class SearchGrid extends StatefulWidget {
   final IconData icon;
   final List<Videos> list;
   final Function onTap;
   final IconData viewIcon;
-  final String userId;
   final bool isLoading;
-   ScrollController scrollController;
-  int type; // 1 for videos by userID, 2 for my liked videos, 3 for by search videos
+  final String views;
+  final String keyword;
+  ScrollController scrollController;
+  int type; // 1 for videos by hashtag, 2 for my liked soundVideos, 3 for by searchVideos and keyword
 
 
-  TabGrid(this.list, this.userId, this.type, {this.isLoading, this.icon, this.onTap, this.viewIcon,  this.scrollController});
+  SearchGrid(this.list, this.keyword, {this.isLoading, this.icon, this.onTap, this.viewIcon, this.views, this.scrollController});
 
   @override
   _MyHomePageState createState() => _MyHomePageState(list);
 }
 
-class _MyHomePageState extends State<TabGrid> with
-    AutomaticKeepAliveClientMixin<TabGrid> {
+class _MyHomePageState extends State<SearchGrid>  {
   final List<Videos> list;
+  bool isLoading = false;
 
+  ScrollController _scrollController = new ScrollController();
 
   _MyHomePageState(this.list);
+
+
+
+
 
 
 
@@ -52,12 +56,8 @@ class _MyHomePageState extends State<TabGrid> with
     super.initState();
 
 
+
   }
-
-
-
-
-
 
 
   @override
@@ -68,8 +68,8 @@ class _MyHomePageState extends State<TabGrid> with
           return;
         },
         child: CustomScrollView(
-            slivers: <Widget>[
-           list.length == 0? Functions.noVideoByUser(context): SliverGrid(
+          slivers: <Widget>[
+            SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,
                   childAspectRatio: 2 / 2.5,
                   crossAxisSpacing: 3,
@@ -82,7 +82,7 @@ class _MyHomePageState extends State<TabGrid> with
                             context,
                             MaterialPageRoute(
                                 builder: (context) => FollowingTabPage(
-                                  list, index, widget.type, widget.type==1 ? Variables.videosByUserId : Variables.my_liked_video,null,
+                                  list, index, 5, Variables.search, widget.keyword,
                                     videos1, imagesInDisc1, false,
                                     variable: 1))),
                         child: Container(
@@ -101,7 +101,7 @@ class _MyHomePageState extends State<TabGrid> with
                                 size: 15,
                               ) ??
                                   SizedBox.shrink(),
-                              !Functions.isNullEmptyOrFalse(list[index].views.toString()) ? Text(' ' + list[index].views.toString()) : SizedBox.shrink(),
+                              widget.views != null ? Text(' ' + widget.views) : SizedBox.shrink(),
                               Spacer(),
                               Icon(
                                 widget.icon,
@@ -116,25 +116,7 @@ class _MyHomePageState extends State<TabGrid> with
                     childCount: list.length
                 )
             ),
-            SliverList(
 
-              delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                  return  widget.isLoading ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Padding(
-                        child: Functions.showLoaderBottom(),
-                        padding: EdgeInsets.only(top: 20, bottom: 20),
-                      )
-                    ],
-                  ):Container();
-                },
-                childCount: 1,
-
-              ),
-            )
           ],
         )/*GridView.builder(
             controller:              widget.scrollController,
@@ -191,19 +173,6 @@ class _MyHomePageState extends State<TabGrid> with
   }
 
 
-
-
-
-
-
-
-
-
-
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
 
 

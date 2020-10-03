@@ -28,7 +28,7 @@ class RowItem extends StatelessWidget {
           ],
         ),
       ),
-      onTap: () {
+      onTap: route == null ?  null :() {
         Navigator.push(context, MaterialPageRoute(builder: (context) => route));
       },
     );

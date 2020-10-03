@@ -20,9 +20,11 @@ import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
 import 'package:qvid/BottomNavigation/MyProfile/followers.dart';
+import 'package:qvid/Settings/Settings.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
 import 'package:qvid/BottomNavigation/MyProfile/following.dart';
@@ -40,19 +42,49 @@ class MyProfileBody extends StatefulWidget {
   _MyProfileBodyState createState() => _MyProfileBodyState();
 }
 
-class _MyProfileBodyState extends State<MyProfileBody> {
+class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProviderStateMixin,    AutomaticKeepAliveClientMixin<MyProfileBody>  {
   final key = UniqueKey();
 
     ScrollController scrollController = new ScrollController();
     ScrollController scrollController2 = new ScrollController();
 
-  List<Videos> list = [];
+  TabController primaryTC;
+
+
+
+  List<Videos> listMyVideos = [];
+  List<Videos> listLikedVideos = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
+    primaryTC = new TabController(length: 2, vsync: this);
 
+
+    scrollController.addListener(() {
+      print(scrollController.position.extentAfter );
+      if (scrollController.position.extentAfter < 300){
+
+        fetchData(primaryTC.index);
+
+      }
+
+    });
+
+    primaryTC.addListener(() {
+
+     // if(primaryTC.indexIsChanging)
+        {
+          print(primaryTC.index);
+          print("changing");
+          print(listLikedVideos.length);
+          if(scrollController.position.extentAfter < 300 || listLikedVideos.length == 0)
+            fetchData(primaryTC.index);
+        }
+
+
+    });
 
     getData();
 
@@ -67,6 +99,158 @@ class _MyProfileBodyState extends State<MyProfileBody> {
   }
 
 
+  fetchData(int index){
+
+    print("fetchData");
+    if(primaryTC.index ==0)
+      {
+        fetchMyVideos(index);
+      }else{
+
+      fetechLikedVideos(index);
+    }
+
+    
+
+  }
+
+  fetechLikedVideos(int index) async{
+    print("fetching liked videos");
+    print(isLoadingLiked);
+
+    if(!isExistLiked)
+    {
+      return ;
+    }
+    if(!isLoadingLiked)
+    {
+      setState(() {
+        isLoadingLiked= true;
+      });
+
+      try{
+
+        var res= await Functions.postReq(Variables.my_liked_video , jsonEncode({
+          "fb_id" : fb_id,
+          "limit" : 21,
+          "offset" : offset2
+
+
+
+        }), context);
+
+
+        var d = jsonDecode(res.body);
+        print(res);
+        if(!d["isError"])
+        {
+
+          int len = d["msg"].length;
+          if(len<21)
+          {
+            isExistLiked= false;
+          }
+          offset2 = offset2 + len;
+          isLoadingLiked = false;
+          listLikedVideos.addAll(Functions.parseVideoList(d["msg"]));
+
+          if(primaryTC.index==index){
+            setState(() {
+
+            });
+            return;
+          }
+          return;
+
+
+        }
+
+
+
+      }catch(e)
+      {
+
+
+        print(e);
+      }
+
+
+      setState(() {
+        isLoadingLiked = false;
+      });
+    }
+  }
+
+
+  fetchMyVideos(int index) async{
+
+
+    if(!isExistMyVideos)
+      {
+        return ;
+      }
+    if(!isLoadingMyVideos)
+    {
+      setState(() {
+        isLoadingMyVideos = true;
+      });
+
+      try{
+
+        var res= await Functions.postReq(Variables.videosByUserId , jsonEncode({
+          "fb_id" : fb_id,
+          "my_fb_id" : Variables.fb_id,
+          "limit" : 21,
+          "offset" : offset1
+
+
+
+        }), context);
+
+
+        var d = jsonDecode(res.body);
+        print(res);
+        if(!d["isError"])
+          {
+
+            int len = d["msg"].length;
+            if(len<21)
+              {
+                isExistMyVideos = false;
+              }
+            offset1 = offset1 + len;
+            isLoadingMyVideos = false;
+            listMyVideos.addAll(Functions.parseVideoList(d["msg"]));
+
+            if(primaryTC.index==index){
+               setState(() {
+
+              });
+              return;
+            }
+            return;
+            
+            
+          }
+        
+        
+
+      }catch(e)
+      {
+
+
+      }
+
+
+      setState(() {
+        isLoadingMyVideos = false;
+      });
+    }
+  }
+
+
+
+
 
   bool isLoading = false;
   bool isError = false;
@@ -74,26 +258,56 @@ String errorMessage = "";
   String fb_id;
 String bio = "";
  int isVerified = 0;
+ int offset1 = 0;
+ int offset2 = 0;
 int likes =0, followers =0, following=0;
+
+bool isLoadingMyVideos = false;
+bool isLoadingLiked = false;
+bool isExistMyVideos = true;
+bool isExistLiked= true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   getData() async{
 
     isLoading = true;
     setState(() {});
 
+
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
     fb_id = preferences.getString(Variables.fbid_String);
     String url = Variables.videosByUserId;
 
+    Variables.fb_id = fb_id;
+    print(Variables.fb_id);
     try{
 
       var s = await Functions.postReq(url, json.encode({
-        "fb_id" : fb_id,
-        "my_fb_id" : fb_id,
+        "fb_id" : Variables.fb_id,
         "offset" : 0,
         "limit" : 21,
 
-      }), context);
+      }), context, isIdChange: true);
 
       var data = jsonDecode(s.body);
       if(data["isError"])
@@ -105,8 +319,7 @@ int likes =0, followers =0, following=0;
       else{
         var user = data["userData"]["user_info"];
         var follow_status = data["userData"]["follow_Status"];
-       // var total_heart = data["userData"]["follow_Status"];
-        SharedPreferences preferences = await SharedPreferences.getInstance();
+         SharedPreferences preferences = await SharedPreferences.getInstance();
         if(!Functions.isNullEmptyOrFalse(user["first_name"]))
           {
             Variables.f_name = Functions.capitalizeFirst(user["first_name"]);
@@ -170,9 +383,15 @@ int likes =0, followers =0, following=0;
 
 
         if(data["msg"]!=null)
-        list = Functions.parseVideoList(data["msg"], list);
+        listMyVideos = Functions.parseVideoList(data["msg"], list: listMyVideos);
 
 
+        offset1 = listMyVideos.length;
+
+        if(listMyVideos.length < 21)
+          {
+            isExistMyVideos = false;
+          }
 
         isError = false;
 
@@ -180,6 +399,7 @@ int likes =0, followers =0, following=0;
 
     }catch(e)
     {
+      print(e);
       isError = true;
       errorMessage = Variables.connErrorMessage;
       isLoading = false;
@@ -208,9 +428,11 @@ int likes =0, followers =0, following=0;
 
 
 
+
+
+
+
   double width;
-
-
 
 
 
@@ -227,18 +449,26 @@ int likes =0, followers =0, following=0;
 
     return Padding(padding: EdgeInsets.only(bottom: 60),
     child: Scaffold(
-        appBar: PreferredSize(
-          child: Container(
-            child: ClipRRect(
-                child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      //   width: MediaQuery.of(context).size.width,
-                      //  height: MediaQuery.of(context).padding.top,
-                      color: backgroundColor,
-                    ))),
+        appBar: AppBar(
+          title: Text(
+            Variables.username == null ? "" : Variables.username, style: TextStyle(
+            color: Colors.white
           ),
-          preferredSize: Size(MediaQuery.of(context).size.width, 22),
+          ),
+          actions: [
+        IconButton(icon: Icon(Icons.menu, color: Colors.white70,),onPressed: (){
+
+
+
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => Settings()),
+    );
+
+
+
+    })
+          ],
         ),
         body: isLoading   ?
         Functions.showLoader()
@@ -247,131 +477,124 @@ int likes =0, followers =0, following=0;
             length: 2,
 
             child: extend.NestedScrollView(
-              //  controller: scrollController,
+                 controller: scrollController,
                 headerSliverBuilder:
                     (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
 
 
-                    SliverList(
-                      delegate: SliverChildListDelegate(
-                          [
+                    SliverToBoxAdapter(child: Padding(
+                      padding: EdgeInsets.only(left: 20, right: 22,top: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
 
-                            Padding(
-                              padding: EdgeInsets.only(left: 20, right: 22,top: 16),
-                              child: Column(
+                              Container(height: 65,width: 65,child:
+
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(40.0),
+
+                               child:      CachedNetworkImage(
+                                  imageUrl: Variables.user_pic == null ? "" : Variables.user_pic,
+                                  imageBuilder: (context, imageProvider) => Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.all(Radius.circular(40)),
+
+                                      image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover, ),
+                                    ),
+                                  ),
+                                  placeholder: (context, url) => Functions.profileImageLoadEffect(),
+                                  errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
+                                )
+                                ,
+
+                              ),
+                              )
+                              ,
+
+
+                              Container(width: 22,),
+
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-
-                                      Container(height: 65,width: 65,child:
-
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(40.0),
-
-                                        /* backgroundImage: Functions.isNullEmptyOrFalse(Variables.user_pic) ?
-                                              AssetImage('assets/images/user.webp') :
-                        */
-                                        child:      CachedNetworkImage(
-                                          imageUrl: Variables.user_pic,
-                                          imageBuilder: (context, imageProvider) => Container(
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(40)),
-
-                                              image: DecorationImage(
-                                                image: imageProvider,
-                                                fit: BoxFit.cover, ),
-                                            ),
-                                          ),
-                                          placeholder: (context, url) => Functions.profileImageLoadEffect(),
-                                          errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
-                                        )
-                                        ,
-
-                                      ),
-                                      )
-                                      ,
-
-
-                                      Container(width: 22,),
-
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            Variables.f_name + " "  + Variables.l_name,
-                                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                                          ),
-
-                                          Container(height: 8,),
-                                          Text(
-                                            Functions.isNullEmptyOrFalse(Variables.username) ? "" : Variables.username,
-                                            style: TextStyle(
-                                                fontSize: 14, color: disabledTextColor),
-                                          ),
-
-                                        ],
-                                      )],
+                                  Text(
+                                    Variables.f_name + " "  + Variables.l_name,
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                                   ),
 
-                                  Container(height: 22,),
-
-                                  Wrap(
-                                    children: <Widget>[
-                                      Text(
-                                        bio,
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
+                                  Container(height: 8,),
+                                  Text(
+                                    Functions.isNullEmptyOrFalse(Variables.username) ? "" : Variables.username,
+                                    style: TextStyle(
+                                        fontSize: 14, color: disabledTextColor),
                                   ),
 
-                                  Container(
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: <Widget>[
-                                        RowItem(
-                                            Functions.getRedableNumber(likes),
-                                            locale.liked,
-                                            Scaffold(
-                                              appBar: AppBar(
-                                                title: Text('Liked'),
-                                              ),
-                                              body: NewScreenGrid(
-                                                food,
-                                              ),
-                                            )),
-                                        RowItem(
-
-                                            Functions.getRedableNumber(followers),locale.followers, FollowersPage()),
-                                        RowItem(
-
-                                            Functions.getRedableNumber(following), locale.following, FollowingPage()),
-                                      ],
-                                    ),
-                                    height: 120,
-                                  )
                                 ],
                               ),
-                            )
-                          ]
+                              Spacer(),
+
+                            
+                            ],
+                          ),
+
+                          Container(height: 22,),
+
+                          Wrap(
+                            children: <Widget>[
+                              Text(
+                                bio,
+                                textAlign: TextAlign.left,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+
+                          Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                RowItem(
+                                    Functions.getRedableNumber(likes),
+                                    locale.liked,
+                                     null),
+                                RowItem(
+
+                                    Functions.getRedableNumber(followers),locale.followers, FollowersPage()),
+                                RowItem(
+
+                                    Functions.getRedableNumber(following), locale.following, FollowingPage()),
+                              ],
+                            ),
+                            height: 120,
+                          )
+                        ],
                       ),
-                    )
+                    ),),
+
 
                   ];
                 },
 
-
+                pinnedHeaderSliverHeightBuilder: () {
+                  return 5;
+                },
 
                 body: Builder(
                   builder: (context){
                          final innerScrollController = PrimaryScrollController.of(context);
+                         //innerScrollController.
+
                          final innerScrollControllerLiked = PrimaryScrollController.of(context);
 
                     return Column(
                       children: <Widget>[
                         TabBar(
+                          controller: primaryTC,
                             labelColor: mainColor,
                             unselectedLabelColor: lightTextColor,
                             indicatorColor: transparentColor,
@@ -383,15 +606,18 @@ int likes =0, followers =0, following=0;
 
                             ]
                         ),
+                        Divider(color: Colors.white10,),
                         Expanded(
 
                           child: TabBarView(
+                            controller: primaryTC,
 
                             children: <Widget>[
 
-                              TabGrid(dance + food + dance , fb_id, 1, isLoading: isLoadingList, scrollController: scrollController ),
 
-                              TabGrid(food + food + dance,fb_id, 2, scrollController: innerScrollController),
+                              TabGrid(listMyVideos, fb_id, 1, isLoading: isLoadingMyVideos, scrollController: scrollController ),
+
+                              TabGrid(listLikedVideos,fb_id, 2,  isLoading: isLoadingLiked),
 
                             ],
                           ),
@@ -407,7 +633,10 @@ int likes =0, followers =0, following=0;
 
 
 
-  bool isLoadingList = false;
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 

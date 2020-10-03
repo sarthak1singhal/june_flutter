@@ -220,10 +220,12 @@ class _MyHomePageState extends State<Verify> {
 
                     Spacer(),
                     PinCodeTextField(
-                      textInputType: TextInputType.numberWithOptions(decimal: false, signed: false),
+                      obscureText: false,
+
+                      appContext: context,
+                      keyboardType: TextInputType.numberWithOptions(decimal: false, signed: false),
                       length: 4,
-                      obsecureText: false,
-                      animationType: AnimationType.fade,
+                       animationType: AnimationType.fade,
                       pinTheme: PinTheme(
                         shape: PinCodeFieldShape.underline,
                         fieldHeight: 50,

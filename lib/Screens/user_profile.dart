@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -11,6 +13,7 @@ import 'package:qvid/Components/sliver_app_delegate.dart';
 import 'package:qvid/Components/tab_grid.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
+import 'package:qvid/Functions/Videos.dart';
 import 'package:qvid/Locale/locale.dart';
 
 import 'package:qvid/Functions/functions.dart';
@@ -49,21 +52,205 @@ class _UserProfileBodyState extends State<UserProfileBody> {
 
   final key = UniqueKey();
 
+  ScrollController scrollController = new ScrollController();
+
+
+  bool isLoading = false;
+  bool isError = false;
+  String errorMessage = "";
+  String fb_id;
+  String bio = "", f_name= "", l_name = "", profile_pic = "", username = "";
+  int isVerified = 0;
+  int offset1 = 0;
+   int likes =0, followers =0, following=0;
+List<Videos> listMyVideos = [];
+  bool isLoadingMyVideos = false;
+   bool isExistMyVideos = true;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getData();
+    scrollController.addListener(() {
+      print(scrollController.position.extentAfter );
+      if (scrollController.position.extentAfter < 300){
+
+        fetchData();
+
+      }
+
+    });
   }
 
-  Future<void> getData() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String fb_id = preferences.getString(Variables.fbid_String);
 
-    var s = await Functions.postReq(Variables.videosByUserId, json.encode({
-      "fb_id": widget.userFb_id,
-      "my_fb_id": fb_id
-    }), context);
+  fetchData() async{
+    if(!isExistMyVideos)
+    {
+      return ;
+    }
+    if(!isLoadingMyVideos)
+    {
+      setState(() {
+        isLoadingMyVideos = true;
+      });
+
+      try{
+
+        var res= await Functions.postReq(Variables.videosByUserId , jsonEncode({
+          "fb_id" : fb_id,
+          "my_fb_id" : Variables.fb_id,
+          "limit" : 21,
+          "offset" : offset1
+
+
+
+        }), context);
+
+
+        var d = jsonDecode(res.body);
+        print(res);
+        if(!d["isError"])
+        {
+          int len = d["msg"].length;
+          if(len<21)
+          {
+            isExistMyVideos = false;
+          }
+
+          offset1 = offset1 + len;
+
+          isLoadingMyVideos = false;
+
+          listMyVideos.addAll(Functions.parseVideoList(d["msg"]));
+        }
+
+
+
+      }catch(e)
+      {
+
+        isLoading = false;
+        isError = true;
+        errorMessage = Variables.connErrorMessage;
+
+      }
+
+
+      setState(() {
+        isLoadingMyVideos = false;
+      });
+    }
+  }
+
+
+  Future<void> getData() async {
+
+    isLoading = true;
+    setState(() {});
+
+
+    try{
+
+
+      var s = await Functions.postReq(Variables.videosByUserId, json.encode({
+        "fb_id": widget.userFb_id,
+        "offset" : offset1,
+        "limit" : 21
+      }), context);
+
+      var data = jsonDecode(s.body);
+      if(data["isError"])
+      {
+        isError = true;
+        errorMessage = "Some error occured";
+
+      }else{
+
+
+        var user = data["userData"]["user_info"];
+        var follow_status = data["userData"]["follow_Status"];
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+        if(!Functions.isNullEmptyOrFalse(user["first_name"]))
+        {
+          f_name = Functions.capitalizeFirst(user["first_name"]);
+
+        }
+        if(!Functions.isNullEmptyOrFalse(user["last_name"]))
+        {
+          l_name = Functions.capitalizeFirst(user["last_name"]);
+
+        }
+
+        if(!Functions.isNullEmptyOrFalse(user["username"]))
+        {
+          username = user["username"];
+
+        }
+
+        if(!Functions.isNullEmptyOrFalse(user["profile_pic"]))
+        {
+          profile_pic= user["profile_pic"];
+
+        }
+
+        if(!Functions.isNullEmptyOrFalse(user["bio"]))
+        {
+          bio = user["bio"];
+          //preferences.setString(Variables.picString, user["bio"]);
+        }
+
+        if(!Functions.isNullEmptyOrFalse(data["userData"]["total_heart"]))
+        {
+          likes = data["userData"]["total_heart"];
+          //preferences.setString(Variables.picString, user["bio"]);
+        }
+        if(!Functions.isNullEmptyOrFalse(data["userData"]["total_fans"]))
+        {
+          followers = data["userData"]["total_fans"];
+          //preferences.setString(Variables.picString, user["bio"]);
+        }
+        if(!Functions.isNullEmptyOrFalse(data["userData"]["total_following"]))
+        {
+          following = data["userData"]["total_following"];
+          //preferences.setString(Variables.picString, user["bio"]);
+        }
+
+        if(data["msg"]!=null)
+          listMyVideos = Functions.parseVideoList(data["msg"], list: listMyVideos);
+
+
+        offset1 = listMyVideos.length;
+
+        if(listMyVideos.length < 21)
+        {
+          isExistMyVideos = false;
+        }
+
+        isError = false;
+
+
+      }
+
+
+
+    }catch(e)
+    {
+
+      isError = true;
+      errorMessage = Variables.connErrorMessage;
+      isLoading = false;
+
+    }
+
+
+
+    setState(() {
+      isLoading = false;
+    });
+
+
+
   }
 
 
@@ -93,166 +280,134 @@ class _UserProfileBodyState extends State<UserProfileBody> {
         .padding
         .top;
     return Scaffold(
-      appBar: AppBar(),
-      body: SmartRefresher(
-          physics: BouncingScrollPhysics(),
-          enablePullDown: true,
-          header: ClassicHeader(),
-          controller: _refreshController,
-          onRefresh: _onRefresh,
-          // onLoading: isLoading,
-          child: DefaultTabController(
-            length: 2,
-            child: SafeArea(
-              child: NestedScrollView(
-                  headerSliverBuilder:
-                      (BuildContext context, bool innerBoxIsScrolled) {
-                    return <Widget>[
-                     /* AppBar(
-                     //   expandedHeight: 40.0,
+      appBar: AppBar(
 
-                        actions: <Widget>[
-                          PopupMenuButton(
-                            color: backgroundColor,
-                            icon: Icon(
-                              Icons.more_vert,
-                              color: secondaryColor,
+        leading: Functions.backButtonMain(context),
+      ),
+      body: isLoading   ?
+      Functions.showLoader()
+          :   isError? Functions.showError(errorMessage) :
+      extend.NestedScrollView(
+          controller: scrollController,
+          headerSliverBuilder:
+              (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+
+
+              SliverToBoxAdapter(child: Padding(
+                padding: EdgeInsets.only(left: 20, right: 22,top: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+
+                        Container(height: 65,width: 65,child:
+
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(40.0),
+
+                          child:      CachedNetworkImage(
+                            imageUrl: profile_pic== null ? "" : profile_pic,
+                            imageBuilder: (context, imageProvider) => Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(40)),
+
+                                image: DecorationImage(
+                                  image: imageProvider,
+                                  fit: BoxFit.cover, ),
+                              ),
                             ),
-                            shape: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                                borderSide: BorderSide.none),
-                            itemBuilder: (BuildContext context) {
-                              return [
-                                PopupMenuItem(
-                                  child: Text(locale.report),
-                                  value: locale.report,
-                                  textStyle: TextStyle(color: secondaryColor),
-                                ),
-                                PopupMenuItem(
-                                  child: Text(locale.block),
-                                  value: locale.block,
-                                  textStyle: TextStyle(color: secondaryColor),
-                                ),
-                              ];
-                            },
+                            placeholder: (context, url) => Functions.profileImageLoadEffect(),
+                            errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
                           )
-                        ],
+                          ,
 
-                      ),*/
-
-                      SliverList(
-                        delegate: SliverChildListDelegate(
-                            [
-
-                             Padding(
-                               padding: EdgeInsets.only(left: 20, right: 22,top: 16),
-                               child: Column(
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                 children: <Widget>[
-                                   Row(
-                                     children: <Widget>[
-                                       Container(height: 65,width: 65,
-                                         child: CircleAvatar(
-                                           radius: 28.0,
-                                           backgroundImage:
-                                           AssetImage('assets/images/user.webp'),
-                                         ),
-                                       ),
-
-                                       Container(width: 22,),
-
-                                       Column(
-                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                         children: <Widget>[
-                                           Text(
-                                             'Samantha Smith',
-                                             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                                           ),
-
-                                           Container(height: 10,),
-                                           Text(
-                                             '@imsamanthasmith',
-                                             style: TextStyle(
-                                                 fontSize: 14, color: disabledTextColor),
-                                           ),
-
-                                         ],
-                                       )],
-                                   ),
-
-                                   Container(height: 20,),
-
-                                   Wrap(
-                                     children: <Widget>[
-                                       Text(
-                                         locale.comment5,
-                                         textAlign: TextAlign.left,
-                                         style: TextStyle(fontSize: 14),
-                                       ),
-                                     ],
-                                   ),
-
-                                   Row(
-                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                     children: <Widget>[
-                                       RowItem(
-                                           '1.2m',
-                                           locale.liked,
-                                           Scaffold(
-                                             appBar: AppBar(
-                                               title: Text('Liked'),
-                                             ),
-                                             body: NewScreenGrid(
-                                               food,
-                                             ),
-                                           )),
-                                       RowItem(
-                                           '12.8k', locale.followers, FollowersPage()),
-                                       RowItem(
-                                           '1.9k', locale.following, FollowingPage()),
-                                     ],
-                                   ),
-                                 ],
-                               ),
-                             )
-                            ]
                         ),
-                      )
-
-                    ];
-                  },
+                        )
+                        ,
 
 
+                        Container(width: 22,),
 
-                  body: Column(
-                    children: <Widget>[
-                      TabBar(
-                          labelColor: mainColor,
-                          unselectedLabelColor: lightTextColor,
-                          indicatorColor: transparentColor,
-                          tabs: [
-                            Tab(icon: Icon(Icons.dashboard)),
-                            Tab(
-                                icon: ImageIcon(AssetImage(
-                                  'assets/icons/ic_like.png',
-                                )))]
-                      ),
-                      Expanded(
-                        child: TabBarView(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            TabGrid(dance, widget.userFb_id,1 ),
-                            TabGrid(food + lol,widget.userFb_id, 2),
+                            Text(
+                              f_name + " "  + l_name,
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                            ),
+
+                            Container(height: 8,),
+                            Text(
+                              Functions.isNullEmptyOrFalse(username) ? "" : username,
+                              style: TextStyle(
+                                  fontSize: 14, color: disabledTextColor),
+                            ),
+
                           ],
+                        )],
+                    ),
+
+                    Container(height: 22,),
+
+                    Wrap(
+                      children: <Widget>[
+                        Text(
+                          bio,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(fontSize: 14),
                         ),
-                      )
-                    ],
+                      ],
+                    ),
+
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          RowItem(
+                              Functions.getRedableNumber(likes),
+                              locale.liked,
+                              null),
+                          RowItem(
+
+                              Functions.getRedableNumber(followers),locale.followers, FollowersPage()),
+                          RowItem(
+
+                              Functions.getRedableNumber(following), locale.following, FollowingPage()),
+                        ],
+                      ),
+                      height: 120,
+                    )
+                  ],
+                ),
+              ),),
 
 
+            ];
+          },
+
+
+          body: Builder(
+            builder: (context){
+              final innerScrollController = PrimaryScrollController.of(context);
+              //innerScrollController.
+
+              final innerScrollControllerLiked = PrimaryScrollController.of(context);
+
+              return Column(
+                children: <Widget>[
+
+                  Expanded(
+
+                    child: TabGrid(listMyVideos, fb_id, 1, isLoading: isLoadingMyVideos, scrollController: scrollController ),
 
                   )
-              ),
-            )),
-    ));
+                ],
+              );
+            },
+          )
+      ),);
   }
 
 

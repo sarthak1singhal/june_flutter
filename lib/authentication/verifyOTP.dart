@@ -321,10 +321,11 @@ class _MyHomePageState extends State<VerifyOTP> {
 
                     Spacer(),
                     PinCodeTextField(
-                      textInputType: TextInputType.numberWithOptions(decimal: false, signed: false),
-                      length: 4,
-                      obsecureText: false,
-                      animationType: AnimationType.fade,
+                      obscureText: false,
+
+                      appContext: context,
+                      keyboardType: TextInputType.numberWithOptions(decimal: false, signed: false),                      length: 4,
+                       animationType: AnimationType.fade,
                       pinTheme: PinTheme(
                         shape: PinCodeFieldShape.underline,
                         fieldHeight: 50,

@@ -8,15 +8,17 @@ class MorePage extends StatelessWidget {
   final List list;
 
   MorePage({this.title, this.list});
+  final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      key: _scaffoldkey,
       child: Scaffold(
           appBar: AppBar(
             title: Text(title),
           ),
-          body: NewScreenGrid(list)),
+          body: NewScreenGrid(3, _scaffoldkey,soundId: title,hashtag: title.replaceAll("#", ''))),
     );
   }
 }

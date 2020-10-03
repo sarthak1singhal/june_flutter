@@ -4,7 +4,7 @@ import 'package:qvid/BottomNavigation/Home/home_page.dart';
 
 class ThumbTile extends StatelessWidget {
   final String mediaListData;
-
+///
   ThumbTile(this.mediaListData);
 
   @override
@@ -21,7 +21,7 @@ class ThumbTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(8.0),
         ),
       ),
-      onTap: () => Navigator.push(
+      /*onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) => FollowingTabPage(
@@ -29,7 +29,7 @@ class ThumbTile extends StatelessWidget {
                     imagesInDisc2 + imagesInDisc1,
                     false,
                     variable: 1,
-                  ))),
+                  ))),*/
     );
   }
 }

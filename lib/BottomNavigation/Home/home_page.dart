@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Home/following_tab.dart';
+import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Theme/colors.dart';
 
@@ -41,6 +42,9 @@ class HomeBody extends StatefulWidget {
 }
 
 class _HomeBodyState extends State<HomeBody> {
+
+
+
   @override
   Widget build(BuildContext context) {
     List<Tab> tabs = [
@@ -53,8 +57,8 @@ class _HomeBodyState extends State<HomeBody> {
         children: <Widget>[
           TabBarView(
             children: <Widget>[
-              FollowingTabPage(videos1, imagesInDisc1, false),
-              FollowingTabPage(videos2, imagesInDisc2, true),
+              FollowingTabPage([], 0, 6, Variables.home_videos,"", videos1, imagesInDisc1, false),
+              FollowingTabPage([], 0, 7, Variables.home_videos,"",videos2, imagesInDisc2, true),
             ],
           ),
           SafeArea(
