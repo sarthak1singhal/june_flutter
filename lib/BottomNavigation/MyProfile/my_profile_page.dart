@@ -152,6 +152,7 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
           }
           offset2 = offset2 + len;
           isLoadingLiked = false;
+          isRequestMade = true;
           listLikedVideos.addAll(Functions.parseVideoList(d["msg"]));
 
           if(primaryTC.index==index){
@@ -176,11 +177,13 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
 
 
       setState(() {
+        isRequestMade = true;
         isLoadingLiked = false;
       });
     }
   }
 
+  bool isRequestMade = false;
 
   fetchMyVideos(int index) async{
 
@@ -361,9 +364,83 @@ bool isExistLiked= true;
 
         if(!Functions.isNullEmptyOrFalse(user["bio"]))
         {
-          bio = user["bio"];
-          //preferences.setString(Variables.picString, user["bio"]);
+          Variables.bio = user["bio"];
+          preferences.setString(Variables.bioString, user["bio"]);
+        }else{
+          Variables.bio = "";
+          preferences.setString(Variables.bioString, "");
         }
+
+
+
+        if(!Functions.isNullEmptyOrFalse(user["gender"]))
+        {
+          Variables.gender= user["gender"];
+          preferences.setString(Variables.genderString, user["gender"]);
+        }else{
+          Variables.gender= "";
+          preferences.setString(Variables.genderString, "");
+        }
+
+
+
+
+
+
+
+        if(!Functions.isNullEmptyOrFalse(data["userData"]["personal"]))
+          {
+
+            var personal = data["userData"];
+            if(!Functions.isNullEmptyOrFalse(personal["email"]))
+            {
+              Variables.email= personal["email"];
+              preferences.setString(Variables.emailString, personal["email"]);
+            }else{
+              Variables.email= "";
+              preferences.setString(Variables.emailString, "");
+            }
+
+
+
+            if(!Functions.isNullEmptyOrFalse(personal["phoneNumber"]))
+            {
+              Variables.phoneNumber= personal["phoneNumber"];
+              preferences.setString(Variables.phoneNumberString, personal["phoneNumber"]);
+            }else{
+              Variables.phoneNumber= "";
+              preferences.setString(Variables.phoneNumberString, "");
+            }
+
+
+
+            if(!Functions.isNullEmptyOrFalse(personal["dob"]))
+            {
+              Variables.dob= personal["dob"];
+              preferences.setString(Variables.dobString, personal["dob"]);
+            }else{
+              Variables.dob= "";
+              preferences.setString(Variables.dobString, "");
+            }
+
+
+
+            if(!Functions.isNullEmptyOrFalse(personal["signup_type"]))
+            {
+              Variables.signupType= personal["signup_type"];
+              preferences.setString(Variables.signupTypeString, personal["signup_type"]);
+            }else{
+              Variables.signupType= "";
+              preferences.setString(Variables.signupTypeString, "");
+            }
+
+
+
+
+          }
+
+
+
 
         if(!Functions.isNullEmptyOrFalse(data["userData"]["total_heart"]))
         {
@@ -491,25 +568,12 @@ bool isExistLiked= true;
                           Row(
                             children: <Widget>[
 
-                              Container(height: 65,width: 65,child:
+                              Container(height: 75,width: 75,child:
 
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(40.0),
 
-                               child:      CachedNetworkImage(
-                                  imageUrl: Variables.user_pic == null ? "" : Variables.user_pic,
-                                  imageBuilder: (context, imageProvider) => Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(Radius.circular(40)),
-
-                                      image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover, ),
-                                    ),
-                                  ),
-                                  placeholder: (context, url) => Functions.profileImageLoadEffect(),
-                                  errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
-                                )
+                               child:     Functions.showProfileImage(Variables.user_pic)
                                 ,
 
                               ),
@@ -547,7 +611,7 @@ bool isExistLiked= true;
                           Wrap(
                             children: <Widget>[
                               Text(
-                                bio,
+                                Variables.bio,
                                 textAlign: TextAlign.left,
                                 style: TextStyle(fontSize: 14),
                               ),
@@ -615,9 +679,9 @@ bool isExistLiked= true;
                             children: <Widget>[
 
 
-                              TabGrid(listMyVideos, fb_id, 1, isLoading: isLoadingMyVideos, scrollController: scrollController ),
+                              TabGrid(listMyVideos, fb_id, 1, isLoading: isLoadingMyVideos, scrollController: scrollController, isRequestMade: true, ),
 
-                              TabGrid(listLikedVideos,fb_id, 2,  isLoading: isLoadingLiked),
+                              TabGrid(listLikedVideos,fb_id, 2,  isLoading: isLoadingLiked, isRequestMade: isRequestMade,),
 
                             ],
                           ),

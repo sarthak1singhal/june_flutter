@@ -8,6 +8,7 @@ class EntryField extends StatelessWidget {
   final bool readOnly;
   final TextInputType keyboardType;
   final int maxLength;
+  final bool obscureText;
   final int maxLines;
   final String hint;
   final Widget prefix;
@@ -16,14 +17,24 @@ class EntryField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final Color fillColor;
   final EdgeInsets padding;
+  Function onChanged;
+  Function onSubmitted;
+  Function validator;
+  bool autoValidate;
   final Widget counter;
 
   EntryField({
+
+    this.onChanged,
+    this.obscureText,
+    this.onSubmitted,
+    this.autoValidate,
     this.controller,
     this.label,
     this.initialValue,
     this.readOnly,
     this.keyboardType,
+    this.validator,
     this.maxLength,
     this.hint,
     this.prefix,
@@ -39,36 +50,49 @@ class EntryField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: padding ?? EdgeInsets.symmetric(vertical: 4.0),
+      padding: padding ?? EdgeInsets.only(left: 5.0, top: 0, bottom: 13, right: 5),
       child: TextFormField(
+
+
+
+        obscureText: obscureText == null ? false : obscureText,
+        onChanged: onChanged,
+        validator: validator,
+        onFieldSubmitted: onSubmitted,
         style: TextStyle(color: secondaryColor),
         enableInteractiveSelection: false,
         textCapitalization: textCapitalization ?? TextCapitalization.sentences,
         cursorColor: mainColor,
         onTap: onTap,
         autofocus: false,
+
+
         controller: controller,
         initialValue: initialValue,
         readOnly: readOnly ?? false,
         keyboardType: keyboardType,
-        minLines: 1,
+        minLines: maxLines == null ? null : 1,
         maxLength: maxLength,
-        maxLines: maxLines,
+        maxLines: maxLines == 1 ? 1: maxLines,
         decoration: InputDecoration(
+
+
             contentPadding: EdgeInsets.all(16.0),
             filled: true,
-            fillColor: fillColor ?? transparentColor,
+            fillColor: fillColor ?? Colors.transparent,
             prefixIcon: prefix,
             suffixIcon: suffixIcon,
             labelText: label,
-            labelStyle: Theme.of(context)
-                .textTheme
-                .subtitle1
-                .copyWith(color: disabledTextColor),
+            labelStyle: TextStyle(
+              color: Colors.white54
+
+            ),
+
             hintText: hint,
             hintStyle: TextStyle(fontSize: 13.3, color: secondaryColor),
             counter: counter ?? Offstage(),
-            border: OutlineInputBorder(borderSide: BorderSide.none)),
+            border: OutlineInputBorder(borderSide: BorderSide.none)
+        ),
       ),
     );
   }

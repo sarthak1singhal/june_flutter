@@ -22,11 +22,12 @@ class TabGrid extends StatefulWidget {
   final IconData viewIcon;
   final String userId;
   final bool isLoading;
+  final bool isRequestMade;
    ScrollController scrollController;
   int type; // 1 for videos by userID, 2 for my liked videos, 3 for by search videos
 
 
-  TabGrid(this.list, this.userId, this.type, {this.isLoading, this.icon, this.onTap, this.viewIcon,  this.scrollController});
+  TabGrid(this.list, this.userId, this.type, {this.isLoading, this.icon, this.onTap, this.viewIcon,  this.scrollController, this.isRequestMade});
 
   @override
   _MyHomePageState createState() => _MyHomePageState(list);
@@ -51,7 +52,6 @@ class _MyHomePageState extends State<TabGrid> with
     // TODO: implement initState
     super.initState();
 
-
   }
 
 
@@ -62,6 +62,7 @@ class _MyHomePageState extends State<TabGrid> with
 
   @override
   Widget build(BuildContext context) {
+
     return NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (OverscrollIndicatorNotification overscroll) {
           overscroll.disallowGlow();
@@ -69,7 +70,7 @@ class _MyHomePageState extends State<TabGrid> with
         },
         child: CustomScrollView(
             slivers: <Widget>[
-           list.length == 0? Functions.noVideoByUser(context): SliverGrid(
+              widget.isRequestMade && list.length == 0? Functions.noVideoByUser(context): SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,
                   childAspectRatio: 2 / 2.5,
                   crossAxisSpacing: 3,

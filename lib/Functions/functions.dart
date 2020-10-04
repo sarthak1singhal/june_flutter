@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_view/flutter_web_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -41,16 +43,12 @@ class Functions {
      // return null;
     }
 
-    print(secondUrl);
+    debugPrint(secondUrl);
+
+    print("KAWASAKI");
 
 
-    HttpClient httpClient = new HttpClient()
-      ..badCertificateCallback =
-      ((X509Certificate cert, String host, int port) => true);
-    IOClient ioClient = new IOClient(httpClient);
-
-
-     var res = await http.post(
+    var res = await http.post(
        secondUrl,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -59,6 +57,8 @@ class Functions {
       },
       body: params,
     );
+    print("KADLKDNSLKAN");
+
     print(res.body);
 
 
@@ -141,18 +141,59 @@ class Functions {
 
 
 
-  static Future<http.Response> unsignPostReq(String url, String params) {
+  static Future<http.Response> unsignPostReq(String url, String params) async{
 
 
     print(Variables.base_url + url);
     print(params);
-    return http.post(
+    var res= await http.post(
       Variables.base_url + url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: params,
     );
+    debugPrint(res.body);
+    return res;
+  }
+
+
+
+
+
+  static Widget showProfileImage(String url){
+
+    bool _validURL = Uri.parse(url).isAbsolute;
+
+    print(url);
+    if(!_validURL){
+      url = Variables.base_url + "local/?p=" +url;
+
+//      return Image.asset("assets/user/user1.png");
+    }
+
+ _validURL = Uri.parse(url).isAbsolute;
+
+    if(!_validURL){
+
+      return Image.asset("assets/user/user1.png");
+    }
+
+    return CachedNetworkImage(
+      imageUrl:   url,
+      imageBuilder: (context, imageProvider) => Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(40)),
+
+          image: DecorationImage(
+            image: imageProvider,
+            fit: BoxFit.cover, ),
+        ),
+      ),
+      placeholder: (context, url) => Functions.profileImageLoadEffect(),
+      errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
+    );
+
   }
 
 
@@ -165,13 +206,27 @@ class Functions {
   }
 
   static Widget showLoaderBottom(){
-    return Center(child: Container(height: 20, width: 20, child: CircularProgressIndicator(
+    return Center(child: Container(height: 25, width: 25, child: CircularProgressIndicator(
       valueColor: new AlwaysStoppedAnimation<Color>(Colors.white30),
       strokeWidth: 2,
 
     ),),);
   }
 
+  static Widget showLoaderSmall(){
+    return Center(child: Container(height: 20, width: 20, child: CircularProgressIndicator(
+      valueColor: new AlwaysStoppedAnimation<Color>(Colors.white38),
+      strokeWidth: 2,
+
+    ),),);
+  }
+  static Widget showLoaderWhite(){
+    return Center(child: Container(height: 20, width: 20, child: CircularProgressIndicator(
+      valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+      strokeWidth: 2,
+
+    ),),);
+  }
 
 
 
@@ -237,7 +292,33 @@ class Functions {
   }
 
 
-
+  static Future<void> showMyDialog(context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text('AlertDialog Title'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('This is a demo alert dialog.'),
+                Text('Would you like to approve of this message?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Approve'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
 

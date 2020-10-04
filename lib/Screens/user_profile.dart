@@ -400,7 +400,7 @@ List<Videos> listMyVideos = [];
 
                   Expanded(
 
-                    child: TabGrid(listMyVideos, fb_id, 1, isLoading: isLoadingMyVideos, scrollController: scrollController ),
+                    child: TabGrid(listMyVideos, fb_id, 1, isLoading: isLoadingMyVideos, scrollController: scrollController , isRequestMade: true,),
 
                   )
                 ],

@@ -30,6 +30,7 @@ dependencies:
   fitted_text_field_container:
   pin_code_fields:
   sliding_up_panel:
+  datetime_picker_formfield:
   camera: ^0.5.8+5
   flashlight: ^0.1.1
   linked_scroll_controller:
