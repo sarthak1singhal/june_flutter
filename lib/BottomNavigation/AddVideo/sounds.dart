@@ -28,11 +28,13 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
   var _controller = TextEditingController();
 
 
+  ScrollController scrollController = ScrollController();
   bool isLoading = false;
 
 
 
   List<Sounds> list = [];
+  List<Sounds> searchList = [];
 
 
   TabController primaryTC;
@@ -41,25 +43,31 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  parseData(int reqTab, data){
-    int currentTab  = primaryTC.index;
-    if(currentTab != reqTab)
-      return;
 
+  int offset = 0;
+  int offsetSearch = 0;
+  bool isSearch = false;
+  bool listEnded = false;
+  bool searchListEnded = false;
 
+  getData(String v) async{
 
-    if(Functions.isNullEmptyOrFalse(data["msg"]))
-    {
-      Functions.showSnackBar(_scaffoldKey, "Some Error Occured");
-      return;
+    if(isLoading)return;
+    if(isSearch)
+      {
+        if(searchListEnded)
+          {
+            return;
+          }
+      }
+    else{
+      if(listEnded)
+        {
+          return;
+        }
     }
 
 
-
-  }
-
-
-  getData(String v) async{
 
     setState(() {
       isLoading = true;
@@ -74,16 +82,38 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
 
 
        var res = await Functions.postReq(Variables.allSounds, jsonEncode({
-        "keyword" : v.length == 0? " " : v
+        "keyword" : v.length == 0? "" : v,
+         "offset" : isSearch ? offsetSearch: offset
       }), context);
 
       var data  = jsonDecode(res.body);
 
-      parseData(tab, data);
+      if(data["isError"])
+        {
 
+         }else{
+        if(isSearch)
+          {
+             offsetSearch = offsetSearch + data["msg"].length;
 
+            if(data["msg"].length<20)
+              {
+                searchListEnded = true;
+              }
+          }else{
 
+           offset = offset + data["msg"].length;
 
+          if(data["msg"].length<20)
+          {
+            listEnded= true;
+          }
+
+        }
+
+         parseData(tab, data);
+
+      }
 
     }catch(e)
     {   setState(() {
@@ -101,15 +131,69 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
 
   }
 
+  parseData(int reqTab, data){
+
+
+
+    if(Functions.isNullEmptyOrFalse(data["msg"]))
+    {
+      Functions.showSnackBar(_scaffoldKey, "Some Error Occured");
+      return;
+    }
+
+
+    for(int i =0;i<data["msg"].length;i++)
+      {
+        print("SDAD");
+        var d = data["msg"][i];
+        Sounds sounds = Sounds(d["id"], d["audio_path"]["mp3"], d["audio_path"]["mp3"], d["sound_name"], d["description"], d["thum"], d["section"].toString(), d["created"]);
+        if(isSearch)
+          searchList.add(sounds);
+        else{
+          list.add(sounds);
+        }
+      }
+
+    print("DONE");
+
+
+  }
 
 
 
 
+  String mp3Url = "https://www.learningcontainer.com/download/sample-mp3-file/?wpdmdl=1676&refresh=5f7b81dc8d61f1601929692";
+  String imageUrl  = "https://i.picsum.photos/id/157/200/200.jpg?hmac=WcY71o73tg2eJc3TmpgdISkTe-p8ZGn-A3Q3jh2h7T4";
   @override
   void initState() {
     super.initState();
     primaryTC = new TabController(length: 2, vsync: this);
     getData("");
+
+
+    list.add(Sounds(1, mp3Url, mp3Url, "Sample Name", "Sample DEscriptipn", imageUrl, "1", "date"));
+    list.add(Sounds(2, mp3Url, mp3Url, "Sample Name2", "Sample DEscriptipn", imageUrl, "1", "date"));
+    list.add(Sounds(3, mp3Url, mp3Url, "Sample Name3", "Sample DEscriptipn", imageUrl, "1", "date"));
+
+
+    scrollController.addListener(() {
+
+       if(scrollController.position.extentAfter<200)
+        {
+          if(_controller.text.trim().length>1) {
+
+            getData(_controller.text);
+
+          } else{
+            getData("");
+        }
+        }
+
+    });
+
+
+
+
   }
 
 
@@ -148,8 +232,20 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
                             onChanged: (v){
 
                               if(v.length>2 && v.length<20)
-                                getData(v);
-                            },
+                                {
+                                  isSearch = true;
+                                  offsetSearch = 0;
+                                  searchListEnded = false;
+                                  getData(v);
+                                }else{
+
+                                isSearch = false;
+                                setState(() {
+
+                                });
+                              }
+
+                              },
                             decoration: InputDecoration(
                               icon: IconButton(
                                 icon: Icon(Icons.arrow_back),
@@ -200,6 +296,7 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
 
           children: <Widget>[
             ListView.builder(
+              controller: scrollController,
               physics: BouncingScrollPhysics(),
               itemCount: list.length,
               shrinkWrap: true,
@@ -213,27 +310,67 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
                         leading: Container(
                           child: CircleAvatar(
                             backgroundColor: darkColor,
-                            backgroundImage: !Functions.isNullEmptyOrFalse(list[index].thum)? NetworkImage(list[index].thum) : Functions.defaultProfileImage(),
+                            backgroundImage: !Functions.isNullEmptyOrFalse(list[index].thum)?
+                Uri.parse(list[index].thum).isAbsolute?
+                            NetworkImage(list[index].thum) :
+                            Functions.defaultProfileImage():
+                            Functions.defaultProfileImage(),
+
                           ),
-                          height: 55,
-                          width: 55,
+                          height: 40,
+                          width: 40,
                         ),
                         title: Padding(padding: EdgeInsets.only(left: 5),child: Text(
                           Functions.capitalizeFirst(list[index].sound_name),
                           style: TextStyle(color: Colors.white),
                         ),),
-                        subtitle: Padding(padding: EdgeInsets.only(left: 5,top: 4),
-                          child: Text(Functions.isNullEmptyOrFalse(list[index].description) ? "" : list[index].description),
-                        ),
+
+
+
+
+
                         onTap: () async{
 
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>   UserProfilePage(fb_id: list[index].id,)),
-                          );
+
 
                         }
+                        ,
+
+                      trailing: IconButton(
+                        icon: Icon(!list[index].isPlaying? Icons.play_arrow : Icons.pause),
+                        onPressed: (){
+
+                          if(currentIndexPlaying!=null)
+                            {
+
+                                list[currentIndexPlaying].pause();
+                                if(currentIndexPlaying == index) {
+                                  currentIndexPlaying = null;
+
+                                  setState(() {
+
+                                  });
+                                  return;
+
+                                }
+
+                            }
+                          if(list[index].changeAndTellPlayStatus())
+                            {
+                              currentIndexPlaying = index;
+                            }
+                          else{
+                            currentIndexPlaying = null;
+                          }
+                          setState(() {
+
+                          });
+
+
+                        },
+
+                      ),
 
 
                     ),
@@ -253,6 +390,23 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
       ),
     );
   }
+
+
+
+  int currentIndexPlaying ;
+
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    if(currentIndexPlaying!=null)
+    {
+      list[currentIndexPlaying].pause();
+    }
+
+  }
+
 
   @override
   // TODO: implement wantKeepAlive

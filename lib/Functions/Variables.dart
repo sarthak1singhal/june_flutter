@@ -84,7 +84,7 @@ class Variables{
 
   static final String allSounds=base_url+"allSounds"; //offset to view or search sounds. if keyword == "" then it shows all sounds
   //else shows searched shounds by keyword
-  //Parameters - keyword, offset. Limit is already set to 30
+  //Parameters - keyword, offset. Limit is already set to 20
   static final String search=base_url+"search";
   static final String mark_unmark_sound_fav=base_url+"mark-s-fav"; //parameter- sound_id, fav(0 or 1, 0 for unfavourite, 1 for favourite)
   static final String showVideoComments=base_url+"showVideoComments"; //offset, video_id, limit = 25
