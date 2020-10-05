@@ -38,6 +38,7 @@ class _MyHomePageState extends State<Settings > {
       body: ListView(
 
 
+        physics: BouncingScrollPhysics(),
         children: <Widget>[
           ListTile(
             title: Text("Edit Profile", style: TextStyle(fontFamily: Variables.fontName, color: Colors.white),),
@@ -77,22 +78,25 @@ class _MyHomePageState extends State<Settings > {
 
 
 
+
+
+
           ListTile(
             title: Text("Logout", style: TextStyle(fontFamily: Variables.fontName, color: Colors.white)),
             onTap: () async{
 
 
-             // Functions.showMyDialog
-             // Variables.token = "";
-              Variables.refreshToken = "";
-              SharedPreferences pref = await SharedPreferences.getInstance();
-              pref.setString(Variables.tokenString, "");
-              pref.setString(Variables.refreshTokenString, "");
-
-              Navigator.pop(context);
-              //Navigator.pop(context);
-              //Navigator.push(context,MaterialPageRoute(builder: (context) => ChangePassword()));
-
+             Functions.showMyDialog(context, "Do you want to logout of June?", "", "Yes", () async{
+               Variables.refreshToken = "";
+               Variables.token = "";
+               SharedPreferences pref = await SharedPreferences.getInstance();
+               pref.setString(Variables.tokenString, "");
+               pref.setString(Variables.refreshTokenString, "");
+               Navigator.pop(context);
+               Navigator.pop(context);
+             }, secondary: (){
+               Navigator.pop(context);
+             }, secondaryText: "Cancel");
 
 
             },

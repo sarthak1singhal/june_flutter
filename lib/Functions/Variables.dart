@@ -87,7 +87,7 @@ class Variables{
   //Parameters - keyword, offset. Limit is already set to 30
   static final String search=base_url+"search";
   static final String mark_unmark_sound_fav=base_url+"mark-s-fav"; //parameter- sound_id, fav(0 or 1, 0 for unfavourite, 1 for favourite)
-  static final String showVideoComments=base_url+"showVideoComments"; //offset, video_id, limit = 30
+  static final String showVideoComments=base_url+"showVideoComments"; //offset, video_id, limit = 25
   static final String my_FavSound=base_url+"my_FavSound"; //offset, limit is already set to 30
   static final String follow_users=base_url+"follow-user";//other_userid, status (0 for unfollow, 1 for follow)
   static final String edit_profile=base_url+"edit-profile"; //full_name, username, gender, bio  ||dob phoneNumber

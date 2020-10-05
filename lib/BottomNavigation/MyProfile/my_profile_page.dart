@@ -18,9 +18,7 @@ import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
-import 'package:qvid/Routes/routes.dart';
-import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
-import 'package:linked_scroll_controller/linked_scroll_controller.dart';
+ import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
 
 import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
 import 'package:qvid/BottomNavigation/MyProfile/followers.dart';
@@ -373,6 +371,7 @@ bool isExistLiked= true;
 
 
 
+
         if(!Functions.isNullEmptyOrFalse(user["gender"]))
         {
           Variables.gender= user["gender"];
@@ -459,6 +458,7 @@ bool isExistLiked= true;
         }
 
 
+
         if(data["msg"]!=null)
         listMyVideos = Functions.parseVideoList(data["msg"], list: listMyVideos);
 
@@ -472,6 +472,16 @@ bool isExistLiked= true;
 
         isError = false;
 
+
+        if(user["verified"]!=null)
+          if(user["verified"] == 0|| user["verified"] == 1)
+          {
+            Variables.isVerified = user["verified"];
+            preferences.setInt(Variables.verifiedString, user["verified"]);
+          }else{
+            Variables.isVerified = 0;
+            preferences.setInt(Variables.verifiedString, 0);
+          }
       }
 
     }catch(e)
@@ -568,16 +578,7 @@ bool isExistLiked= true;
                           Row(
                             children: <Widget>[
 
-                              Container(height: 75,width: 75,child:
-
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(40.0),
-
-                               child:     Functions.showProfileImage(Variables.user_pic)
-                                ,
-
-                              ),
-                              )
+                              Functions.showProfileImage(Variables.user_pic,75, Variables.isVerified)
                               ,
 
 

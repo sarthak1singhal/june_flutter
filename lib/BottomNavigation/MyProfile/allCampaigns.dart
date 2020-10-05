@@ -29,10 +29,10 @@ class _MyHomePageState extends State<AllCampaigns>
   @override
   void initState() {
     super.initState();
-     for(int i = 0; i< 100;i++)
-{
-  list.add("dadad");
-}
+    for(int i = 0; i< 100;i++)
+    {
+      list.add("dadad");
+    }
     controller.addListener(() async {
       double max = controller.position.maxScrollExtent;
       double current = controller.position.pixels;

@@ -54,6 +54,8 @@ android {
         flutterFFmpegPackage  = "video-lts"
         flutterFFmpegPackage  = "full-lts"
         flutterFFmpegPackage  = "full-gpl-lts"
+        flutterFFmpegPackage  = "lame"
+
     }
 
     buildTypes {

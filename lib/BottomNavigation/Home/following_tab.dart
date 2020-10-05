@@ -2,8 +2,8 @@ import 'package:cached_video_player/cached_video_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/Auth/login_navigator.dart';
-import 'package:qvid/BottomNavigation/Home/comment_sheet.dart';
-import 'package:qvid/Components/custom_button.dart';
+import 'package:qvid/BottomNavigation/Home/commentSheet.dart';
+ import 'package:qvid/Components/custom_button.dart';
 import 'package:qvid/Components/rotated_image.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/Videos.dart';
@@ -11,6 +11,8 @@ import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:video_player/video_player.dart';
+
+import 'ShowVideosBySound.dart';
 
 class FollowingTabPage extends StatelessWidget {
   final List<String> videos;
@@ -147,6 +149,7 @@ class _VideoPageState extends State<VideoPage> {
   CachedVideoPlayerController _controller;
   bool initialized = false;
   bool isLiked = false;
+  String link = "https://multiplatform-f.akamaihd.net/i/multi/april11/sintel/sintel-hd_,512x288_450_b,640x360_700_b,768x432_1000_b,1024x576_1400_m,.mp4.csmil/master.m3u8";
 
 
 
@@ -155,11 +158,11 @@ class _VideoPageState extends State<VideoPage> {
   void initState() {
     super.initState();
 
-    _controller = CachedVideoPlayerController.network("https://multiplatform-f.akamaihd.net/i/multi/april11/sintel/sintel-hd_,512x288_450_b,640x360_700_b,768x432_1000_b,1024x576_1400_m,.mp4.csmil/master.m3u8", )
+    _controller = CachedVideoPlayerController.network(link, )
       ..initialize().then((value) {
 
 
-        setState(() {
+         setState(() {
           /*if (widget.pageIndex == widget.currentPageIndex &&
               !widget.isPaused &&
               initialized) {
@@ -270,8 +273,22 @@ class _VideoPageState extends State<VideoPage> {
                       AssetImage('assets/icons/ic_comment.png'),
                       color: secondaryColor,
                     ),
-                    '287', onPressed: () {
-                  commentSheet(context);
+
+                    '287', onPressed: () async {
+
+                        await   showModalBottomSheet(
+                            isScrollControlled: true,
+                            backgroundColor: Colors.white10,//backgroundColor.withOpacity(0.3),
+                            shape: OutlineInputBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
+                                borderSide: BorderSide.none),
+                            context: context,
+                            builder: (context) {
+                              return CommentSheet(context, "video idddddddddddddddddddddd");
+                            }
+                        );
+
+
                 }),
                 /*Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -300,7 +317,7 @@ class _VideoPageState extends State<VideoPage> {
           Positioned.directional(
             textDirection: Directionality.of(context),
             start: 12.0,
-            bottom: 120.0,
+            bottom: 160.0,
             child: Row(
               mainAxisSize: MainAxisSize.min,
 
@@ -334,11 +351,33 @@ class _VideoPageState extends State<VideoPage> {
             )
           ),
 
+           Positioned.directional(
+                textDirection: Directionality.of(context),
+                start: 12.0,
+                bottom: 130.0,
+                child:  GestureDetector(
+                  child: RichText(
+                  text: TextSpan(children: [
 
+                    TextSpan(text: "Original Sound"),
+
+                  ]),
+                ),onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => VideosBySound(
+                      title: "Sound ID",
+                      list: [link],
+                    )),
+                  );
+                },
+                ),
+
+              ),
           Positioned.directional(
             textDirection: Directionality.of(context),
             start: 12.0,
-            bottom: 72.0,
+            bottom: 90.0,
             child: RichText(
               text: TextSpan(children: [
 

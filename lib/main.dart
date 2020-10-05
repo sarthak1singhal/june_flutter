@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:qvid/BottomNavigation/bottom_navigation.dart';
-import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:qvid/Functions/Variables.dart';
 
 void main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:qvid/BottomNavigation/Home/comment_sheet.dart';
-import 'package:qvid/Components/custom_button.dart';
+import 'package:qvid/BottomNavigation/Home/commentSheet.dart';
+ import 'package:qvid/Components/custom_button.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Theme/colors.dart';
 
@@ -71,9 +71,18 @@ class _VideoOptionState extends State<VideoOption> {
                     AssetImage('assets/icons/ic_comment.png'),
                     color: secondaryColor,
                   ),
-                  '287', onPressed: () {
-                commentSheet(context);
-              }),
+                  '287', onPressed: () async{
+                await   showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: backgroundColor,
+                    shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+                borderSide: BorderSide.none),
+                context: context,
+                builder: (context) {
+                return CommentSheet(context, "video idddddddddddddddddddddddddddd");
+                }
+                );              }),
               CustomButton(
                 Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,

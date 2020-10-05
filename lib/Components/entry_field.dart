@@ -22,11 +22,13 @@ class EntryField extends StatelessWidget {
   Function validator;
   bool autoValidate;
   final Widget counter;
+  FocusNode focusNode;
 
-  EntryField({
+   EntryField({
 
-    this.onChanged,
+     this.onChanged,
     this.obscureText,
+    this.focusNode,
     this.onSubmitted,
     this.autoValidate,
     this.controller,
@@ -55,6 +57,7 @@ class EntryField extends StatelessWidget {
 
 
 
+        focusNode: focusNode,
         obscureText: obscureText == null ? false : obscureText,
         onChanged: onChanged,
         validator: validator,
@@ -85,11 +88,11 @@ class EntryField extends StatelessWidget {
             labelText: label,
             labelStyle: TextStyle(
               color: Colors.white54
-
             ),
 
+
             hintText: hint,
-            hintStyle: TextStyle(fontSize: 13.3, color: secondaryColor),
+            hintStyle: TextStyle(fontSize: 13.3, color: lightWhite),
             counter: counter ?? Offstage(),
             border: OutlineInputBorder(borderSide: BorderSide.none)
         ),

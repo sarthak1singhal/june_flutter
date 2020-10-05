@@ -198,6 +198,10 @@ List<Videos> listMyVideos = [];
         {
           bio = user["bio"];
           //preferences.setString(Variables.picString, user["bio"]);
+        }   if(!Functions.isNullEmptyOrFalse(user["verified"]))
+        {
+          isVerified= user["verified"];
+          //preferences.setString(Variables.picString, user["bio"]);
         }
 
         if(!Functions.isNullEmptyOrFalse(data["userData"]["total_heart"]))
@@ -302,29 +306,7 @@ List<Videos> listMyVideos = [];
                     Row(
                       children: <Widget>[
 
-                        Container(height: 65,width: 65,child:
-
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(40.0),
-
-                          child:      CachedNetworkImage(
-                            imageUrl: profile_pic== null ? "" : profile_pic,
-                            imageBuilder: (context, imageProvider) => Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.all(Radius.circular(40)),
-
-                                image: DecorationImage(
-                                  image: imageProvider,
-                                  fit: BoxFit.cover, ),
-                              ),
-                            ),
-                            placeholder: (context, url) => Functions.profileImageLoadEffect(),
-                            errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
-                          )
-                          ,
-
-                        ),
-                        )
+                        Functions.showProfileImage(profile_pic, 65, isVerified)
                         ,
 
 

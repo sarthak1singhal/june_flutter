@@ -26,6 +26,7 @@ dependencies:
   flutter_uploader:
   pull_to_refresh:
   fluttertoast:
+  timeago:
   flutter_web_view:
   fitted_text_field_container:
   pin_code_fields:
@@ -33,7 +34,6 @@ dependencies:
   datetime_picker_formfield:
   camera: ^0.5.8+5
   flashlight: ^0.1.1
-  linked_scroll_controller:
   image_cropper:
   dio:
   file_picker: ^2.0.0

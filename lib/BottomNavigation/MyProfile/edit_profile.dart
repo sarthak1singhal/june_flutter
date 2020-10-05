@@ -44,7 +44,17 @@ class _EditProfileState extends State<EditProfile> {
 
   saveData() async
   {
-    if(_formKey.currentState.validate()){
+    if(username.trim() == "")
+      {
+        setState(() {
+          usernameErrorMessage = "Enter a username";
+          validatingUsername = false;
+        });
+        return;
+       }
+
+    //print(username)
+    if(usernameErrorMessage.toLowerCase() == "username available" || username == Variables.username){
 
         setState(() {
           isLoadingForms = true;
@@ -139,6 +149,14 @@ class _EditProfileState extends State<EditProfile> {
 
   checkUsername() async{
 
+    if(username == Variables.username)
+      {
+        setState(() {
+          usernameErrorMessage = "";
+          validatingUsername = false;
+        });
+        return;
+      }
     if(username.contains(" "))
       {
         setState(() {
@@ -147,13 +165,7 @@ class _EditProfileState extends State<EditProfile> {
         });
         return;
       }
-    if(username.trim() == Variables.username) {
-      setState(() {
-        usernameErrorMessage = "";
-        validatingUsername = false;
-      });
-      return;
-    }
+
     setState(() {
       usernameErrorMessage = "";
       validatingUsername = true;
@@ -217,18 +229,7 @@ class _EditProfileState extends State<EditProfile> {
 
               Spacer(),
               Padding(padding: EdgeInsets.only(top: 50),
-                child:  Container(
-                  height: 120,
-                  width: 120,
-                  child:  ClipRRect(
-
-                    borderRadius: BorderRadius.circular(60.0),
-
-                    child:    Functions.showProfileImage(Variables.user_pic)// Container(height: 50,width: 50,color: Colors.pink,)
-                    ,
-
-                  ),
-                )
+                child: Functions.showProfileImage(Variables.user_pic, 120,0)
               ),
               FlatButton(onPressed: (){
 
@@ -336,7 +337,7 @@ class _EditProfileState extends State<EditProfile> {
                validator: (s){
 
 
-                 if(usernameErrorMessage.toLowerCase() != "username available" )
+                /* if(usernameErrorMessage.toLowerCase() != "username available" )
                    {
                      return "Username not available";
                    }
@@ -345,7 +346,7 @@ class _EditProfileState extends State<EditProfile> {
                   if(username.trim().length==0)
                     return "Please enter a username";
                  if(usernameErrorMessage == "")
-                   return null;
+                   return null;*/
                   return null;
 
                },
@@ -545,8 +546,8 @@ class _EditProfileState extends State<EditProfile> {
 
     File croppedFile = await ImageCropper.cropImage(
         compressQuality: 80,
-        maxWidth: 1080,
-        maxHeight: 1080,
+        maxWidth: 800,
+        maxHeight: 800,
         sourcePath: compressedImage.path,
         aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
         aspectRatioPresets: [
