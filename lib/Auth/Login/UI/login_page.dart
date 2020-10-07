@@ -232,9 +232,6 @@ class _LoginBodyState extends State<LoginBody> {
         Variables.l_name= Functions.capitalizeFirst(data["last_name"]);
 
 
-        if(widget.comingFromClass=="following") {
-          FollowingTabBodyState.closeSheet();
-        }
       }
 
     isLoading = false;

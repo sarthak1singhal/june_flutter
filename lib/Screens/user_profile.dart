@@ -12,8 +12,7 @@ import 'package:qvid/Components/row_item.dart';
 import 'package:qvid/Components/sliver_app_delegate.dart';
 import 'package:qvid/Components/tab_grid.dart';
 import 'package:qvid/Functions/Variables.dart';
-import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
-import 'package:qvid/Functions/Videos.dart';
+ import 'package:qvid/Functions/Videos.dart';
 import 'package:qvid/Locale/locale.dart';
 
 import 'package:qvid/Functions/functions.dart';
@@ -96,8 +95,9 @@ List<Videos> listMyVideos = [];
       });
 
       try{
+        Functions fx = Functions();
 
-        var res= await Functions.postReq(Variables.videosByUserId , jsonEncode({
+        var res = await fx.postReq(Variables.videosByUserId , jsonEncode({
           "fb_id" : fb_id,
           "my_fb_id" : Variables.fb_id,
           "limit" : 21,
@@ -122,7 +122,7 @@ List<Videos> listMyVideos = [];
 
           isLoadingMyVideos = false;
 
-          listMyVideos.addAll(Functions.parseVideoList(d["msg"]));
+          listMyVideos.addAll(Functions.parseVideoList(d["msg"], context));
         }
 
 
@@ -152,8 +152,9 @@ List<Videos> listMyVideos = [];
 
     try{
 
+      Functions fx = Functions();
 
-      var s = await Functions.postReq(Variables.videosByUserId, json.encode({
+      var s = await fx.postReq(Variables.videosByUserId, json.encode({
         "fb_id": widget.userFb_id,
         "offset" : offset1,
         "limit" : 21
@@ -221,7 +222,7 @@ List<Videos> listMyVideos = [];
         }
 
         if(data["msg"]!=null)
-          listMyVideos = Functions.parseVideoList(data["msg"], list: listMyVideos);
+          listMyVideos = Functions.parseVideoList(data["msg"], context,list: listMyVideos);
 
 
         offset1 = listMyVideos.length;
@@ -291,7 +292,7 @@ List<Videos> listMyVideos = [];
       body: isLoading   ?
       Functions.showLoader()
           :   isError? Functions.showError(errorMessage) :
-      extend.NestedScrollView(
+      NestedScrollView(
           controller: scrollController,
           headerSliverBuilder:
               (BuildContext context, bool innerBoxIsScrolled) {

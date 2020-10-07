@@ -37,7 +37,6 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
   List<Sounds> searchList = [];
 
 
-  TabController primaryTC;
 
 
 
@@ -78,10 +77,9 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
     try{
 
 
-      int tab = primaryTC.index;
+       Functions fx = Functions();
 
-
-       var res = await Functions.postReq(Variables.allSounds, jsonEncode({
+       var res = await fx.postReq(Variables.allSounds, jsonEncode({
         "keyword" : v.length == 0? "" : v,
          "offset" : isSearch ? offsetSearch: offset
       }), context);
@@ -111,7 +109,7 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
 
         }
 
-         parseData(tab, data);
+         parseData( data);
 
       }
 
@@ -131,7 +129,7 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
 
   }
 
-  parseData(int reqTab, data){
+  parseData( data){
 
 
 
@@ -167,8 +165,7 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    primaryTC = new TabController(length: 2, vsync: this);
-    getData("");
+     getData("");
 
 
     list.add(Sounds(1, mp3Url, mp3Url, "Sample Name", "Sample DEscriptipn", imageUrl, "1", "date"));
@@ -201,199 +198,207 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     var local = AppLocalizations.of(context);
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(118.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                 Padding(padding: EdgeInsets.only(left: 22,top: 17),child: Text("Sounds", style: TextStyle(fontSize: 24, color: Colors.white),),
-                    ),
-                Container(
-                    margin:
-                    EdgeInsets.symmetric(horizontal: 20.0, vertical: 18.0),
-                    decoration: BoxDecoration(
-                      color: darkColor,
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    child: Row(
-                      children: <Widget>[
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(118.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(padding: EdgeInsets.only(left: 22,top: 17),child: Text("Sounds", style: TextStyle(fontSize: 24, color: Colors.white),),
+              ),
+              Container(
+                  margin:
+                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 18.0),
+                  decoration: BoxDecoration(
+                    color: darkColor,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: Row(
+                    children: <Widget>[
 
-                        Container(
-                          height: 45,
-                          width: MediaQuery.of(context).size.width-100,
-                          child:  TextField(
-                            controller: _controller,
+                      Container(
+                        height: 45,
+                        width: MediaQuery.of(context).size.width-100,
+                        child:  TextField(
+                          controller: _controller,
 
-                            onChanged: (v){
+                          onChanged: (v){
+                            if(currentIndexPlaying!=null)
+                            {
+                              list[currentIndexPlaying].pause();
 
-                              if(v.length>2 && v.length<20)
-                                {
-                                  isSearch = true;
-                                  offsetSearch = 0;
-                                  searchListEnded = false;
-                                  getData(v);
-                                }else{
+                              currentIndexPlaying= null;
+                            }
+                            if(currentSearchIndexPlaying!=null)
+                            {
+                              searchList[currentSearchIndexPlaying].pause();
+                              currentSearchIndexPlaying = null;
+                            }
 
-                                isSearch = false;
-                                setState(() {
+                            if(v.length>2 && v.length<20)
+                            {
+                              isSearch = true;
+                              offsetSearch = 0;
+                              searchListEnded = false;
+                              getData(v);
+                            }else{
 
-                                });
-                              }
+                              isSearch = false;
+                              setState(() {
 
-                              },
-                            decoration: InputDecoration(
-                              icon: IconButton(
-                                icon: Icon(Icons.arrow_back),
-                                color: secondaryColor,
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                              border: InputBorder.none,
+                              });
+                            }
 
-                              hintText: AppLocalizations.of(context).search,
-                              hintStyle: Theme.of(context).textTheme.subtitle1,
-
+                          },
+                          decoration: InputDecoration(
+                            icon: IconButton(
+                              icon: Icon(Icons.arrow_back),
+                              color: secondaryColor,
+                              onPressed: () => Navigator.pop(context),
                             ),
+                            border: InputBorder.none,
+
+                            hintText: AppLocalizations.of(context).search,
+                            hintStyle: Theme.of(context).textTheme.subtitle1,
+
                           ),
                         ),
-                        Spacer(),
-                        isLoading ? Padding(
-                          padding: EdgeInsets.only(right: 20),
-                          child: Container(height: 15,width: 15, child: CircularProgressIndicator(strokeWidth: 2,),),
-                        ) : Container(
-                          width: 20,
-                        )
+                      ),
+                      Spacer(),
+                      isLoading ? Padding(
+                        padding: EdgeInsets.only(right: 20),
+                        child: Container(height: 15,width: 15, child: CircularProgressIndicator(strokeWidth: 2,),),
+                      ) : Container(
+                        width: 20,
+                      )
 
-                      ],
-                    )
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TabBar(
-                    controller: primaryTC,
-
-                    indicator: BoxDecoration(color: transparentColor),
-                    isScrollable: true,
-                    labelColor: mainColor,
-                    labelStyle: Theme.of(context).textTheme.headline6,
-                    unselectedLabelColor: disabledTextColor,
-                    tabs: <Widget>[
-                      Tab(text: "Sounds"),
-                      Tab(text: "Local"),
                     ],
-                  ),
-                )
-              ],
-            ),
+                  )
+              ),
+             ],
           ),
         ),
-        body: TabBarView(
-          controller: primaryTC,
+      ),
+      body:   ListView.builder(
+          controller: scrollController,
+          physics: BouncingScrollPhysics(),
+          itemCount: isSearch? searchList.length:list.length,
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            return Column(
+              children: <Widget>[
 
-          children: <Widget>[
-            ListView.builder(
-              controller: scrollController,
-              physics: BouncingScrollPhysics(),
-              itemCount: list.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: <Widget>[
+                Container(height: 5,),
 
-                    Container(height: 5,),
-
-                    ListTile(
-                        leading: Container(
-                          child: CircleAvatar(
-                            backgroundColor: darkColor,
-                            backgroundImage: !Functions.isNullEmptyOrFalse(list[index].thum)?
-                Uri.parse(list[index].thum).isAbsolute?
-                            NetworkImage(list[index].thum) :
-                            Functions.defaultProfileImage():
-                            Functions.defaultProfileImage(),
-
-                          ),
-                          height: 40,
-                          width: 40,
-                        ),
-                        title: Padding(padding: EdgeInsets.only(left: 5),child: Text(
-                          Functions.capitalizeFirst(list[index].sound_name),
-                          style: TextStyle(color: Colors.white),
-                        ),),
-
-
-
-
-
-                        onTap: () async{
-
-
-
-
-                        }
-                        ,
-
-                      trailing: IconButton(
-                        icon: Icon(!list[index].isPlaying? Icons.play_arrow : Icons.pause),
-                        onPressed: (){
-
-                          if(currentIndexPlaying!=null)
-                            {
-
-                                list[currentIndexPlaying].pause();
-                                if(currentIndexPlaying == index) {
-                                  currentIndexPlaying = null;
-
-                                  setState(() {
-
-                                  });
-                                  return;
-
-                                }
-
-                            }
-                          if(list[index].changeAndTellPlayStatus())
-                            {
-                              currentIndexPlaying = index;
-                            }
-                          else{
-                            currentIndexPlaying = null;
-                          }
-                          setState(() {
-
-                          });
-
-
-                        },
-
-                      ),
-
+                ListTile(
+                  leading: Container(
+                    child: CircleAvatar(
+                      backgroundColor: darkColor,
+                      backgroundImage: !Functions.isNullEmptyOrFalse(isSearch? searchList[index].thum:list[index].thum)?
+                      Uri.parse(list[index].thum).isAbsolute?
+                      NetworkImage(isSearch? searchList[index].thum:list[index].thum) :
+                      Functions.defaultProfileImage():
+                      Functions.defaultProfileImage(),
 
                     ),
-                  ],
-                );
-              }),
+                    height: 40,
+                    width: 40,
+                  ),
+                  title: Padding(padding: EdgeInsets.only(left: 5),child: Text(
+                    Functions.capitalizeFirst(isSearch? searchList[index].sound_name:list[index].sound_name),
+                    style: TextStyle(color: Colors.white),
+                  ),),
 
-            ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemCount: list.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Container();
-                })
-          ],
-        ),
-      ),
+
+
+
+
+                  onTap: () async{
+
+
+
+
+                  }
+                  ,
+
+                  trailing: IconButton(
+                    icon: Icon(!(isSearch? searchList[index].isPlaying:list[index].isPlaying)? Icons.play_arrow : Icons.pause),
+                    onPressed: (){
+
+                      if(isSearch)
+                      {
+                        if(currentSearchIndexPlaying!=null)
+                        {
+
+                          list[currentSearchIndexPlaying].pause();
+                          if(currentSearchIndexPlaying == index) {
+                            currentSearchIndexPlaying = null;
+
+                            setState(() {
+
+                            });
+                            return;
+
+                          }
+
+                        }
+                        if(list[index].changeAndTellPlayStatus())
+                        {
+                          currentSearchIndexPlaying = index;
+                        }
+                        else{
+                          currentSearchIndexPlaying = null;
+                        }
+                      }else{
+
+
+                        if(currentIndexPlaying!=null)
+                        {
+
+                          list[currentIndexPlaying].pause();
+                          if(currentIndexPlaying == index) {
+                            currentIndexPlaying = null;
+
+                            setState(() {
+
+                            });
+                            return;
+
+                          }
+
+                        }
+                        if(list[index].changeAndTellPlayStatus())
+                        {
+                          currentIndexPlaying = index;
+                        }
+                        else{
+                          currentIndexPlaying = null;
+                        }
+                      }
+                      setState(() {
+
+                      });
+
+
+                    },
+
+                  ),
+
+
+                ),
+              ],
+            );
+          }),
+
     );
   }
 
 
 
   int currentIndexPlaying ;
+  int currentSearchIndexPlaying ;
 
 
   @override
@@ -403,7 +408,11 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
     if(currentIndexPlaying!=null)
     {
       list[currentIndexPlaying].pause();
-    }
+     }
+ if(currentSearchIndexPlaying!=null)
+    {
+      searchList[currentSearchIndexPlaying].pause();
+     }
 
   }
 

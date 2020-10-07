@@ -33,7 +33,10 @@ class _MyHomePageState extends State<ChangePassword> {
       });
 
       try {
-        var res = await Functions.postReq(
+
+        Functions fx = Functions();
+
+      var res = await fx.postReq(
             Variables.changePassword, json.encode({
           "password": currentPassword,
           "new_password": _newPass,

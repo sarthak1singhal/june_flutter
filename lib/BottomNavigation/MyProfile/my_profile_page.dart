@@ -18,7 +18,6 @@ import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
- import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
 
 import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
 import 'package:qvid/BottomNavigation/MyProfile/followers.dart';
@@ -127,8 +126,9 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
       });
 
       try{
+        Functions fx = Functions();
 
-        var res= await Functions.postReq(Variables.my_liked_video , jsonEncode({
+        var res = await fx.postReq(Variables.my_liked_video , jsonEncode({
           "fb_id" : fb_id,
           "limit" : 21,
           "offset" : offset2
@@ -151,7 +151,7 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
           offset2 = offset2 + len;
           isLoadingLiked = false;
           isRequestMade = true;
-          listLikedVideos.addAll(Functions.parseVideoList(d["msg"]));
+          listLikedVideos.addAll(Functions.parseVideoList(d["msg"], context));
 
           if(primaryTC.index==index){
             setState(() {
@@ -197,8 +197,9 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
       });
 
       try{
+        Functions fx = Functions();
 
-        var res= await Functions.postReq(Variables.videosByUserId , jsonEncode({
+        var res = await fx.postReq(Variables.videosByUserId , jsonEncode({
           "fb_id" : fb_id,
           "my_fb_id" : Variables.fb_id,
           "limit" : 21,
@@ -221,7 +222,7 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
               }
             offset1 = offset1 + len;
             isLoadingMyVideos = false;
-            listMyVideos.addAll(Functions.parseVideoList(d["msg"]));
+            listMyVideos.addAll(Functions.parseVideoList(d["msg"], context));
 
             if(primaryTC.index==index){
                setState(() {
@@ -302,8 +303,9 @@ bool isExistLiked= true;
     Variables.fb_id = fb_id;
     print(Variables.fb_id);
     try{
+      Functions fx = Functions();
 
-      var s = await Functions.postReq(url, json.encode({
+      var s = await fx.postReq(url, json.encode({
         "fb_id" : Variables.fb_id,
         "offset" : 0,
         "limit" : 21,
@@ -460,7 +462,7 @@ bool isExistLiked= true;
 
 
         if(data["msg"]!=null)
-        listMyVideos = Functions.parseVideoList(data["msg"], list: listMyVideos);
+        listMyVideos = Functions.parseVideoList(data["msg"],context, list: listMyVideos);
 
 
         offset1 = listMyVideos.length;
@@ -563,7 +565,7 @@ bool isExistLiked= true;
         DefaultTabController(
             length: 2,
 
-            child: extend.NestedScrollView(
+            child: NestedScrollView(
                  controller: scrollController,
                 headerSliverBuilder:
                     (BuildContext context, bool innerBoxIsScrolled) {
@@ -645,9 +647,7 @@ bool isExistLiked= true;
                   ];
                 },
 
-                pinnedHeaderSliverHeightBuilder: () {
-                  return 5;
-                },
+
 
                 body: Builder(
                   builder: (context){

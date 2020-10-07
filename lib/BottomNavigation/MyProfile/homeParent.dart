@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
- import 'package:extended_nested_scroll_view/extended_nested_scroll_view.dart' as extend;
-import 'package:flutter/cupertino.dart';
+ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 

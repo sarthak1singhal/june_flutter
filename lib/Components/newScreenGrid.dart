@@ -73,8 +73,9 @@ class _MyHomePageState extends State<NewScreenGrid> {
 
       try {
 
+        Functions fx = Functions();
 
-        var res = await Functions.postReq(widget.type == 3 ? Variables.showVideoByHashtag : Variables.showVideosBySound, jsonEncode({
+        var res = await fx.postReq(widget.type == 3 ? Variables.showVideoByHashtag : Variables.showVideosBySound, jsonEncode({
           "hashtag": widget.hashtag,
           "sound_id" : widget.soundId,
           "offset" : offset,
@@ -94,7 +95,7 @@ class _MyHomePageState extends State<NewScreenGrid> {
                 isExistMore = false;
               }
 
-            list.addAll(Functions.parseVideoList(data["msg"]));
+            list.addAll(Functions.parseVideoList(data["msg"], context));
 
 
           }else{

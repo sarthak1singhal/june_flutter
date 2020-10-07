@@ -22,7 +22,6 @@ dependencies:
   shared_preferences:
   cached_network_image:
   image_picker:
-  extended_nested_scroll_view:
   flutter_uploader:
   pull_to_refresh:
   fluttertoast:
@@ -35,9 +34,12 @@ dependencies:
   camera: ^0.5.8+5
   flashlight: ^0.1.1
   image_cropper:
+  permission_handler:
   just_audio:
+  clipboard_manager:
   dio:
   file_picker: ^2.0.0
+  gallery_saver:
   flutter_ffmpeg: ^0.3.0
 #  flutter_ffmpeg:
 #    git:

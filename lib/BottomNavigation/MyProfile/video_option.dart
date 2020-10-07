@@ -61,7 +61,7 @@ class _VideoOptionState extends State<VideoOption> {
             children: <Widget>[
               CustomButton(
                 ImageIcon(
-                  AssetImage('assets/icons/ic_views.png'),
+                  AssetImage('assets/icons/ic_share.png'),
                   color: secondaryColor,
                 ),
                 '1.2k',

@@ -73,8 +73,9 @@ TextEditingController controller  = new TextEditingController();
 
 
     try{
+      Functions fx = Functions();
 
-      var res = await Functions.postReq(Variables.postComment, jsonEncode({
+      var res = await fx.postReq(Variables.postComment, jsonEncode({
         "video_id":widget.video_id,
         "comment": s
 
@@ -120,8 +121,9 @@ TextEditingController controller  = new TextEditingController();
 
     try{
 
+      Functions fx = Functions();
 
-      var res = await Functions.postReq(Variables.showVideoComments, jsonEncode({
+      var res = await fx.postReq(Variables.showVideoComments, jsonEncode({
         "offset": offset
       }), context );
 
@@ -216,7 +218,7 @@ TextEditingController controller  = new TextEditingController();
                           style: Theme.of(context)
                               .textTheme
                               .headline6
-                              .copyWith(color: Colors.white, fontSize:MediaQuery.of(context).viewInsets.bottom>10? 24:21),
+                              .copyWith(color: Colors.white70, fontSize:MediaQuery.of(context).viewInsets.bottom>10? 24:21),
                         ),
                       ),
                       isLoading?Functions.showLoaderSmall():Container(),

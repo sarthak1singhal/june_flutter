@@ -21,8 +21,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'Videos.dart';
 
 class Functions {
-  static Future<http.Response> postReq(
-      String secondUrl, String params, BuildContext context,
+    Future<http.Response> postReq(
+      String url, String params, BuildContext context,
       {Map<String, String> urlParams, bool isIdChange}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Variables.token = prefs.getString(Variables.tokenString);
@@ -42,12 +42,12 @@ class Functions {
       // return null;
     }
 
-    debugPrint(secondUrl);
+    debugPrint(url);
 
     print("KAWASAKI");
 
     var res = await http.post(
-      secondUrl,
+      url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'token': Variables.token,
@@ -110,10 +110,10 @@ class Functions {
   }
 
   static Future<http.Response> unsignPostReq(String url, String params) async {
-    print(Variables.base_url + url);
+    print(url);
     print(params);
     var res = await http.post(
-      Variables.base_url + url,
+       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -513,7 +513,7 @@ class Functions {
     return _formattedNumber;
   }
 
-  static List<Videos> parseVideoList(var data, {List<Videos> list}) {
+  static List<Videos> parseVideoList(var data, BuildContext context,{List<Videos> list}) {
     if (list == null) {
       list = [];
     }
@@ -553,7 +553,9 @@ class Functions {
           data["count"]["view"],
           data["description"],
           data["created"],
-          sound));
+          sound,
+          context
+      ));
     }
 
     return list;

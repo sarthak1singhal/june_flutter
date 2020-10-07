@@ -63,7 +63,9 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
           url = Uri.encodeFull(url);
 
           print(url);
-          var res = await Functions.postReq(url, jsonEncode({
+      Functions fx = Functions();
+
+      var res = await fx.postReq(url, jsonEncode({
             "type" : tab == 0? "video" : "users",
             "keyword" : v.length == 0? " " : v
           }), context);
@@ -120,7 +122,7 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
     if(reqTab == 0)
       {
 
-        videos = Functions.parseVideoList(data["msg"]);
+        videos = Functions.parseVideoList(data["msg"],context);
 
       }
     if(reqTab==1)

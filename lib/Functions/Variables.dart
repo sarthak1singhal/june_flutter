@@ -96,7 +96,7 @@ class Variables{
   static final String postComment=base_url+"post-comment";// video_id, comment
   static final String likeDislikeVideo=base_url+"likeDislikeVideo";//action (0 for delete like, 1 for like), video_id
   static final String reportVideo=base_url+"reportVideo"; //action, video_id
-  static final String DeleteVideo=base_url+"delete-video";//video_id
+  static final String deleteVideo=base_url+"delete-video";//video_id
   static final String updateVideoView=base_url+"updateVideoView";//video_id
   static final String getNotifications=base_url+"getNotifications"; //offset, limit is set to 30
   static final String uploadProfileImg=base_url+"uploadProfileImage_app";
@@ -124,18 +124,18 @@ class Variables{
 
 
 
-  static final String loginUrl = "login";
-  static final String login_fb = "login-fb";
-  static final String isUsernameOrEmailExist = "isEmailorUsernameExist";
+  static final String loginUrl = base_url+"login";
+  static final String login_fb = base_url+"login-fb";
+  static final String isUsernameOrEmailExist = base_url+"isEmailorUsernameExist";
    //username or email and password
        //if account exist, login
        //else show error
 
-  static final String signup = "signup";//creates an account
-  static final String sendOTP = "send-otp";//verify user account details and sends otp to mail
+  static final String signup =base_url+ "signup";//creates an account
+  static final String sendOTP = base_url+"send-otp";//verify user account details and sends otp to mail
 
-  static final String checkEmailExist = "isEmailExist";//check if email exist
-  static final String isUsernameExist = "isUsernameExist"; //check if username exist and recommend some usernames related to it
+  static final String checkEmailExist =base_url+ "isEmailExist";//check if email exist
+  static final String isUsernameExist = base_url+"isUsernameExist"; //check if username exist and recommend some usernames related to it
 
   //static final String checkUsername = "checkUsername";//logs user in with password
 
@@ -144,6 +144,7 @@ class Variables{
   static final String connErrorMessage = "Connection Error";
 
   static List<String> genders = ["Male", "Female", "Prefer not to say","1"];
+  static List<String> reportStatements = ["Nudity", "Fake News", "Copyright issues","I just don't like it"];
 
   static final String basicErrorMessage  = "Some error occoured";
 

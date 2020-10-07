@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/Auth/login_navigator.dart';
 import 'package:qvid/BottomNavigation/Home/commentSheet.dart';
+import 'package:qvid/BottomNavigation/Home/shareSheet.dart';
  import 'package:qvid/Components/custom_button.dart';
 import 'package:qvid/Components/rotated_image.dart';
 import 'package:qvid/Functions/Variables.dart';
@@ -13,6 +14,7 @@ import 'package:qvid/Theme/colors.dart';
 import 'package:video_player/video_player.dart';
 
 import 'ShowVideosBySound.dart';
+import 'dynamicBottomSheet.dart';
 
 class FollowingTabPage extends StatelessWidget {
   final List<String> videos;
@@ -78,19 +80,11 @@ class FollowingTabBodyState extends State<FollowingTabBody> {
     _pageController.addListener(scrollListener);
   }
 
-  static var c;
-
-  static closeSheet()
-  {
-     Navigator.pop(c);
-  }
 
 
   @override
   Widget build(BuildContext context) {
-    print("SSS");
-    c = context;
-    return PageView.builder(
+      return PageView.builder(
       physics: BouncingScrollPhysics(),
       scrollDirection: Axis.vertical,
       controller: _pageController,
@@ -104,26 +98,7 @@ class FollowingTabBodyState extends State<FollowingTabBody> {
           isFollowing: widget.isFollowing,
         );
       },
-/*      onPageChanged: Variables.token == null
-          ? (i) async {
-              if (i == 2) {
-                await showModalBottomSheet(
-                   shape: OutlineInputBorder(
-                      borderSide: BorderSide(color: transparentColor),
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(16.0))),
-                  context: context,
-                  isScrollControlled: true,
-                  isDismissible: false,
-                  builder: (context) {
-                    return Container(
-                        height: MediaQuery.of(context).size.width * 1.5,
-                        child: LoginNavigator("following"));
-                  },
-                );
-              }
-            }
-          : null,*/
+
       itemCount: widget.videos.length,
     );
   }
@@ -278,7 +253,7 @@ class _VideoPageState extends State<VideoPage> {
 
                         await   showModalBottomSheet(
                             isScrollControlled: true,
-                            backgroundColor: Colors.white10,//backgroundColor.withOpacity(0.3),
+                            backgroundColor: Colors.white.withOpacity(0.07),//backgroundColor.withOpacity(0.3),
                             shape: OutlineInputBorder(
                                 borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
                                 borderSide: BorderSide.none),
@@ -290,6 +265,82 @@ class _VideoPageState extends State<VideoPage> {
 
 
                 }),
+                CustomButton(
+                    ImageIcon(
+                      AssetImage('assets/icons/ic_share.png'),
+                      color: secondaryColor,
+                    ),
+
+                    '', onPressed: () async {
+
+               String res =    await   showModalBottomSheet(
+                      isScrollControlled: true,
+                   backgroundColor: Colors.white.withOpacity(0.04),//backgroundColor.withOpacity(0.3),
+                      shape: OutlineInputBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
+                          borderSide: BorderSide.none),
+                      context: context,
+                      builder: (context) {
+                        return ShareSheet(context, null);
+                      }
+                  );
+
+               if(res == "delete")
+                 {
+
+                 }
+               if(res =="report")
+                 {
+                  int s =  await showModalBottomSheet(
+                       isScrollControlled: true,
+                       backgroundColor: Colors.white.withOpacity(0.02),//backgroundColor.withOpacity(0.3),
+                       shape: OutlineInputBorder(
+                           borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
+                           borderSide: BorderSide.none),
+                       context: context,
+                       builder: (context) {
+                         List<Widget> l = [];
+
+                         print("RANDO");
+                         for(int i  =0; i<Variables.reportStatements.length; i++)
+                         {
+                           l.add(BottomSheetButton(
+                             title: Variables.reportStatements[i],
+                             onTap: (){
+
+                               Navigator.pop(context, 1);
+                               //TODO : CALL VIDEO REPORT METHOD HERE video.reportVideo();
+
+                             },
+                           ));
+                           l.add(Container(height: 18,));
+                         }
+                         l.add(BottomSheetButton(
+                           title: "Cancel",
+                           onTap: (){
+
+                             Navigator.pop(context, 0);
+
+                           },
+                         ));
+                         return MyBottomSheet(context, list: l,);
+                       }
+
+
+                   );
+
+                  if(s == 1)
+                  {
+
+                  }
+
+
+                 }
+
+                }),
+
+
+
                 /*Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: RotatedImage(widget.image),

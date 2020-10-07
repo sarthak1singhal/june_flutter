@@ -63,7 +63,9 @@ class _EditProfileState extends State<EditProfile> {
 
 
           print(username);
-          var res= await Functions.postReq(Variables.edit_profile, jsonEncode({
+          Functions fx = Functions();
+
+          var res = await fx.postReq(Variables.edit_profile, jsonEncode({
             "username"  : username.trim(),
             "gender" : gender.trim(),
             "bio" : bio.trim(),
@@ -416,16 +418,14 @@ class _EditProfileState extends State<EditProfile> {
 
 
               Container(
+
                 width: MediaQuery.of(context).size.width,
                 child: DropdownButton<String>(
                   value: Functions.isNullEmptyOrFalse(gender) ? "1" : gender,
                   icon: null,
                   elevation: 16,
                   style: TextStyle(color: Colors.white),
-                  underline: Container(
-                    height: 1,
-                    color: Colors.transparent,
-                  ),
+
                   onChanged: (String newValue) {
                     FocusScope.of(context).requestFocus(new FocusNode());
 
