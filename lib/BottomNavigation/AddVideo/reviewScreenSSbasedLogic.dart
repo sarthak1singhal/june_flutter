@@ -290,61 +290,75 @@ class ReviewState extends State<ReviewScreen2>  {
                         width: MediaQuery.of(context).size.width,
                         child: Padding(
                           padding: EdgeInsets.only(left: 20,right: 20,top: 13,bottom: 5),
-                          child: FlutterSlider(
-                            values: [0,widget.duration*10],
-                            rangeSlider: true,
+                          child: Builder(
+                            builder: (c){
 
-                            max: widget.duration*10,
-                            min: 0,
-                            tooltip: FlutterSliderTooltip(
-                                format: (String value) {
-                                  return (double.parse(value)/10).toStringAsFixed(1);
-                                },
-                                textStyle: TextStyle(fontSize: 17, color: Colors.white),
-                                boxStyle: FlutterSliderTooltipBox(
-                                    decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.7)
+                              List<Widget> l = [];
+                              for(int i=0;i<thumbPath.length;i++)
+                                {
+                                  l.add(Flexible(
+                                    child: Image.file(File(thumbPath[i])),
+                                  ));
+                                }
+                              return FlutterSlider(
+                                values: [selectedWidget.startTime*10,selectedWidget.endTime*10],
+                                rangeSlider: true,
+
+                                max: widget.duration*10,
+                                min: 0,
+                                tooltip: FlutterSliderTooltip(
+                                    format: (String value) {
+                                      return (double.parse(value)/10).toStringAsFixed(1);
+                                    },
+                                    textStyle: TextStyle(fontSize: 17, color: Colors.white),
+                                    boxStyle: FlutterSliderTooltipBox(
+                                        decoration: BoxDecoration(
+                                            color: Colors.blue.withOpacity(0.7)
+                                        )
                                     )
-                                )
-                            ),
-                            onDragging: (handlerIndex,   lowerValue, upperValue) {
-                              _lowerValue = (double.parse(lowerValue.toString()))/10;
-                              _upperValue = (double.parse(lowerValue.toString()))/10;
-                              print(_lowerValue);
-                              //setState(() {});
-                            },
-                            trackBar: FlutterSliderTrackBar(
-                              centralWidget: Container(height: 30,  padding: EdgeInsets.only(left: 5,right: 5), child: Container(height: 30, color: Colors.pinkAccent,),),
-
-                              activeTrackBar: BoxDecoration(
-                                color:  mainColor.withOpacity(0.2)
-                              ),
-                              activeTrackBarHeight: 30,
-           ),
-                            handler: FlutterSliderHandler(
-                              decoration: BoxDecoration(),
-                              child: Material(
-                                type: MaterialType.canvas,
-                                color: secondaryColor,
-                                elevation: 3,
-                                child: Container(
-                                  height: 50,
-                                    width: 10,
-                                  ),
-                              ),
-                            ),
-                            rightHandler:  FlutterSliderHandler(
-                              decoration: BoxDecoration(),
-                              child: Material(
-                                type: MaterialType.canvas,
-                                color: secondaryColor,
-                                elevation: 3,
-                                child: Container(
-                                  height: 50,
-                                  width: 10,
                                 ),
-                              ),
-                            ),
+                                onDragging: (handlerIndex,   lowerValue, upperValue) {
+                                  _lowerValue = (double.parse(lowerValue.toString()))/10;
+                                  _upperValue = (double.parse(upperValue.toString()))/10;
+                                  print(_lowerValue);
+                                  //setState(() {});
+                                },
+                                trackBar: FlutterSliderTrackBar(
+                                  centralWidget: Container(height: 30,  padding: EdgeInsets.only(left: 5,right: 5), child: Row(
+                                    children: l,
+                                  ),),
+
+                                  activeTrackBar: BoxDecoration(
+                                      color:  mainColor.withOpacity(0.2)
+                                  ),
+                                  activeTrackBarHeight: 30,
+                                ),
+                                handler: FlutterSliderHandler(
+                                  decoration: BoxDecoration(),
+                                  child: Material(
+                                    type: MaterialType.canvas,
+                                    color: secondaryColor,
+                                    elevation: 3,
+                                    child: Container(
+                                      height: 50,
+                                      width: 10,
+                                    ),
+                                  ),
+                                ),
+                                rightHandler:  FlutterSliderHandler(
+                                  decoration: BoxDecoration(),
+                                  child: Material(
+                                    type: MaterialType.canvas,
+                                    color: secondaryColor,
+                                    elevation: 3,
+                                    child: Container(
+                                      height: 50,
+                                      width: 10,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
 
@@ -373,14 +387,16 @@ class ReviewState extends State<ReviewScreen2>  {
                             Spacer(),
                             IconButton(icon: Icon(Icons.done, color: Colors.white,), onPressed: (){
 
-                              selectedWidget.endTime = 4;
-                              selectedWidget.startTime= 2;
+                              print(_lowerValue);
+                              print(_upperValue);
+                              selectedWidget.endTime = _upperValue;
+                              selectedWidget.startTime= _lowerValue;
                                if(!(selectedWidget.startTime==0 && selectedWidget.endTime == widget.duration)) {
                                 for (int i = 0; i < listOverlays.length; i++) {
                                   if (selectedWidget.key ==
                                       listOverlays[i].key) {
-                                    listOverlays[i].endTime = 4;
-                                    listOverlays[i].startTime = 2;
+                                    listOverlays[i].endTime = _upperValue;
+                                    listOverlays[i].startTime = _lowerValue;
 
                                     listOverlays.add(listOverlays[i]);
                                      listOverlays.removeAt(i);
@@ -871,10 +887,17 @@ class ReviewState extends State<ReviewScreen2>  {
     int num = (w/30).ceil();
 
 
+
     String path = v.path + "/" +"thumb";
     String command = "-i $finalVideoPath -vf \"select='not(mod(n,$num))',scale=120:120\" -vsync vfr ${v.path}/thum_%d.jpg";
    await _flutterFFmpeg.execute(command);
+    for(int i= 1;i<=num;i++)
+    {
+      thumbPath.add(v.path+"/thum_$i.jpg");
+    }
+   setState(() {
 
+   });
       print(finalVideoPath);
       print(widget.duration);
       print(num);
