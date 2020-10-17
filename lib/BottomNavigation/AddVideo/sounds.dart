@@ -7,16 +7,13 @@ import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
 import 'package:qvid/Components/newScreenGrid.dart';
 import 'package:qvid/Components/searchGrid.dart';
 import 'package:qvid/Functions/Variables.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Functions/VideoDownloader.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Screens/user_profile.dart';
 import 'package:qvid/Theme/colors.dart';
-import 'package:qvid/Extension/extensions.dart';
-import 'package:qvid/Components/tab_grid.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 
 
 class GetSounds extends StatefulWidget {
@@ -318,8 +315,20 @@ class _SearchUsersState extends State<GetSounds >  with SingleTickerProviderStat
                   onTap: () async{
 
 
+                    MyAudioDownloader download = MyAudioDownloader();
+                    String path = await download.downloadAndSaveHls(isSearch? searchList[index].audioPath:list[index].audioPath,  _scaffoldKey);
 
 
+                    List<String> l=[];
+                    if(path!=null)
+                      {
+                        l.add(path);
+                        l.add( isSearch? searchList[index].sound_name:list[index].sound_name);
+                        l.add(isSearch? searchList[index].id.toString():list[index].id.toString());
+
+                        Navigator.pop(context, l);
+
+                      }
                   }
                   ,
 

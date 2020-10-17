@@ -15,7 +15,7 @@ import 'package:qvid/Components/row_item.dart';
 import 'package:qvid/Components/sliver_app_delegate.dart';
 import 'package:qvid/Components/tab_grid.dart';
 import 'package:qvid/Functions/Variables.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 

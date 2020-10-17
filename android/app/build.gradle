@@ -46,15 +46,8 @@ android {
         versionName flutterVersionName
     }
     ext {
-        flutterFFmpegPackage  = "min-lts"
-        flutterFFmpegPackage  = "min-gpl-lts"
-        flutterFFmpegPackage  = "https-lts"
-        flutterFFmpegPackage  = "https-gpl-lts"
-        flutterFFmpegPackage  = "audio-lts"
-        flutterFFmpegPackage  = "video-lts"
-        flutterFFmpegPackage  = "full-lts"
+
         flutterFFmpegPackage  = "full-gpl-lts"
-        flutterFFmpegPackage  = "lame"
 
     }
 

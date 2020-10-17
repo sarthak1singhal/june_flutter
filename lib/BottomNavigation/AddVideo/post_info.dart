@@ -16,19 +16,6 @@ class _PostInfoState extends State<PostInfo> {
   bool isSwitched1 = false;
   bool isSwitched2 = false;
 
-  final List<PostThumbList> thumbLists = [
-    PostThumbList(dance),
-  ];
-  static List<String> dance = [
-    'assets/thumbnails/dance/Layer 951.png',
-    'assets/thumbnails/dance/Layer 952.png',
-    'assets/thumbnails/dance/Layer 953.png',
-    'assets/thumbnails/dance/Layer 954.png',
-    'assets/thumbnails/dance/Layer 951.png',
-    'assets/thumbnails/dance/Layer 952.png',
-    'assets/thumbnails/dance/Layer 953.png',
-    'assets/thumbnails/dance/Layer 954.png',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +30,7 @@ class _PostInfoState extends State<PostInfo> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             EntryField(
-              prefix: CircleAvatar(
-                backgroundImage: AssetImage('assets/images/user.webp'),
-              ),
+
               label: '    ' + AppLocalizations.of(context).describeVideo,
             ),
             Spacer(),
@@ -53,13 +38,7 @@ class _PostInfoState extends State<PostInfo> {
               AppLocalizations.of(context).selectCover + '\n',
               style: TextStyle(color: secondaryColor, fontSize: 18),
             ),
-            ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: thumbLists.length,
-                itemBuilder: (context, index) {
-                  return thumbLists[index];
-                }),
+
             SizedBox(height: 12.0),
             ListTile(
               title: Text(

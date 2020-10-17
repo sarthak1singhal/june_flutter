@@ -2,12 +2,12 @@ class MediaInfo{
   
   
   
-  int _duration;
+  double _duration;
   String _filepath;
 
-  int get duration => _duration;
+  double get duration => _duration;
 
-  set duration(int value) {
+  set duration(double value) {
     _duration = value;
   }
 

@@ -7,7 +7,7 @@ import 'package:qvid/BottomNavigation/Explore/explore_page.dart';
 import 'package:qvid/Components/newScreenGrid.dart';
 import 'package:qvid/Components/searchGrid.dart';
 import 'package:qvid/Functions/Variables.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';

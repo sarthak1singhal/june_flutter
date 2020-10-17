@@ -10,7 +10,7 @@ import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
 import 'package:qvid/Components/entry_field.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/VideoDownloader.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Theme/colors.dart';

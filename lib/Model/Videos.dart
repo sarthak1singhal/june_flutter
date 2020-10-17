@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:qvid/Functions/Variables.dart';
 
-import 'functions.dart';
+import '../Functions/functions.dart';
 
 class Videos{
 

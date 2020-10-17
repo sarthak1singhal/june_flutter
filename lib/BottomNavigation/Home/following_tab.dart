@@ -7,7 +7,7 @@ import 'package:qvid/BottomNavigation/Home/shareSheet.dart';
  import 'package:qvid/Components/custom_button.dart';
 import 'package:qvid/Components/rotated_image.dart';
 import 'package:qvid/Functions/Variables.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -301,8 +301,7 @@ class _VideoPageState extends State<VideoPage> {
                        builder: (context) {
                          List<Widget> l = [];
 
-                         print("RANDO");
-                         for(int i  =0; i<Variables.reportStatements.length; i++)
+                          for(int i  =0; i<Variables.reportStatements.length; i++)
                          {
                            l.add(BottomSheetButton(
                              title: Variables.reportStatements[i],

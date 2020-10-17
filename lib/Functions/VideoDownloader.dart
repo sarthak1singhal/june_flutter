@@ -5,6 +5,8 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'functions.dart';
+
 class MyVideoDownloader{
 
 
@@ -79,3 +81,72 @@ class MyVideoDownloader{
 
 
 
+
+
+class MyAudioDownloader{
+
+
+
+
+    Future<String> downloadAndSaveHls(String url,  _scaffoldKey) async {
+
+
+    var status = await Permission.storage.status;
+    print(status);
+    if (status.isUndetermined) {
+
+      status = await Permission.storage.request(); // We didn't ask for permission yet.
+    }
+
+    if(status.isRestricted)
+      status = await Permission.storage.request(); // We didn't ask for permission yet.
+
+    if (status.isPermanentlyDenied) {
+
+      // The OS restricts access, for example because of parental controls.
+    }
+
+
+    if (await Permission.storage.request().isGranted) {
+
+
+      File file;
+      final value =    await getApplicationDocumentsDirectory();
+
+
+
+      print(value.path);
+
+      String fileName =
+          "vid${DateTime.now().millisecondsSinceEpoch.toString()}.mp3";
+
+
+      file = new File(value.path + "/" + fileName);
+
+
+
+      print(value.path);
+      print(file.path);
+
+      FlutterFFmpeg _flutterFFmpeg =   FlutterFFmpeg();
+      String c = "-i "+url+" -codec copy ${file.path}";
+
+      int r = await _flutterFFmpeg.execute(c);
+
+
+      if(r==1) {
+        Functions.showSnackBar(_scaffoldKey, "Some error occured");
+        return null;
+      }
+      return file.path;
+
+    }
+
+
+
+
+
+
+  }
+
+}

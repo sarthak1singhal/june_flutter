@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Components/entry_field.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/VideoDownloader.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Theme/colors.dart';
@@ -21,9 +21,12 @@ class MyBottomSheet extends StatefulWidget {
 
   //Videos video;
   final String title;
+  final Color textColor;
+  final double titleSize;
   final List<Widget> list;
+  final bool enableBackDropFilter;
   BuildContext context;
-  MyBottomSheet(this.context, {this.title, this.list});
+  MyBottomSheet(this.context, {this.titleSize,this.title, this.list, this.enableBackDropFilter, this.textColor});
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -52,44 +55,45 @@ class _MyHomePageState extends State<MyBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    Widget w = Stack(
+      children: <Widget>[
+        Column(
+          mainAxisSize: MainAxisSize.min,
+
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(height: 10,),
+            //Container(height: 2, width: 40, color: Colors.white,),
+
+            Divider(color: Colors.white, endIndent: 170,indent: 170,),
+            Container(height: 21,),
+            widget.title != null ?Padding(
+              padding: EdgeInsets.only(left: 20,right: 20, bottom: 20),
+              child: Text(
+                widget.title,
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(color: widget.textColor==null? Colors.white60 : widget.textColor,fontSize:widget.titleSize== null? MediaQuery.of(context).viewInsets.bottom>10? 24:21 :widget.titleSize)  ,
+              ),
+            ):Container(),
+            Padding(padding: EdgeInsets.only(left: 20, right: 20, bottom: 50), child:  Column(
+              mainAxisSize: MainAxisSize.min,
+              children: widget.list,
+            ),)
+
+          ],
+        ),
+      ],
+    );
     return  Container(
 
         child: ClipRRect(
 
             borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
-            child: new BackdropFilter(
+            child: widget.enableBackDropFilter == null ? new BackdropFilter(
               filter: new ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0),
-              child:Stack(
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      Container(height: 10,),
-                      //Container(height: 2, width: 40, color: Colors.white,),
-
-                      Divider(color: Colors.white, endIndent: 170,indent: 170,),
-                      Container(height: 21,),
-                      widget.title != null ?Padding(
-                        padding: EdgeInsets.only(left: 20,right: 20, bottom: 20),
-                        child: Text(
-                          widget.title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headline6
-                              .copyWith(color: Colors.white60, fontSize:MediaQuery.of(context).viewInsets.bottom>10? 24:21),
-                        ),
-                      ):Container(),
-                      Padding(padding: EdgeInsets.only(left: 20, right: 20, bottom: 50), child:  Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: widget.list,
-                      ),)
-
-                    ],
-                  ),
-                ],
-              ),))
+              child:w,):   w)
     );
   }
 

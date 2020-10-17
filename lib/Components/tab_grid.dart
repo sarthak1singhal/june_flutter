@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Home/following_tab.dart';
 import 'package:qvid/BottomNavigation/Home/home_page.dart';
 import 'package:qvid/Functions/Variables.dart';
-import 'package:qvid/Functions/Videos.dart';
+import 'package:qvid/Model/Videos.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Theme/colors.dart';
 

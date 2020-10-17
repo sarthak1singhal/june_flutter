@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:qvid/Auth/login_navigator.dart';
+import 'package:qvid/BottomNavigation/AddVideo/add_video2.dart';
+import 'package:qvid/BottomNavigation/AddVideo/add_video3.dart';
+import 'package:qvid/BottomNavigation/AddVideo/flashTry.dart';
 import 'package:qvid/BottomNavigation/Explore/more_page.dart';
 import 'package:qvid/BottomNavigation/MyProfile/badge_request.dart';
 import 'package:qvid/BottomNavigation/MyProfile/video_option.dart';
@@ -40,7 +43,7 @@ class PageRoutes {
       helpPage: (context) => HelpPage(),
       tncPage: (context) => TnC(),
       searchPage: (context) => SearchUsers(),
-      addVideoPage: (context) => AddVideo(),
+      addVideoPage: (context) => AddVideo2(),//AddVideo(),
       addVideoFilterPage: (context) => AddVideoFilter(),
       postInfoPage: (context) => PostInfo(),
       userProfilePage: (context) => UserProfilePage( ),

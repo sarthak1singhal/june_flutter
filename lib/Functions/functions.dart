@@ -18,7 +18,7 @@ import 'package:qvid/Theme/colors.dart';
 import 'Variables.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-import 'Videos.dart';
+import '../Model/Videos.dart';
 
 class Functions {
     Future<http.Response> postReq(
@@ -109,7 +109,7 @@ class Functions {
     );
   }
 
-  static Future<http.Response> unsignPostReq(String url, String params) async {
+  static Future<http.Response> unsignPostReq(String url, String params, ) async {
     print(url);
     print(params);
     var res = await http.post(
@@ -413,7 +413,135 @@ class Functions {
 
 
 
-  static Widget backButton(context, {Function function}) {
+    static Future<String> showVideoDialog(context,Offset offset, String field0, Function field0Tap , String field1, Function field1Tap ) async {
+      return showDialog<String>(
+        context: context,
+        barrierColor: Colors.transparent,
+        useSafeArea: true,
+         builder: (BuildContext context) {
+
+          double h =MediaQuery.of(context).size.height;
+          double w =MediaQuery.of(context).size.width;
+          if(w-offset.dx<232)
+            {
+               offset =  Offset(offset.dx  - (offset.dx + 232- w) , offset.dy);
+            }
+
+          if(h-offset.dy<200)
+          {
+             offset =  Offset(offset.dx , offset.dy  - (offset.dy + 200- h));
+          }
+
+          return  Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+
+              Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  child: Container(
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                      child: new BackdropFilter(
+                        filter: new ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                        child:   new Container(
+                           decoration: new BoxDecoration(
+                              color: Colors.black.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(10)
+
+
+                          ),
+
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 13,right: 13,top: 10,bottom: 10),
+                                child: Column(
+                                  children: [
+                                    GestureDetector(child: Container(
+
+                                        width: 200,
+                                        height: 37,
+                                        color: Colors.transparent,
+
+                                        child: Row(
+                                           children: [
+                                             Text(field0,
+                                                 style: TextStyle(
+                                                     inherit: false,
+                                                     fontSize: 16
+                                                 ))
+                                           ],
+                                        )
+                                    ),
+                                      onTap: field0Tap,
+                                    ),
+
+
+
+                                    GestureDetector(child: Container(
+                                        width: 200,
+                                        height: 37,
+                                        color: Colors.transparent,
+                                        child: Row(
+                                          children: [
+                                            Text(field1,
+                                                style: TextStyle(
+                                                    inherit: false,
+                                                    fontSize: 16
+                                                ))
+                                          ],
+                                        )
+                                    ),
+                                      onTap: field1Tap,
+                                    )
+
+
+                                  ],
+                                ),
+                              ),
+
+
+
+                            ],
+                          ),
+
+                        ),
+
+
+                      ),
+                    ),
+                  )
+
+              )
+
+
+            ],
+          );
+
+        },
+      );
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    static Widget backButton(context, {Function function}) {
     return IconButton(
       icon: Icon(
         Icons.arrow_back_ios,

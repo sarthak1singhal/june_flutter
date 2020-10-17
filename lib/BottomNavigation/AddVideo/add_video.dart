@@ -3,8 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flashlight/flashlight.dart';
-import 'package:flutter/cupertino.dart';
+ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
@@ -36,7 +35,7 @@ class _AddVideoState extends State<AddVideo> {
   String fileName="";
 
   bool isRecordingStarted = false;
-  int _start = 30;
+  double _start = 30;
   Timer _timer;
 
   List<MediaInfo> list = List();
@@ -56,7 +55,6 @@ class _AddVideoState extends State<AddVideo> {
 
     ));
     getCamera();
-    initFlashlight();
 
     initliaze();
 
@@ -98,7 +96,7 @@ class _AddVideoState extends State<AddVideo> {
                               builder: (context) => ReviewScreen(
                                 listVideo: list,
                                 audioPath: audioPath,
-                                duration: 30-_start,
+                                duration: 30-_start.toInt(),
                               )),
                         );
                       },
@@ -311,13 +309,7 @@ class _AddVideoState extends State<AddVideo> {
     );
   }
 
-  initFlashlight() async {
-    bool hasFlash = await Flashlight.hasFlashlight;
-    print("Device has flash ? $hasFlash");
-    setState(() {
-      _hasFlashlight = hasFlash;
-    });
-  }
+
   Future<void> getCamera() async {
     cameras = await availableCameras();
     controller = CameraController(cameras[0], ResolutionPreset.medium);
