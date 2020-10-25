@@ -18,12 +18,14 @@ typedef MathF<T extends num> = T Function(T, T);
     Function onTapDown;
     double startTime;
     Matrix4 matrix4;
+
+   final Widget child;
     double endTime;
   Offset tapOffset = Offset(0,0);
 
 
 
-  OverlayWidget({Key key, this.height, this.width, this.file, this.fx, this.startTime, this.endTime, this.onTapDown, this.matrix4}) : super(key: key);
+  OverlayWidget({Key key, this.height, this.width, this.file, this.fx, this.startTime, this.endTime, this.onTapDown, this.matrix4,@required this.child}) : super(key: key);
 
   _MyHomePageState _child ;
 
@@ -134,6 +136,7 @@ class _MyHomePageState extends State<OverlayWidget> {
       child: Screenshot(
         controller: screenshotController,
         child: Container(
+
           height: widget.height,
           width: widget.width,
           child: MatrixGestureDetector(
@@ -161,11 +164,23 @@ class _MyHomePageState extends State<OverlayWidget> {
                   child:
                   Align(
                     heightFactor: 1,
-                    child: Container(
-                      child:           widget.file==null? Container( child: Text("HEY YOU", style: TextStyle(inherit:false,fontSize: 28),),) :Image.file(
+                    child:
+
+                    Opacity(
+                      opacity: isBorderShowing? 0.67 : 1.0,
+                      child:         widget.child!=null?   widget.child :Image.file(
 
                         widget.file,
-                      ), padding: EdgeInsets.all(3/ matrix.getMaxScaleOnAxis()),
+                      ),
+                    )
+
+
+
+                   /* OverflowBox(child: Container(
+                       child:           widget.child!=null? widget.child :Image.file(
+
+                        widget.file,
+                      ), padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         border: Border.all(color: isBorderShowing?  Colors.blue: LocalColors.transparent, width: 0.6/matrix.getMaxScaleOnAxis()),
                         borderRadius: BorderRadius.all(
@@ -174,7 +189,7 @@ class _MyHomePageState extends State<OverlayWidget> {
 
                         ),
                       ),
-                    ),
+                    ),)*/
                   ),
 
                   transform:  matrix//Matrix4.diagonal3Values(2, 2, 2.0),

@@ -8,8 +8,7 @@ import 'package:gallery_saver/gallery_saver.dart';
 import 'package:http/http.dart' as http;
 
  import 'package:flutter/material.dart';
-import 'package:chewie/chewie.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
  import 'package:matrix_gesture_detector/matrix_gesture_detector.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Functions/EncodingProvider.dart';
@@ -42,8 +41,7 @@ class ReviewState extends State<ReviewScreen>  {
   GlobalKey parentKey = GlobalKey();
   String finalVideoPath;
 
-  Chewie playerWidget;
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
   File fileMerged ;
   File finalFileWithAudio ;

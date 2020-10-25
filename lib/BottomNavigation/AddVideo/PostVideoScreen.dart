@@ -6,12 +6,12 @@ import 'package:qvid/Components/post_thumb_list.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Theme/colors.dart';
 
-class ChoseCover extends StatefulWidget {
+class PostInfo extends StatefulWidget {
   @override
   _PostInfoState createState() => _PostInfoState();
 }
 
-class _PostInfoState extends State<ChoseCover> {
+class _PostInfoState extends State<PostInfo> {
   var icon = Icons.check_box_outline_blank;
   bool isSwitched1 = false;
   bool isSwitched2 = false;

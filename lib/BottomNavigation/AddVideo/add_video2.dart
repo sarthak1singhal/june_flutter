@@ -19,8 +19,7 @@ import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Model/MediaInfo.dart';
-import 'package:qvid/Routes/routes.dart';
-import 'package:qvid/Screens/review_screen.dart';
+ import 'package:qvid/Screens/review_screen.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:path/path.dart' as path;
 import 'package:qvid/Uploader/FileUploader.dart';
@@ -34,7 +33,7 @@ class AddVideo2 extends StatefulWidget {
   _AddVideoState createState() => _AddVideoState();
 }
 
-class _AddVideoState extends State<AddVideo2> {
+class _AddVideoState extends State<AddVideo2>   with WidgetsBindingObserver{
   CameraController controller;
   List<CameraDescription> cameras;
   bool isFront = false;
@@ -45,8 +44,7 @@ class _AddVideoState extends State<AddVideo2> {
   String fileName = "";
 
   bool isRecordingStarted = false;
-  double _start = 30;
-  Timer _timer;
+   Timer _timer;
   Timer countDownTimer;
 
   var player = AudioPlayer();
@@ -65,7 +63,7 @@ class _AddVideoState extends State<AddVideo2> {
   double _progress = 0.0;
 
   Directory directory;
-
+  ProgressBar progressBar = ProgressBar(Size(10,10));
   @override
   void initState() {
     super.initState();
@@ -77,7 +75,8 @@ class _AddVideoState extends State<AddVideo2> {
     initFlashlight();
 
     initliaze();
-    Progress.stops = [];
+    WidgetsBinding.instance.addObserver(this);
+
   }
 
   Size size;
@@ -122,8 +121,7 @@ class _AddVideoState extends State<AddVideo2> {
             ),
            Align(
               alignment: AlignmentDirectional.topCenter,
-              //top: 30,
-//             left: size.width/2 - 30,
+
               child: Padding(
                 padding: EdgeInsets.only(top: 20),
                 child: FlatButton(
@@ -162,8 +160,7 @@ class _AddVideoState extends State<AddVideo2> {
                         File picture = File(audioPath);
                         String dir = path.dirname(picture.path);
                         String newPath = path.join(dir, 'test.mp3');
-                        print('NewPath: ${newPath}');
-                        picture.renameSync(newPath);
+                         picture.renameSync(newPath);
                         audioPath = newPath;
                         File(audioPath).existsSync();
                         player.setFilePath(audioPath);
@@ -178,6 +175,8 @@ class _AddVideoState extends State<AddVideo2> {
                 ),
               ),
             ),
+
+
             Positioned(
               child: IconButton(
                   icon: Icon(
@@ -234,20 +233,20 @@ class _AddVideoState extends State<AddVideo2> {
                           return;
                         }
 
-                        Progress.changeSpeed(2);
+                    //    Progress.changeSpeed(2);
                         if (list.length == 1) {
                           _progress = 0;
                           player.seek(Duration(seconds: 0));
 
-                          _start = 30;
+                          //_start = 30;
                         } else {
-                          _start = list[list.length - 2].duration;
-                          _progress = 30 -list[list.length - 2].duration;
-                          player.seek(Duration(seconds: _progress.toInt()));
+                         // _start = list[list.length - 2].duration;
+                          _progress = progressBar.getTime();//30 -list[list.length - 2].duration;
+                          player.seek(Duration(milliseconds: (progressBar.getTime()*1000).toInt()));
 
                         }
 
-                        Progress.removeLastSegmet();
+                        progressBar.removeLastSegmet();
                         list.removeLast();
                         setState(() {});
                       }),
@@ -255,7 +254,7 @@ class _AddVideoState extends State<AddVideo2> {
               bottom: 50,
             ),
             Positioned(
-              child: _start < 25
+              child: progressBar.getTime() > 5
                   ? IconButton(
                       onPressed: () {
                         //controller?.dispose();
@@ -268,7 +267,7 @@ class _AddVideoState extends State<AddVideo2> {
                               builder: (context) => ReviewScreen2(
                                     listVideo: list,
                                     audioPath: audioPath,
-                                    duration: 30 - _start,
+                                    duration: progressBar.getTime(),
                                   )),
                         );
                       },
@@ -282,28 +281,7 @@ class _AddVideoState extends State<AddVideo2> {
               bottom: 50,
             ),
 
-            /* Positioned(
-              //alignment: Alignment.bottomCenter,
 
-              bottom: 50,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child:      Container(
-                  width: size.width,
-                  child:                Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-
-
-                      Spacer(flex: 2,),
-                      Spacer(),
-
-
-
-                      Spacer(),
-
-
-                   */
             /*   GestureDetector(
                           child: Icon(
                             Icons.perm_media,
@@ -338,16 +316,19 @@ class _AddVideoState extends State<AddVideo2> {
          !isRecordingStarted?   Positioned(
               child: Column(
                 children: [
-                  GestureDetector(
+                  _progress >0?  Icon(
+                    Icons.camera_roll,
+                    color: Colors.white,
+                  ):  GestureDetector(
                       child: Icon(
                         Icons.camera_alt,
                         color: Colors.white,
                       ),
                       onTap: () {
                         if (isFront) {
-                          changeCamera(cameras[0]);
+                          onNewCameraSelected(cameras[0]);
                         } else {
-                          changeCamera(cameras[1]);
+                          onNewCameraSelected(cameras[1]);
                         }
                       }),
                   Container(
@@ -425,7 +406,7 @@ class _AddVideoState extends State<AddVideo2> {
 
                               l.add(SliderWidget(
 
-                                min: 30-_start.toInt()+1,
+                                min: progressBar.getTime().toInt() + 1,//30-_start.toInt()+1,
                                 max: 30,
                                 initial: recordTill,
                                 fullWidth: true,
@@ -526,7 +507,10 @@ class _AddVideoState extends State<AddVideo2> {
               right: 18,
             ):Container(),
 
-       isTimerVisible?     Align(
+
+
+
+          isTimerVisible?     Align(
               alignment: AlignmentDirectional.center,
               child:             Text(countdown.toString(), style: TextStyle(
                 inherit: false, fontSize: 40, color: Colors.white, shadows: [  Shadow(
@@ -602,7 +586,16 @@ Positioned(
 
 
 
-,            ProgressBar(size),
+,
+            Builder(builder: (context){
+              if(progressBar.size.height == 10)
+                {
+                  progressBar = ProgressBar(size);
+                }
+
+              return progressBar;
+            },)
+            ///ProgressBar(size),
 
           ],
         ),
@@ -617,7 +610,6 @@ Positioned(
   }
 
   bool _isOn = false;
-  double _intensity = 1.0;
 
   Future _turnFlash() async {
 
@@ -635,31 +627,69 @@ Positioned(
 
   Future<void> getCamera() async {
     cameras = await availableCameras();
-    controller = CameraController(cameras[0], ResolutionPreset.high);
+
+    print(cameras[0].sensorOrientation);
+    print(cameras[0].lensDirection);
+     controller = CameraController(cameras[0], ResolutionPreset.high);
 
 
     controller.initialize().then((_) {
       if (!mounted) {
         return;
       }
-      setState(() {});
-    });
-  }
-
-  Future<void> changeCamera(CameraDescription camera) async {
-    controller = CameraController(camera, ResolutionPreset.high);
-    controller.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
-      isFront = !isFront;
       setState(() {});
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // App state changed before we got the chance to initialize.
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+    if (state == AppLifecycleState.inactive) {
+      controller?.dispose();
+    } else if (state == AppLifecycleState.resumed) {
+      if (controller != null) {
+        onNewCameraSelected(controller.description);
+      }
+    }
+  }
+  void onNewCameraSelected(CameraDescription cameraDescription) async {
+    if (controller != null) {
+      await controller.dispose();
+    }
+    controller = CameraController(
+      cameraDescription,
+      ResolutionPreset.medium,
+     );
+
+    // If the controller is updated then update the UI.
+    controller.addListener(() {
+      if (mounted) setState(() {});
+      if (controller.value.hasError) {
+       }
+    });
+
+    try {
+      await controller.initialize();
+      isFront = !isFront;
+       setState(() {
+
+      });
+    } on CameraException catch (e) {
+     }
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+
+  @override
   void dispose() {
-    print("DISPOSE");
+    WidgetsBinding.instance.removeObserver(this);
+
     controller?.dispose();
     player.dispose();
     if(_timer!=null)
@@ -675,43 +705,51 @@ Positioned(
   }
 
 
-  playPauseVideo(){
+  playPauseVideo() async{
+
+
+    if(progressBar.isCompleted())
+      {
+        return;
+      }
+
+
       if (!isRecordingStarted) {
-      String fileName =
-          "outputjune${DateTime.now().toIso8601String()}.mp4";
+      String fileName = "outputjune${DateTime.now().toIso8601String()}.mp4";
       File file = new File(directory.path + "/" + fileName);
-      controller.startVideoRecording(file.path);
+      await controller.startVideoRecording(file.path);
+      setState(() {});
       isRecordingStarted = !isRecordingStarted;
       const oneSec = const Duration(milliseconds: 500);
-      Progress.start();
+      progressBar.start();
       if(!Functions.isNullEmptyOrFalse(audioPath))
         {
           player.play();
-
         }
       if (_timer == null) {
-        _timer = new Timer.periodic(
+         _timer = new Timer.periodic(
           oneSec,
               (Timer timer) {
 
 
-            if (_start < 0.6) {
-              controller.stopVideoRecording();
-              Progress.pause();
+                if ( progressBar.isCompleted()) {
 
-              isRecordingStarted = !isRecordingStarted;
-              _timer.cancel();
-              setState(() {});
+              if(isRecordingStarted)
+                {
+                  controller.stopVideoRecording();
+                  progressBar.pause();
+
+                  isRecordingStarted = !isRecordingStarted;
+                  setState(() {});
+                }
             } else {
 
               if(recordTill!=null )
               {
                 if(isRecordingStarted)
                 {
-                  if(recordTill<=(30-_start))
+                  if(recordTill<=(progressBar.getTime()))
                   {
-
-
 
                     recordTill = null;
                     playPauseVideo();
@@ -722,38 +760,46 @@ Positioned(
 
 
               if (isRecordingStarted) {
-                _start = _start - 0.5;
                 _timer.tick;
-                _progress = 0.5 + _progress;
-                if (_progress > 4 && _progress < 6) {
+                 _progress = progressBar.getTime();
+                 if (_progress > 4 && _progress < 6) {
                   setState(() {});
                 }
               }
             }
-          },
+              },
         );
-      }
-      list.add(MediaInfo(-1, file.path));
+       }
+      list.add(MediaInfo(-1, file.path, isFront?1 :0));
 
-      setState(() {});
     } else {
 
-      for (int i = 0; i < list.length; i++) {
-        if (list[i].duration == -1) {
-          list[i].duration = _start;
-        }
-      }
+
+
+
 
       if(!Functions.isNullEmptyOrFalse(audioPath))
       {
         player.pause();
       }
 
-      Progress.pause();
+      progressBar.pause();
 
-      controller.stopVideoRecording();
-      isRecordingStarted = !isRecordingStarted;
+     await controller.stopVideoRecording();
+      for (int i = 0; i < list.length; i++) {
+
+         if (list[i].duration == -1) {
+          list[i].duration = 30.0 - progressBar.getTime();
+        //   list[i].rotate(directory);
+        }
+      }
+     isRecordingStarted = !isRecordingStarted;
+
       setState(() {});
     }
   }
+
+  void _showCameraException(CameraException e) {
+    print('Error: ${e.code}\nError Message: ${e.description}');
+   }
 }

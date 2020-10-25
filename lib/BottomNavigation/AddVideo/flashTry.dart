@@ -1,3 +1,4 @@
+/*
 import 'dart:async';
 import 'dart:io';
 
@@ -386,7 +387,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
 
     try {
-      await controller.pauseVideoRecording();
+      //await controller.pauseVideoRecording();
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -399,7 +400,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
 
     try {
-      await controller.resumeVideoRecording();
+   ///   await controller.resumeVideoRecording();
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -479,4 +480,4 @@ Future<void> main() async {
     logError(e.code, e.description);
   }
   runApp(CameraApp());
-}
+}*/

@@ -77,7 +77,9 @@ class _MyHomePageState extends State<ShowHideScreen> {
   Widget build(BuildContext context) {
     return  Container(
         child: Stack(
-        children: widget.list,
+          overflow: Overflow.visible,
+
+          children: widget.list,
         )
     );
   }

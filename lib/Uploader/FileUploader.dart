@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_uploader/flutter_uploader.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
+import 'package:image_picker/image_picker.dart';
 
 const String title = "FileUpload Sample app";
 const String uploadURL = "https://us-central1-flutteruploader.cloudfunctions.net/upload";
@@ -16,10 +16,10 @@ class FileUploader extends StatefulWidget {
 
   FileUploader({Key key, this.child}) : super(key: key);
 
-  _AppState createState() => _AppState();
+  UploadFileState  createState() => UploadFileState ();
 }
 
-class _AppState extends State<FileUploader> {
+class UploadFileState extends State<FileUploader> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

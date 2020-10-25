@@ -31,11 +31,10 @@ dependencies:
   pin_code_fields:
   sliding_up_panel:
   datetime_picker_formfield:
-  camera: ^0.5.8+5
+  camera:
   lamp:
   torch_compat:
   image_cropper:
-  tapioca:
   permission_handler:
   just_audio:
   matrix_gesture_detector:
@@ -46,11 +45,11 @@ dependencies:
   gallery_saver:
   flutter_ffmpeg: ^0.3.0
   path_provider: ^1.6.5
-  chewie:
   media_info:
   screenshot:
   flutter_xlider:
-  text_editor:
+  auto_size_text:
+  native_device_orientation:
 
 
    # The following adds the Cupertino Icons font to your application.

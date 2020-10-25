@@ -29,18 +29,21 @@ class Functions {
     Variables.refreshToken = prefs.getString(Variables.refreshTokenString);
 
     print(Variables.token);
-    if (isNullEmptyOrFalse(Variables.token)) {
-      var isLoggedIn = await Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Login()));
-      print("SIGN IN");
-      print(Variables.token);
-      if (isIdChange) {
-        var m = jsonDecode(params);
-        m["fb_id"] = Variables.fb_id;
-        params = jsonEncode(m);
-      }
-      // return null;
-    }
+   if(context!=null)
+     {
+       if (isNullEmptyOrFalse(Variables.token)) {
+         var isLoggedIn = await Navigator.push(
+             context, MaterialPageRoute(builder: (context) => Login()));
+         print("SIGN IN");
+         print(Variables.token);
+         if (isIdChange) {
+           var m = jsonDecode(params);
+           m["fb_id"] = Variables.fb_id;
+           params = jsonEncode(m);
+         }
+         // return null;
+       }
+     }
 
     debugPrint(url);
 

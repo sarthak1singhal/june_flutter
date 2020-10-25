@@ -11,21 +11,68 @@ class ProgressBar extends StatefulWidget {
   final bool isProgressing ;
 
   final Size size;
-  const ProgressBar(this.size,{Key key, this.pauses, this.isProgressing}) : super(key: key);
+  ProgressBar(this.size,{Key key, this.pauses, this.isProgressing}) : super(key: key);
 
 
+  pause(){
+    progress.pause();
+  }
+
+  removeLastSegmet()
+  {
+    progress.removeLastSegmet();
+  }
+
+  start(){
+    progress.start();
+  }
+
+  changeSpeed(int speed){
+    progress.changeSpeed(speed);
+  }
 
 
+  double getTime(){
+    double d = progress.getTime();//.inMilliseconds.toDouble() ;
+    return d /1000;
+  }
+
+
+  Progress progress  = Progress();
   @override
-  Progress createState() => Progress();
+  Progress createState() {
+    return progress;
+  }
+
+  bool isRecording(){
+    return progress.isRecording();
+  }
+
+  bool isCompleted(){
+    return progress.isCompleted();
+  }
 }
 
 class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
+  isRecording(){
+    if(controller==null) return false;
+    return controller.isAnimating;
+  }
 
- static AnimationController controller;
+  isCompleted(){
+    if(controller==null) return false;
+    return controller.isCompleted;
+  }
 
 
+
+
+
+   AnimationController controller;
+
+
+  double time = 0;
 
 
    static bool isPaused = true;
@@ -35,7 +82,8 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
   double height = 4;
  int i =0;
 
- static List<double> stops = [];
+   List<double> stops = [];
+   List<double> stopDurations = [];
 
  @override
   void initState() {
@@ -60,6 +108,22 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
     );
     controller.addListener(() {
+
+
+
+
+      if(controller.value == maxWidth)
+         {
+        //   print(controller.isAnimating);
+           //print(controller.value.toString() + " ---- " + maxWidth.toString());
+              time = 30000;
+             stopDurations.add(time);
+             stops.add(controller.value);
+
+             //controller.stop();
+             // _timer.cancel();
+         }
+
       if(initialWidth<=maxWidth) {
         if(!isPaused)
       {
@@ -67,18 +131,11 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
         });
 
-         /*setState(() {
-          initialWidth = maxWidth/30 * time;
 
-        })*/;
+
       }
       }
-      else{
-        if (controller.status == AnimationStatus.forward) {
-          controller.stop();
-        // _timer.cancel();
-        }
-      }
+
 
 
 
@@ -88,47 +145,83 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
 
  }
+   double getTime(){
+   if(controller==null) return 0;
+     if(controller.isAnimating)
+       return time + controller.lastElapsedDuration.inMilliseconds;
+     else{
+       return time;
+     }
+   }
+
+   start(){
+
+   if(controller.isCompleted)
+     {
+       return;
+     }
 
 
- static start(){
+   /*if(time/1000>=29.8)
+     {
+    return;
+     }*/
 
    isPaused = false;
 
    controller.forward();
-  }
+
+
+ }
 
 
 
- static pause(){
+   pause() {
+     if (!controller.isCompleted) {
+       time = time + controller.lastElapsedDuration.inMilliseconds.toDouble();
+       stopDurations.add(time);
+       controller.stop();
+       isPaused = true;
+       stops.add(controller.value);
+       setState(() {
 
-    controller.stop();
-    isPaused = true;
-    stops.add(controller.value);
-  }
+       });
+     }
+   }
 
- static removeLastSegmet(){
+   removeLastSegmet(){
 
 
     if(stops.length==0)return;
 
    if(stops.length ==1)
      {
+       time = 0;
+       stopDurations.removeLast();
        controller.value = 0;
        stops.removeLast();
 
      }
    else{
 
+
+
      controller.value = stops[stops.length-2];
      stops.removeLast();
+     time =  stopDurations[stopDurations.length-2];
+     stopDurations.removeLast();
 
    }
+
+   setState(() {
+
+   });
 
 
   }
 
 
- static changeSpeed(int speed){
+   changeSpeed(int speed){
 
    //0.3, 0.5, 1, 2, 3
    if(speed==2)
@@ -180,6 +273,8 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
         child: ClipRect(
           child: Container(
+            clipBehavior: Clip.hardEdge,
+
             decoration: BoxDecoration(
                 color: isPaused?Colors.white38 :Colors.white54,
 

@@ -52,10 +52,10 @@ class VideosBySound extends StatelessWidget {
                     child: Container(height: 80,width: 90,color: Colors.white70,)
                     ,
                     onTap: (){
-                      Navigator.push(
+                     /* Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => PostInfo ()),
-                      );
+                      );*/
                      // fetchAudio();
                     },
                   )

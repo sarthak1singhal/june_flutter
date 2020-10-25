@@ -5,18 +5,19 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
+import 'package:qvid/BottomNavigation/AddVideo/post_info.dart';
 import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/Functions/MergeImagesWithVideo.dart';
 import 'package:qvid/Model/OverlayDeatils.dart';
 import 'package:qvid/Theme/colors.dart';
 
-import 'package:chewie/chewie.dart';
-import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+ import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:matrix_gesture_detector/matrix_gesture_detector.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qvid/BottomNavigation/AddVideo/setDurationScreen.dart';
@@ -29,10 +30,10 @@ import 'package:qvid/Model/OverlayModel.dart';
 import 'package:qvid/Model/OverlayModelTimeScreen.dart';
 import 'package:qvid/Screens/TextPainter.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:text_editor/text_editor.dart';
-import 'package:video_player/video_player.dart';
+ import 'package:video_player/video_player.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
+import 'TextOverlay.dart';
 import 'hideShowScreen.dart';
 
 
@@ -40,7 +41,8 @@ class ReviewScreen2 extends StatefulWidget {
   List<MediaInfo> listVideo;
   String audioPath;
   double duration ;
-  ReviewScreen2({this.listVideo, this.audioPath,this.duration}) {}
+  String audioId ;
+  ReviewScreen2({this.listVideo, this.audioPath,this.duration, this.audioId}) {}
 
   @override
   State<StatefulWidget> createState() {
@@ -53,11 +55,9 @@ class ReviewState extends State<ReviewScreen2>  {
   VideoPlayerController _controller;
 
   GlobalKey key = GlobalKey();
-  GlobalKey parentKey = GlobalKey();
-  String finalVideoPath;
+   String finalVideoPath;
 
-  Chewie playerWidget;
-  final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
 
   File fileMerged ;
   File finalFileWithAudio ;
@@ -65,8 +65,7 @@ class ReviewState extends State<ReviewScreen2>  {
   ScreenshotController parentScreenshotController = ScreenshotController();
 
 
-  List<Widget> textOverlayList = [];
-  Offset initialTextOffset = Offset(0.0, 50.0);
+   Offset initialTextOffset = Offset(0.0, 50.0);
   Offset offsetColorPicker = Offset(0.0, 50.0);
   Offset offsetSec = Offset(0.0, 100.0);
   Future<void> _initializeVideoPlayerFuture;
@@ -87,6 +86,7 @@ class ReviewState extends State<ReviewScreen2>  {
   bool isLoading = false;
   File loadingImage;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -130,7 +130,7 @@ class ReviewState extends State<ReviewScreen2>  {
 
 
 
-    return Scaffold(key: parentKey ,
+    return Scaffold(key: _scaffoldKey ,
       resizeToAvoidBottomInset : false,
       body: FutureBuilder(
         future: _initializeVideoPlayerFuture,
@@ -140,146 +140,101 @@ class ReviewState extends State<ReviewScreen2>  {
             // the data it provides to limit the aspect ratio of the VideoPlayer.
 
             return  Stack(
+              overflow: Overflow.visible,
+
               children: [
-               SafeArea(child:  Container(
+             Screenshot(
+               controller: parentScreenshotController,
+               child:   SafeArea(
+                 left: false,
+                 right: false,
+                 child:  Container(
 
-                 height:size.height,
-                 width: size.width,
-                 child:  Align(
-                   alignment: Alignment.topCenter,
-                   child: Screenshot(
-                     controller: parentScreenshotController,
-                     child: AspectRatio(
-
-                       child: Stack(
-                         children: [
-                           VideoPlayer(_controller),
-
-
-                           Screenshot(
-                             controller: screenshotController,
-                             child: Container(
-                               child: ShowHideScreen(
-                                 list: listOverlays,
-                                 startTime: 0,
-                                 endTime: widget.duration,
-                                 isPlaying: _controller.value.isPlaying,
-                                 controller: _controller,
+                   height:size.height,
+                   width: size.width,
+                   child:  Align(
+                       alignment: Alignment.topCenter,
+                       child: AspectRatio(
 
 
+                         child: Stack(
+                           overflow: Overflow.visible,
 
-                               ),
+                           children: [
+                             VideoPlayer(_controller),
 
-                             ),
-                           ),
 
+                             Screenshot(
+                               controller: screenshotController,
+                               child: Container(
+                                 child: ShowHideScreen(
+                                   list: listOverlays,
+                                   startTime: 0,
+                                   endTime: widget.duration,
+                                   isPlaying: _controller.value.isPlaying,
+                                   controller: _controller,
 
 
 
-                           Positioned(
-                             bottom: showTrimmer?100: 65,
-                             right: 0,
-                             child: GestureDetector(
-                               onTap: (){
-                                 // Wrap the play or pause in a call to `setState`. This ensures the
-                                 // correct icon is shown.
-                                 setState(() {
-                                   // If the video is playing, pause it.
-                                   if (_controller.value.isPlaying) {
-                                     _controller.pause();
-                                   } else {
-                                     // If the video is paused, play it.
-                                     _controller.play();
-                                   }
-                                 });
-                               },
-                               child: Container(height: 44, width: 90,
-
-                                 decoration: BoxDecoration(
-                                   shape: BoxShape.rectangle,
-                                   color: Colors.black26,
-                                   borderRadius: BorderRadius.only(
-                                     topLeft: Radius.circular(10.0),
-                                     topRight: Radius.zero,
-                                     bottomLeft: Radius.circular(10),
-                                     bottomRight: Radius.zero,
-                                   ),
                                  ),
 
-                                 child: Row(
-                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                   children: <Widget>[
-                                     Icon( _controller.value.isPlaying ? Icons.pause:Icons.play_arrow, size: 17, color: Colors.white,),
-                                     Text(_controller.value.isPlaying ? "Pause":"Play", style: TextStyle(color: Colors.white),)
-                                   ],)
-                                 ,),
+                               ),
                              ),
-                           ),
-
-
-                           isLoading ?
-                           Stack(
-                             children: [
-                               loadingImage==null?Container(height: 0,width: 0,): Image.file(loadingImage),
-                               Container(height: size.height, width: size.width, color: Colors.black12, child: Center(child: Functions.showLoaderSmall(),),)
-                             ],
-                           )
-                               :Positioned(left: 0,top: 0,child: Container(height: 0,width: 0,),)
-                           ,
 
 
 
-                           showTextfield? Positioned(
-                             left: 8,
-                             right:8,
-                             top: initialTextOffset.dy,
-                             child: GestureDetector(
 
-                                 child:                        Container(
-                                     constraints: BoxConstraints(minHeight: 0,maxHeight: MediaQuery.of(context).size.height,maxWidth: MediaQuery.of(context).size.width,minWidth: 4),
+                             Positioned(
+                               bottom: showTrimmer?100: 65,
+                               right: 0,
+                               child: GestureDetector(
+                                 onTap: (){
+                                   // Wrap the play or pause in a call to `setState`. This ensures the
+                                   // correct icon is shown.
+                                   setState(() {
+                                     // If the video is playing, pause it.
+                                     if (_controller.value.isPlaying) {
+                                       _controller.pause();
+                                     } else {
+                                       // If the video is paused, play it.
+                                       _controller.play();
+                                     }
+                                   });
+                                 },
+                                 child: Container(height: 44, width: 90,
 
-                                     color: Colors.redAccent,
-                                     child: TextField(
+                                   decoration: BoxDecoration(
+                                     shape: BoxShape.rectangle,
+                                     color: Colors.black26,
+                                     borderRadius: BorderRadius.only(
+                                       topLeft: Radius.circular(10.0),
+                                       topRight: Radius.zero,
+                                       bottomLeft: Radius.circular(10),
+                                       bottomRight: Radius.zero,
+                                     ),
+                                   ),
 
-                                       autofocus: true,
-                                       maxLines: null,
-
-                                       cursorColor: Colors.green,
-                                       style: TextStyle(inherit: false, fontSize: 24, textBaseline: TextBaseline.alphabetic),
-                                       focusNode:  focusNode,
-                                       decoration: InputDecoration(
-                                         contentPadding: EdgeInsets.all(14),
-                                         fillColor: Colors.orange,
-                                         filled: true,
-                                         border: InputBorder.none,
-
-                                         focusedBorder: InputBorder.none,
-                                       ),
-
-                                       controller: _textController,
-                                       textInputAction: TextInputAction.newline,
-
-                                       onSubmitted: (val) {
-                                         print(val);
-                                       },
-                                     )
-                                 )
-
+                                   child: Row(
+                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                     children: <Widget>[
+                                       Icon( _controller.value.isPlaying ? Icons.pause:Icons.play_arrow, size: 17, color: Colors.white,),
+                                       Text(_controller.value.isPlaying ? "Pause":"Play", style: TextStyle(color: Colors.white),)
+                                     ],)
+                                   ,),
+                               ),
                              ),
-                           ) :Positioned(top: 0,left: 0,child: SizedBox(height: 0,width: 0,),),
 
 
 
 
 
+                           ],
+                         ),
 
-                         ],
-                       ),
-
-                       aspectRatio: 8.9/16,
-                     ),
-                   )),
-               ),),
+                         aspectRatio: 8.9/16,
+                       )),
+                 ),),
+             ),
 
                 showTrimmer  ?
                 Positioned(
@@ -433,105 +388,6 @@ class ReviewState extends State<ReviewScreen2>  {
                       ),
                       onTap: () {
 
-                        OverlayWidget w = OverlayWidget(height: size.height,width: size.width, key: Key(changableKeys.toString()), startTime: 0, endTime: widget.duration.toDouble(),);
-
-                        changableKeys++;
-                        w.fx = (){
-
-
-
-                          hideBorders(myKey: w.key);
-
-                          w.hideShowBorder();
-
-
-
-                        };
-
-
-
-                        w.onTapDown = (TapUpDetails details) async{
-
-                          w.tapOffset = Offset(details.globalPosition.dx,details.globalPosition.dy);
-
-                          if(!w.isBorderShown())
-                          {
-
-                            bool pressedPlay = false;
-                            if (_controller.value.isPlaying) {
-                              _controller.pause();
-                              pressedPlay = true;
-                              setState(() {
-
-                              });
-                            }
-                         String c= await  Functions.showVideoDialog(context,w.tapOffset, "Set Duration", (){
-
-
-                           Navigator.pop(context, "duration");
-
-
-
-                            for(int i=0;i<listOverlays.length;i++)
-                              {
-                                if(listOverlays[i].key == w.key)
-                                  {
-
-                                      selectedWidget = listOverlays[i];
-
-                                  }
-                              }
-                            showTrimmer = true;
-                            setState(() {
-
-                            });
-
-
-                            }, "Delete", (){
-
-                            Navigator.pop(context,"delete");
-
-                          });
-
-                            if(pressedPlay)
-                              {
-                                if (!_controller.value.isPlaying) {
-                                  _controller.play();
-                                  setState(() {
-
-                                  });
-                                }
-                              }
-
-                            if(c!="duration")
-                              {
-                                w.hideShowBorder();
-                              }
-                            if(c=="delete")
-                              {
-                                for(int i=0;i<listOverlays.length;i++)
-                                  {
-                                   if(listOverlays[i].key==w.key)
-                                     {
-                                       showTrimmer = false;
-                                       listOverlays.removeAt(i);
-                                       setState(() {
-
-                                       });
-                                     }
-                                  }
-                              }
-                          }
-
-                        };
-
-
-
-                        listOverlays.add( w);
-
-
-
-                        setState(() {});
 
                       },
 
@@ -549,14 +405,76 @@ class ReviewState extends State<ReviewScreen2>  {
                         color: Colors.white,
                       ),
                       onTap: () {
-                      /*   offsetColorPicker = Offset(50, MediaQuery.of(context).viewInsets.bottom-200);
+                         offsetColorPicker = Offset(50, size.height- MediaQuery.of(context).viewInsets.bottom-200);
 
                         _textController.text = "";
-                        setState(() {
-                          showTextfield = !showTextfield;
-                        });
-                        focusNode.requestFocus(FocusNode());
-*/
+
+
+                         TextOverlay w = TextOverlay(
+                           onCancel: (){
+                              Navigator.pop(context);
+                           },
+
+                           focusNode: focusNode,
+                           colorOffset: offsetColorPicker,
+                         );
+
+                         w.onDone = (){
+                            TextStyle style = w.getStyle();
+                           String t= w.getText();
+
+                           double scale = 1.0;
+                           if(t.length >300)
+                             {
+                               scale = 0.5;
+                             }
+                           else if(('\n'.allMatches(t).length + 1) > 12)
+                             {
+                               if(('\n'.allMatches(t).length + 1) < 30)
+                                scale = scale*12/('\n'.allMatches(t).length + 1) +0.13 ;
+                               else
+                                scale = scale*10/('\n'.allMatches(t).length + 4) ;
+                             }
+
+
+                           if(scale==1.0) {
+
+                             EdgeInsets p = EdgeInsets.all(14);
+                             if(t.length<10)
+                              {
+                                p = EdgeInsets.all(20);
+                              }
+                             if(t.length<=4)
+                             {
+                               p = EdgeInsets.all(34);
+                             }
+                               getOverlayWidget(size, Container(color: Colors.transparent,  child: Text(t, style: style,
+                                 overflow: TextOverflow.visible, ), padding: p, ));
+                           }
+                           else{
+                             getOverlayWidget(size, Container(
+                               color: Colors.transparent,
+
+                               child: Transform.scale(scale: scale, alignment: Alignment.topCenter, child: Text(t, style: style,
+                                 overflow: TextOverflow.visible,),),
+                               padding: EdgeInsets.all(14),
+
+                             ));
+                           }
+                           Navigator.pop(context);
+
+                         };
+                         Navigator.of(context).push(
+                           PageRouteBuilder(
+                             opaque: false, // set to false
+                             pageBuilder: (context, a, a2) => w,
+                           ),
+                         );
+
+
+
+
+                       focusNode.requestFocus(FocusNode());
                       },
                     ),
                     SizedBox(height: 20,),
@@ -571,10 +489,17 @@ class ReviewState extends State<ReviewScreen2>  {
                       child: Text("Next",),
                       textColor: Colors.white,
                       onPressed: () async{
+
                         hideBorders();
                         setState(() {
 
                         });
+                        if(MergeImagesWithVideo.queue.length>1)
+                        {
+
+                          Functions.showSnackBar(_scaffoldKey, "Please wait for previous file to get uploaded");
+                          return;
+                        }
 
 
                         if(!isLoading) {
@@ -582,19 +507,19 @@ class ReviewState extends State<ReviewScreen2>  {
                           isLoading = true;
 
                           final value = await getApplicationDocumentsDirectory();
-                           loadingImage = await parentScreenshotController.capture(
+                          _controller.pause();
+                         /* loadingImage = await parentScreenshotController.capture(
                               path: value.path + "/load" + DateTime
                                   .now()
                                   .millisecondsSinceEpoch
-                                  .toString() + ".png", pixelRatio: 1.75);
+                                  .toString() + ".png", pixelRatio: 1.75);*/
 
-                           print(loadingImage);
 
-                           await GallerySaver.saveImage(loadingImage.path);
                            setState(() {
 
                            });
 
+                          // GallerySaver.saveImage(loadingImage.path);
                            String fileName =value.path +  "vid${DateTime
                               .now()
                               .millisecondsSinceEpoch
@@ -618,74 +543,67 @@ class ReviewState extends State<ReviewScreen2>  {
 
 
                           List<OverlayDetails> overlayDetails = [];
-                          File fScreenShot = await screenshotController.capture(
-                              path: screenshotFile.path, pixelRatio: 1.75);
-                          overlayDetails.add(OverlayDetails(screenshotFile.path, 0, widget.duration));
+                          if(listOverlays.length!=0) {
+
+                            if ((listOverlays[0].startTime == 0 &&
+                                listOverlays[0].endTime == widget.duration)) {
+                              File fScreenShot = await screenshotController
+                                  .capture(
+                                  path: screenshotFile.path, pixelRatio: 1.75);
+                              overlayDetails.add(OverlayDetails(
+                                  screenshotFile.path, 0, widget.duration));
+                            }
 
 
-                          for (int i = 0; i < l; i++) {
-                            if (!(listOverlays[i].startTime == 0 &&
-                                listOverlays[i].endTime == widget.duration)) {
-                              listOverlays[i].showVisibility();
-                              bool tempChange = false;
-                              if(!listOverlays[i].isChildVisible()) {
-                                listOverlays[i].showChildVisibility();
-                                tempChange = true;
-                              }
-                              String imgPath  =  value.path + "/${i.toString()}" + DateTime
-                                  .now().millisecondsSinceEpoch
-                                  .toString() + ".png";
-                              await listOverlays[i].takeScreenshot(imgPath);
+                            for (int i = 0; i < l; i++) {
+                              if (!(listOverlays[i].startTime == 0 &&
+                                  listOverlays[i].endTime == widget.duration)) {
+                                listOverlays[i].showVisibility();
+                                bool tempChange = false;
+                                if(!listOverlays[i].isChildVisible()) {
+                                  listOverlays[i].showChildVisibility();
+                                  tempChange = true;
+                                }
+                                String imgPath  =  value.path + "/${i.toString()}" + DateTime
+                                    .now().millisecondsSinceEpoch
+                                    .toString() + ".png";
+                                await listOverlays[i].takeScreenshot(imgPath);
 
-                              overlayDetails.add(OverlayDetails(imgPath, listOverlays[i].startTime, listOverlays[i].endTime));
+                                overlayDetails.add(OverlayDetails(imgPath, listOverlays[i].startTime, listOverlays[i].endTime));
 
-                              if(tempChange)
+                                if(tempChange)
                                 {
                                   listOverlays[i].hideChildVisibility();
                                 }
 
 
+                              }
                             }
-                          }
-                          setState(() {
 
-                          });
+
+
+                          }
+
+
 
 
                           MergeImagesWithVideo.mergeImages(finalVideoPath,fileName, overlayDetails);
 
 
-                          //                          var res = await Functions.unsignPostReq(Variables.base_url+"getUploadUrl", jsonEncode({}));
 
-                          //                            var body = jsonDecode(res.body);
 
-                          //    showFiles(value.path);
 
                           isLoading=false;
+
+                         await  Navigator.push(context, MaterialPageRoute(builder: (context)=>PostInfo(widget.audioId)));
+
                           setState(() {
 
                           });
 
-                          var headers = {
-                            "Content-Type": "application/octet-stream",
-                            "reportProgress": true,
-                            'x-amz-acl': 'public'
-                          };
 
 
-                          //     String upload = "-re -i in.ts -f hls -method PUT ${body["url"]}";
-
-                          /*   FlutterFFmpeg _flutterFFmpeg =   FlutterFFmpeg();
-                          int r = await _flutterFFmpeg.execute(command);*/
-
-/*var re = await http.put(
-    body["url"],
-  headers: <String, String>{
-    'Content-Type': 'application/json; charset=UTF-8',
-  },
-  body: ""//binary data,
-);*/
-                        }
+                    }
 
                       },
                     ),
@@ -699,47 +617,13 @@ class ReviewState extends State<ReviewScreen2>  {
 
 
 
+              isLoading ?                                  Container(height: size.height, width: size.width, color: backgroundColor, child: Center(child: Functions.showLoaderSmall(),),)
+                  : Container(height: 0,width: 0,)
 
 
 
 
 
-                Positioned(child: Container(height: 120,width: size.width,
-                child: showTextfield?Row(
-                  children: [
-                    FlatButton(
-                      child: Text("CANCEL", style: TextStyle(
-
-                        inherit: false
-                      ), ),
-                      textColor: Colors.white,
-                      color: Colors.transparent,
-                      onPressed: (){
-
-                        showTextfield= !showTextfield;
-                        setState(() {
-
-                        });
-                      },
-                    ),
-                    Spacer(),
-                    FlatButton(
-                      child: Text("DONE", style: TextStyle(
-
-                          inherit: false
-                      ), ),
-                      textColor: Colors.white,
-                      color: Colors.transparent,
-                      onPressed: ()async{
-
-                        setState(() {
-
-                        });
-                      },
-                    )
-                  ],
-                ) : Container(),
-                ), top: 0, ),
               ],
             );
 
@@ -831,14 +715,20 @@ class ReviewState extends State<ReviewScreen2>  {
           " -c copy -bsf:a aac_adtstoasc ${fileIntermediate.path}";  // command for merging video
 
     var v = await  _flutterFFmpeg.execute(mergefileCommand) ;
-        print("June---->video merge $v");
 
         //String transpose = "-i ${fileIntermediate.path} -vf \"transpose=1\" ${fileMerged.path}";
         File fileMerged0 = new File(value.path + "/aa" + fileName);
         String transpose = "-i ${fileIntermediate.path} -c copy -metadata:s:v:0 rotate=270 -aspect 16:9 ${fileMerged.path}";
+        if(widget.listVideo[0].camera==1) {
+           transpose = "-i ${fileIntermediate
+              .path} -c copy -metadata:s:v:0 rotate=90 -aspect 16:9 ${fileMerged
+              .path}";
+        }await _flutterFFmpeg.execute(transpose);
+        //fileMerged  = File(fileIntermediate.path);
 
-        await _flutterFFmpeg.execute(transpose);
-      //  await _flutterFFmpeg.execute("-i ${fileMerged0.path} -filter:v fps=fps=30 ${fileMerged.path}");
+
+
+   //  await _flutterFFmpeg.execute("-i ${fileMerged0.path} -filter:v fps=fps=30 ${fileMerged.path}");
 
         if(widget.audioPath.isNotEmpty) {
           String cutAudioCommand = " -i ${widget.audioPath} -ss 00:00:00 -t ${widget.duration} -acodec copy ${finalfilecutAudio.path}"; // command for cut audio
@@ -888,6 +778,7 @@ class ReviewState extends State<ReviewScreen2>  {
 
 
 
+
     String path = v.path + "/" +"thumb";
     String command = "-i $finalVideoPath -vf \"select='not(mod(n,$num))',scale=120:120\" -vsync vfr ${v.path}/thum_%d.jpg";
    await _flutterFFmpeg.execute(command);
@@ -929,6 +820,112 @@ class ReviewState extends State<ReviewScreen2>  {
       }
     }
   }
+
+
+
+  getOverlayWidget(Size size, Widget wid){
+    OverlayWidget w = OverlayWidget(height: size.height,width: size.width, key: Key(changableKeys.toString()), startTime: 0, endTime: widget.duration.toDouble(), child: wid,);
+
+    changableKeys++;
+    w.fx = (){
+
+
+
+      hideBorders(myKey: w.key);
+
+      w.hideShowBorder();
+
+
+
+    };
+
+
+
+    w.onTapDown = (TapUpDetails details) async{
+
+      w.tapOffset = Offset(details.globalPosition.dx,details.globalPosition.dy);
+
+      if(!w.isBorderShown())
+      {
+
+        bool pressedPlay = false;
+        if (_controller.value.isPlaying) {
+          _controller.pause();
+          pressedPlay = true;
+          setState(() {
+
+          });
+        }
+        String c= await  Functions.showVideoDialog(context,w.tapOffset, "Set Duration", (){
+
+
+          Navigator.pop(context, "duration");
+
+
+
+          for(int i=0;i<listOverlays.length;i++)
+          {
+            if(listOverlays[i].key == w.key)
+            {
+
+              selectedWidget = listOverlays[i];
+
+            }
+          }
+          showTrimmer = true;
+          setState(() {
+
+          });
+
+
+        }, "Delete", (){
+
+          Navigator.pop(context,"delete");
+
+        });
+
+        if(pressedPlay)
+        {
+          if (!_controller.value.isPlaying) {
+            _controller.play();
+            setState(() {
+
+            });
+          }
+        }
+
+        if(c!="duration")
+        {
+          w.hideShowBorder();
+        }
+        if(c=="delete")
+        {
+          for(int i=0;i<listOverlays.length;i++)
+          {
+            if(listOverlays[i].key==w.key)
+            {
+              showTrimmer = false;
+              listOverlays.removeAt(i);
+              setState(() {
+
+              });
+            }
+          }
+        }
+      }
+
+    };
+
+
+
+    listOverlays.add( w);
+
+
+
+    setState(() {});
+
+  }
+
 
 
 
