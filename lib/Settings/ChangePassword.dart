@@ -72,7 +72,8 @@ class _MyHomePageState extends State<ChangePassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+
+      backgroundColor: bottomNavColor,
       appBar: AppBar(
         
 
@@ -142,6 +143,7 @@ physics: BouncingScrollPhysics(),
                decoration: InputDecoration(
                    border: InputBorder.none,
                    focusedBorder: InputBorder.none,
+
                    labelText: "New Password",
                    labelStyle: TextStyle(color: Colors.white70, fontFamily: Variables.fontName ),
 

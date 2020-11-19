@@ -258,7 +258,7 @@ Spacer(),
                                 return null;
                             }
 
-                            if(s.length<12 || s.length>8)
+                             if(s.length<8 || s.length>12 )
                             return "Enter a valid mobile number";
                             RegExp _numeric = RegExp(r'^-?[0-9]+$');
 

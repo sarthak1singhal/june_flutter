@@ -40,8 +40,8 @@ typedef MathF<T extends num> = T Function(T, T);
     _child.showHideBorder();
   }
 
-  Future<void> takeScreenshot(String path) async{
-  await  _child.takeScreenshot(path);
+  Future<void> takeScreenshot(String path, double ratio) async{
+  await  _child.takeScreenshot(path, ratio);
   }
 
   isBorderShown(){
@@ -146,8 +146,7 @@ class _MyHomePageState extends State<OverlayWidget> {
                 if(m.getMaxScaleOnAxis()>2.5)
                 {
 
-                  //   return;
-                }
+                 }
 
 
                 if(isBorderShowing)
@@ -175,21 +174,6 @@ class _MyHomePageState extends State<OverlayWidget> {
                     )
 
 
-
-                   /* OverflowBox(child: Container(
-                       child:           widget.child!=null? widget.child :Image.file(
-
-                        widget.file,
-                      ), padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: isBorderShowing?  Colors.blue: LocalColors.transparent, width: 0.6/matrix.getMaxScaleOnAxis()),
-                        borderRadius: BorderRadius.all(
-
-                          Radius.circular(2.0/matrix.getMaxScaleOnAxis()),
-
-                        ),
-                      ),
-                    ),)*/
                   ),
 
                   transform:  matrix//Matrix4.diagonal3Values(2, 2, 2.0),
@@ -206,9 +190,9 @@ class _MyHomePageState extends State<OverlayWidget> {
 
 
 
-    Future<void> takeScreenshot(String path) async{
+    Future<void> takeScreenshot(String path, double ratio) async{
 
-      await  screenshotController.capture(path:path,pixelRatio: 1.75);
+      await  screenshotController.capture(path:path,pixelRatio:ratio);
 
   }
 

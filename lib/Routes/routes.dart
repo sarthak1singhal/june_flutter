@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:qvid/Auth/login_navigator.dart';
-import 'package:qvid/BottomNavigation/AddVideo/add_video2.dart';
-import 'package:qvid/BottomNavigation/AddVideo/add_video3.dart';
-import 'package:qvid/BottomNavigation/AddVideo/flashTry.dart';
+ import 'package:qvid/BottomNavigation/AddVideo/add_video2.dart';
 import 'package:qvid/BottomNavigation/Explore/more_page.dart';
 import 'package:qvid/BottomNavigation/MyProfile/badge_request.dart';
 import 'package:qvid/BottomNavigation/MyProfile/video_option.dart';
 import 'package:qvid/BottomNavigation/bottom_navigation.dart';
-import 'package:qvid/BottomNavigation/AddVideo/add_video.dart';
-import 'package:qvid/BottomNavigation/AddVideo/add_video_filter.dart';
-import 'package:qvid/BottomNavigation/MyProfile/followers.dart';
-import 'package:qvid/BottomNavigation/MyProfile/help_page.dart';
+ import 'package:qvid/BottomNavigation/AddVideo/add_video_filter.dart';
+ import 'package:qvid/BottomNavigation/MyProfile/help_page.dart';
 import 'package:qvid/BottomNavigation/AddVideo/post_info.dart';
 import 'package:qvid/BottomNavigation/Explore/search_users.dart';
 import 'package:qvid/BottomNavigation/MyProfile/tnc.dart';
@@ -37,13 +32,11 @@ class PageRoutes {
 
   Map<String, WidgetBuilder> routes() {
     return {
-      loginNavigator: (context) => LoginNavigator("routes"),
-      bottomNavigation: (context) => BottomNavigation(),
-      followersPage: (context) => FollowersPage(),
+       bottomNavigation: (context) => BottomNavigation(),
       helpPage: (context) => HelpPage(),
       tncPage: (context) => TnC(),
       searchPage: (context) => SearchUsers(),
-      addVideoPage: (context) =>  AddVideo2(),//AddVideo(),
+      addVideoPage: (context) =>   AddVideo2(),//AddVideo(),
       addVideoFilterPage: (context) => AddVideoFilter(),
       postInfoPage: (context) => PostInfo(null),
       userProfilePage: (context) => UserProfilePage( ),

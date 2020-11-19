@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/Components/entry_field.dart';
+import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
@@ -14,16 +15,17 @@ import 'package:qvid/Locale/locale.dart';
 
 class CommentSheet extends StatefulWidget {
 
-  String video_id;
+  int video_id;
+  String username;
   BuildContext context;
-  CommentSheet(this.context, this.video_id);
+  CommentSheet(this.context, this.video_id, this.username);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class Comment{
-  final String profile_pic,username,comment,  isLiked, fb_id, video_id;
-  final int isVerified;
+  final String profile_pic,username,comment,  isLiked, fb_id;
+  final int isVerified,video_id;
   String timeString;
   DateTime time;
 
@@ -44,7 +46,6 @@ TextEditingController controller  = new TextEditingController();
 
     getData();
 
-    comments.add(Comment(profile_pic: Variables.user_pic, timeString: "DAADAD", username: "trial", fb_id: Variables.fb_id, comment: "HEY"));
 
     _scrollController.addListener(() {
        if (_scrollController.position.extentAfter < 100) {
@@ -85,14 +86,14 @@ TextEditingController controller  = new TextEditingController();
       comments.insert(0,Comment(profile_pic: Variables.user_pic, isVerified: Variables.isVerified,
           fb_id: Variables.fb_id,
           video_id: widget.video_id,
-          username: Variables.username,
+          username: widget.username,
           comment: s,
           time: DateTime.now(),
           timeString: Functions.dateToReadableString(DateTime.now())
 
       ));
        else
-      Functions.showToast("Unable to post comment");
+      Functions.showToast("Unable to post comment", context);
       //Functions.showSnackBar(_scaffoldKey, message)
 
     }catch(e)
@@ -114,53 +115,63 @@ TextEditingController controller  = new TextEditingController();
       {
         return;
       }
-    setState(() {
-      isLoading = true;
-    });
+
+    if(!isLoading)
+      {
+        setState(() {
+          isLoading = true;
+        });
 
 
-    try{
+        try{
 
-      Functions fx = Functions();
+          Functions fx = Functions();
+          print(widget.video_id);
 
-      var res = await fx.postReq(Variables.showVideoComments, jsonEncode({
-        "offset": offset
-      }), context );
+          var res = await fx.postReq(Variables.showVideoComments, jsonEncode({
+            "offset": offset,
+            "video_id" : widget.video_id
+          }), context );
 
-      var s = jsonDecode(res.body);
+          var s = jsonDecode(res.body);
 
-      if(s["isError"])
-        {
-
-
-
-        }else{
-
-        if(!Functions.isNullEmptyOrFalse(s['msg']))
+          if(s["isError"])
           {
-            parseData(s['msg']);
 
-            offset = offset + s["msg"].length;
-            if(s['msg'].length<limit)
+
+
+          }else{
+
+            if(!Functions.isNullEmptyOrFalse(s['msg']))
+            {
+              parseData(s['msg']);
+
+              offset = offset + s["msg"].length;
+              if(s['msg'].length<limit)
               {
                 existMore = false;
                 setState(() {
                   isLoading =false;
                 });
               }
+            }
+
+            setState(() {
+
+            });
+
           }
 
+        }catch(e){
+
+        }
+
+
+        setState(() {
+          isLoading = false;
+        });
+
       }
-
-    }catch(e){
-
-    }
-
-
-    setState(() {
-      isLoading = false;
-    });
-
   }
 
   parseData(var data){
@@ -177,7 +188,7 @@ TextEditingController controller  = new TextEditingController();
           //time: DateTime.parse(data[i]["created"]),
           timeString: Functions.dateToReadableString(DateTime.parse(data[i]["created"])),
           comment: data[i]["comments"],
-          video_id: data[i]["video_id"],
+          video_id: widget.video_id,
           fb_id: data[i]["fb_id"],
 
 
@@ -191,7 +202,14 @@ TextEditingController controller  = new TextEditingController();
   @override
   Widget build(BuildContext context) {
     return  Container(
+        decoration: BoxDecoration(
+            color: Colors.transparent,
+            boxShadow:  [  BoxShadow(
+                color:  Colors.black.withOpacity(0.16),
+                blurRadius: 13,
 
+                offset: Offset(0, -6))    ]
+        ),
       height: MediaQuery.of(context).viewInsets.bottom >10?MediaQuery.of(context).size.height
         :
       MediaQuery.of(context).size.height / 1.5,
@@ -199,9 +217,14 @@ TextEditingController controller  = new TextEditingController();
 
           borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
           child: new BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
               child:Stack(
                 children: <Widget>[
+                  Container(
+                    height:20,
+
+
+                  ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
@@ -218,7 +241,7 @@ TextEditingController controller  = new TextEditingController();
                           style: Theme.of(context)
                               .textTheme
                               .headline6
-                              .copyWith(color: Colors.white70, fontSize:MediaQuery.of(context).viewInsets.bottom>10? 24:21),
+                              .copyWith(color: Colors.white, fontSize:MediaQuery.of(context).viewInsets.bottom>10? 24:21),
                         ),
                       ),
                       isLoading?Functions.showLoaderSmall():Container(),
@@ -230,46 +253,67 @@ TextEditingController controller  = new TextEditingController();
                             padding: EdgeInsets.only(bottom: 60.0),
                             itemCount: comments.length,
                             itemBuilder: (context, index) {
-                              return Column(
-                                children: <Widget>[
-                                 /* Divider(
-                                    color: darkColor.withOpacity(0.4),
-                                    thickness: 1,
-                                  ),*/
-                                  ListTile(
-                                    leading: GestureDetector(
-                                      child: Functions.showProfileImage(comments[index].profile_pic,45,comments[index].isVerified),
-                                      onTap: (){
+                              return ListTile(
 
-                                      },
+                                  leading: Container(
+                                    child: Center(
+                                      child: GestureDetector(
+                                        child: Functions.showProfileImage(comments[index].profile_pic,32,comments[index].isVerified),
+                                        onTap: (){
 
+                                        },
+
+                                      ),
                                     ),
-
-                                    title: Text(comments[index].username,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText2
-                                            .copyWith(
-                                            height: 2,
-                                            color: disabledTextColor)),
-                                    subtitle: RichText(
-                                      text: TextSpan(children: [
-                                        TextSpan(
-                                          text: comments[index].comment,
-                                        ),
-                                        TextSpan(
-                                            text: comments[index].timeString,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .caption),
-                                      ]),
-                                    ),
+                                    width: 40,
 
                                   ),
-                                ],
+
+                                  title: Text(Functions.isNullEmptyOrFalse(comments[index].username)? "":comments[index].username,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText2
+                                          .copyWith(
+                                          height: 1.5,
+                                          fontWeight: FontWeight.w500,
+
+                                          color: Colors.white)),
+                                  subtitle: RichText(
+                                    text: TextSpan(children: [
+                                      TextSpan(
+                                          text: comments[index].comment,
+                                          style: TextStyle(
+                                              inherit: false,
+                                              height: 1,
+
+                                              color: Colors.white.withOpacity(0.8)
+                                          )
+                                      ),
+
+                                    ]),
+
+                                  ),
+                                  trailing: Container(child: Text(
+                                      comments[index].timeString,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .caption.copyWith(
+                                          inherit: false,
+
+                                          color: Colors.white.withOpacity(0.45),
+                                          fontSize: 11
+
+
+                                      )
+                                  ),)
+
                               );
                             }),
                       ),
+
+
+
+
                       Container(height: MediaQuery.of(context).viewInsets.bottom>10?MediaQuery.of(context).viewInsets.bottom+40:50,
                         //width: 10,
                         color: darkColor,
@@ -281,36 +325,55 @@ TextEditingController controller  = new TextEditingController();
                     ,
                     //  alignment: Alignment.bottomCenter,
                     child: Container(height: 90,
+                      color: darkColor,
                       width: MediaQuery.of(context).size.width,
-                      child: EntryField(
-                        onChanged: (s){
-                          comment = s;
-                        },
-                        focusNode: _focusNode,
-                        counter: null,
-                        padding: EdgeInsets.zero,
-                        controller: controller,
-                        hint: locale.writeYourComment,
-                        fillColor: darkColor,
-                        prefix: Padding(
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          child:  Functions.showProfileImage(Variables.user_pic,45,0),
-                        ),
-                        suffixIcon: isSendingMessage ? Container(height: 30,width: 30, child: Functions.showLoaderSmall(),)
-                            :IconButton(
-                          icon: Icon(Icons.send ,),
-                          onPressed: (){
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Padding(
+                            padding:
+                            EdgeInsets.only(left: 22,right: 17,bottom: 5),
+                            child:  Functions.showProfileImage(Variables.user_pic,36,0),
+                          ),
+                          Container(
+                            width: MediaQuery.of(context).size.width-140,
+                            child:  EntryField(
+                              textCapitalization: TextCapitalization.sentences,
+                              onChanged: (s){
+                                comment = s;
+setState(() {
 
-                            if(controller.text!=null)
-                              if(controller.text.trim().length>0) {
+});
+                              },
+                              focusNode: _focusNode,
+                              counter: null,
+                              contentPadding: EdgeInsets.only(top: 18),
+                              padding: EdgeInsets.zero,
+                              controller: controller,
+                              hint: locale.writeYourComment,
+                              fillColor: darkColor,
+                              ),
+                          ),
 
-                                sendMessage(controller.text);
-                                controller.text = "";
-                              }
-                          },
 
-                        ),
+                          isSendingMessage ? Container(height: 30,width: 30, child: Functions.showLoaderSmall(),)
+                              :Padding(padding: EdgeInsets.only(right: 17,bottom: 5),
+                          child: IconButton(
+                            icon: Icon(Icons.send , color: Functions.isNullEmptyOrFalse(controller.text) ? Colors.white38 : mainColor.withOpacity(0.9) ),
+                            onPressed: (){
+
+                              if(controller.text!=null)
+                                if(controller.text.trim().length>0) {
+
+                                  sendMessage(controller.text);
+                                  controller.text = "";
+                                }
+                            },
+
+                          ),
+                          )
+
+                        ],
                       ),
                     ),
                   ),

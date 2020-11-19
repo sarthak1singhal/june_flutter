@@ -1,6 +1,12 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 class Variables{
 
-  static final String fontName = "Roboto";
+  static final String fontName = "NotoSans";
+  static final String defaultAudioThumb = "Roboto";
+  static final IconData viewIcon = Icons.remove_red_eye;
+
 
 
 
@@ -53,7 +59,7 @@ class Variables{
   static final String termsAndConditionUrl="https://docs.google.com/document/d/1A4E_egHnUoZdd5_5v0UBpHzbgogeZKvLuGXH71lQFdw/edit?usp=sharing";
 
   //static String base_url="http://elyisonsocialmedia.com/";
-  static String base_url="http://ec2-13-233-22-72.ap-south-1.compute.amazonaws.com:3000/";
+  static String base_url="http://ec2-13-233-22-72.ap-south-1.compute.amazonaws.com/";
 
 
   //public static String base_url="https://juneapp.in/API/";
@@ -72,6 +78,7 @@ class Variables{
 
   //POST PARAMETERS
   static final String home_videos = base_url+"showAllVideos"; //gives at max 20 video data
+  static final String home_videosNotLoggedIn = base_url+"showAllVideosUnsigned"; //gives at max 20 video data
   static final String videos_following = base_url+"show-videos-following"; //offset and offset2. gives at max 20 video data
   static final String showVideosBySound = base_url+"videos-by-sound"; //sound_id, offset, limit is set to 21.
 
@@ -98,13 +105,20 @@ class Variables{
   static final String reportVideo=base_url+"reportVideo"; //action, video_id
   static final String deleteVideo=base_url+"delete-video";//video_id
   static final String updateVideoView=base_url+"updateVideoView";//video_id
-  static final String getNotifications=base_url+"getNotifications"; //offset, limit is set to 30
+  static final String getNotifications=base_url+"get-notification"; //offset, limit is set to 30
   static final String uploadProfileImg=base_url+"uploadProfileImage_app";
   static final String changePassword=base_url+"change-password";  //password, confirm_password, new_password
-  static final String getVerified=base_url+"get-verified"; //
+  static final String getVerified=base_url+"get-verified"; // profile_path, document_path
+  static final String getVerificationStatus=base_url+"get-verify-status"; // profile_path, document_path
+  static final String getVerificationDocsUrl=base_url+"get-verification-docs-url"; //
+
+  static final String get_profile_picture_url=base_url+"getProfilePicUrl"; //
+  static final String on_profile_img_upload=base_url+"on-profile-img-upload"; //
+
+  static final String get_stickers=base_url+"get-stickers"; //offset. Default limit is 30
 
 
-    //TODO: Set username at the time of signup
+  //TODO: Set username at the time of signup
 
   //static final String showMyAllVideos=domain+"showMyAllVideos";
 
@@ -121,10 +135,9 @@ class Variables{
    //static final String selectedLanguage = "selected_language";
 
 
-
-
-
   static final String loginUrl = base_url+"login";
+  static final String forgortPasswordSendOtp = base_url+"forgot-password/send-otp";
+  static final String forgortPasswordLogin = base_url+"forgot-password/login";
   static final String login_fb = base_url+"login-fb";
   static final String isUsernameOrEmailExist = base_url+"isEmailorUsernameExist";
    //username or email and password
@@ -137,9 +150,6 @@ class Variables{
   static final String checkEmailExist =base_url+ "isEmailExist";//check if email exist
   static final String isUsernameExist = base_url+"isUsernameExist"; //check if username exist and recommend some usernames related to it
 
-  //static final String checkUsername = "checkUsername";//logs user in with password
-
-  //static final String signup = "sendOTP"; //full name, email, password
 
   static final String connErrorMessage = "Connection Error";
 

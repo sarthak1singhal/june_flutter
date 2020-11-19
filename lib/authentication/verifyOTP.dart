@@ -12,7 +12,6 @@ import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class VerifyOTP extends StatefulWidget {
 
@@ -59,14 +58,8 @@ class _MyHomePageState extends State<VerifyOTP> {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: LocalColors.backgroundLight, //top bar color
       statusBarIconBrightness: Brightness.dark, //top bar icons
-
     ));
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+
     super.dispose();
   }
 

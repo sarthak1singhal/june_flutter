@@ -60,8 +60,7 @@ class _MyProfileBodyState extends State<MyProfileBody>  with SingleTickerProvide
 
 
     scrollController.addListener(() {
-      print(scrollController.position.extentAfter );
-      if (scrollController.position.extentAfter < 300){
+       if (scrollController.position.extentAfter < 300){
 
         fetchData(primaryTC.index);
 
@@ -301,8 +300,7 @@ bool isExistLiked= true;
     String url = Variables.videosByUserId;
 
     Variables.fb_id = fb_id;
-    print(Variables.fb_id);
-    try{
+     try{
       Functions fx = Functions();
 
       var s = await fx.postReq(url, json.encode({
@@ -312,6 +310,7 @@ bool isExistLiked= true;
 
       }), context, isIdChange: true);
 
+      fb_id = Variables.fb_id;
       var data = jsonDecode(s.body);
       if(data["isError"])
         {
@@ -525,12 +524,25 @@ bool isExistLiked= true;
 
 
 
+  RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
+
+
+  onRefresh()async {
+    await getData();
+    _refreshController.refreshCompleted();
+
+  }
+
 
 
 
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+
     width = MediaQuery.of(context).size.width;
     var locale = AppLocalizations.of(context);
 
@@ -538,10 +550,14 @@ bool isExistLiked= true;
 
     return Padding(padding: EdgeInsets.only(bottom: 60),
     child: Scaffold(
+
         appBar: AppBar(
+
           title: Text(
-            Variables.username == null ? "" : Variables.username, style: TextStyle(
-            color: Colors.white
+            Variables.username == null ? "" : "${Variables.username}", style: TextStyle(
+            color: Colors.white, fontSize: 18,
+            fontFamily: Variables.fontName,
+            fontWeight: FontWeight.w600
           ),
           ),
           actions: [
@@ -559,8 +575,15 @@ bool isExistLiked= true;
     })
           ],
         ),
-        body: isLoading   ?
-        Functions.showLoader()
+        body: SmartRefresher(
+            enablePullDown: true,
+            physics: BouncingScrollPhysics(),
+
+            header: Functions.swipeDownHeaderLoader(),
+            controller: _refreshController,
+            onRefresh: onRefresh,
+            child: isLoading   ?
+        Functions.showLoaderSmall()
             :   isError? Functions.showError(errorMessage) :
         DefaultTabController(
             length: 2,
@@ -573,7 +596,7 @@ bool isExistLiked= true;
 
 
                     SliverToBoxAdapter(child: Padding(
-                      padding: EdgeInsets.only(left: 20, right: 22,top: 16),
+                      padding: EdgeInsets.only(left: 20, right: 22,top: 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -585,60 +608,57 @@ bool isExistLiked= true;
 
 
                               Container(width: 22,),
+                              Container(
 
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text(
-                                    Variables.f_name + " "  + Variables.l_name,
-                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                                  ),
+                                width: MediaQuery.of(context).size.width - 22-20-75-22,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    RowItem(
+                                        Functions.getRedableNumber(likes),
+                                        locale.liked,
+                                        null),
+                                    RowItem(
 
-                                  Container(height: 8,),
-                                  Text(
-                                    Functions.isNullEmptyOrFalse(Variables.username) ? "" : Variables.username,
-                                    style: TextStyle(
-                                        fontSize: 14, color: disabledTextColor),
-                                  ),
+                                        Functions.getRedableNumber(followers),locale.followers, FollowersPage(Variables.fb_id)),
+                                    RowItem(
 
-                                ],
+                                        Functions.getRedableNumber(following), locale.following, FollowingPage(Variables.fb_id)),
+                                  ],
+                                ),
+                                height: 120,
                               ),
-                              Spacer(),
 
-                            
+                              //Spacer()
                             ],
                           ),
 
-                          Container(height: 22,),
+                          Container(height: 2,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                Variables.f_name + " "  + Variables.l_name,
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                              ),
 
+                              Container(height: 6,),
+
+                            ],
+                          ),
                           Wrap(
                             children: <Widget>[
                               Text(
                                 Variables.bio,
                                 textAlign: TextAlign.left,
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w400),
                               ),
                             ],
                           ),
 
-                          Container(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: <Widget>[
-                                RowItem(
-                                    Functions.getRedableNumber(likes),
-                                    locale.liked,
-                                     null),
-                                RowItem(
+                          Container(height: Functions.isNullEmptyOrFalse(Variables.bio) ? 8: Variables.bio.trim().length> 0? 12:6,)
 
-                                    Functions.getRedableNumber(followers),locale.followers, FollowersPage()),
-                                RowItem(
-
-                                    Functions.getRedableNumber(following), locale.following, FollowingPage()),
-                              ],
-                            ),
-                            height: 120,
-                          )
                         ],
                       ),
                     ),),
@@ -671,7 +691,7 @@ bool isExistLiked= true;
 
                             ]
                         ),
-                        Divider(color: Colors.white10,),
+                        Divider(color: Colors.white24,),
                         Expanded(
 
                           child: TabBarView(
@@ -691,7 +711,7 @@ bool isExistLiked= true;
                     );
                   },
                 )
-            )),),);
+            ))),),);
 
   }
 

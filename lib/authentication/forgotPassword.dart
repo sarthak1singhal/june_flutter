@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,13 +13,13 @@ import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Verify extends StatefulWidget {
 
-  final String ScreenPopmessage;
+  final String usernameOrEmail;
+    String hashKey;
 
-  const Verify({Key key, this.ScreenPopmessage}) : super(key: key);
+    Verify({Key key, this.usernameOrEmail, this.hashKey}) : super(key: key);
 
 
   @override
@@ -41,18 +42,6 @@ class _MyHomePageState extends State<Verify> {
 
     ));
 
-    if(widget.ScreenPopmessage != null)
-    {
-
-      if(widget.ScreenPopmessage.trim()!="")
-      {
-
-        Functions.showSnackBar(_scaffoldKey, widget.ScreenPopmessage);
-
-      }
-
-    }
-
   }
 
 
@@ -63,16 +52,11 @@ class _MyHomePageState extends State<Verify> {
     _errorController.close();
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: LocalColors.backgroundLight, //top bar color
-      statusBarIconBrightness: Brightness.dark, //top bar icons
+      statusBarColor: LocalColors.transparent, //top bar color
+      statusBarIconBrightness: Brightness.light, //top bar icons
 
     ));
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+
     super.dispose();
   }
 
@@ -85,6 +69,12 @@ class _MyHomePageState extends State<Verify> {
 
   verifyOtp() async{
 
+    if(attempts>=5)
+      {
+        Functions.showSnackBar(_scaffoldKey, "Finished with attempts, resend OTP instead.");
+
+        return;
+      }
     if(_formKey.currentState.validate())
     {
       isLoading = true;
@@ -95,9 +85,11 @@ class _MyHomePageState extends State<Verify> {
       try{
 
 
-        var res = await  Functions.unsignPostReq(Variables.loginUrl, jsonEncode({
+        var res = await  Functions.unsignPostReq(Variables.forgortPasswordLogin, jsonEncode({
 
           "otp" : currentText,
+          "email": widget.usernameOrEmail,
+          "key" : widget.hashKey
 
         }));
 
@@ -106,29 +98,67 @@ class _MyHomePageState extends State<Verify> {
         if(s["isError"])
         {
 
-          String p = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
 
-          RegExp regExp = new RegExp(p);
+          attempts ++ ;
 
-          if(Functions.isNullEmptyOrFalse(s["email"])) {
-
-            if (regExp.hasMatch(s["email"])){
-
-
-
-            }
-            else if(s["message"]!=null){
+          if(!Functions.isNullEmptyOrFalse(s["message"])) {
 
               Functions.showSnackBar(_scaffoldKey, s["message"].toString());
 
-            }
-          }
+           }
 
 
 
 
         }else{
 
+
+
+
+
+
+
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+          if(!Functions.isNullEmptyOrFalse(s["first_name"]))
+          {
+            preferences.setString(Variables.f_nameString, s["first_name"]);
+            Variables.f_name = s["first_name"];
+          }
+          if(!Functions.isNullEmptyOrFalse(s["last_name"]))
+          {
+            preferences.setString(Variables.l_nameString, s["last_name"]);
+            Variables.l_name = s["last_name"];
+          }
+          if(!Functions.isNullEmptyOrFalse(s["email"]))
+          {
+            preferences.setString(Variables.emailString, s["email"]);
+            Variables.email= s["email"];
+          }
+          if(!Functions.isNullEmptyOrFalse(s["token"]))
+          {
+            preferences.setString(Variables.tokenString, s["token"]);
+            Variables.token= s["token"];
+          }
+          if(!Functions.isNullEmptyOrFalse(s["refresh"]))
+          {
+            preferences.setString(Variables.refreshTokenString, s["refresh"]);
+            Variables.refreshToken= s["refresh"];
+          }
+          if(!Functions.isNullEmptyOrFalse(s["uid"]))
+          {
+            preferences.setString(Variables.fbid_String, s["uid"]);
+            Variables.fb_id= s["uid"];
+          }
+          if(!s["isUsername"])
+          {
+            preferences.setString(Variables.usernameString, s["username"]);
+            Variables.username= s["username"];
+          }
+
+
+
+          Navigator.pop(context);
+          Navigator.pop(context);
 
 
 
@@ -160,6 +190,11 @@ class _MyHomePageState extends State<Verify> {
       }
 
 
+      setState(() {
+        isLoading = false;
+      });
+
+
 
     }
 
@@ -170,6 +205,62 @@ class _MyHomePageState extends State<Verify> {
 
 
 
+  bool isResending = false;
+
+  resendOtp() async{
+    if(isResending) return;
+
+    setState(() {
+      isResending = true;
+    });
+    try{
+
+      var res =  await Functions.unsignPostReq(Variables.forgortPasswordSendOtp, jsonEncode({
+        "email" : widget.usernameOrEmail.trim()
+
+      }));
+
+      var s = jsonDecode(res.body);
+      print(s);
+
+
+      if(s["isError"]) {
+
+        if(!Functions.isNullEmptyOrFalse(s["message"]))
+        {
+          Functions.showSnackBar(_scaffoldKey, s["message"]);
+        }
+
+        setState(() {
+          isResending  = false;
+        });
+
+        return;
+
+      }
+
+      attempts = 0;
+
+      widget.hashKey = s["key"];
+
+
+
+      setState(() {
+        isResending  = false;
+      });
+
+    }catch(e){
+      setState(() {
+        isResending  = false;
+      });
+    }
+
+
+    setState(() {
+      isResending = false;
+    });
+
+  }
 
 
   @override
@@ -192,6 +283,7 @@ class _MyHomePageState extends State<Verify> {
 
 
 
+  int attempts = 0;
 
 
 
@@ -215,8 +307,9 @@ class _MyHomePageState extends State<Verify> {
 //                  mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
 
-                    Text("Welcome", style: TextStyle(fontSize: 32, fontFamily: Variables.fontName, fontWeight: FontWeight.w700),),
-                    Text("Back!", style: TextStyle(fontSize: 32, fontFamily: Variables.fontName, fontWeight: FontWeight.w700),),
+                    Text("Forgot Password?", style: TextStyle(fontSize: 32, color: LocalColors.textColorDark, fontFamily: Variables.fontName, fontWeight: FontWeight.w600),),
+                    Container(height: 4,),
+                    Text("Check your mail", style: TextStyle(fontSize: 20, fontFamily: Variables.fontName, fontWeight: FontWeight.w500, color: LocalColors.textColorDark),),
 
                     Spacer(),
                     PinCodeTextField(
@@ -261,28 +354,35 @@ class _MyHomePageState extends State<Verify> {
                     ),
 
                     Spacer()                      ,
-                    FlatButton(
-                      child:RichText(
-                        text: TextSpan(
-                          text: "Didn't Receive Mail? "  ,
-                          style: TextStyle(
-                            color: LocalColors.textColorLight,
+                    RichText(
+                      text: TextSpan(
+                        text: attempts>1 ?"Didn't Receive Mail? Check your spam folder \n":"Didn't Receive Mail? "   ,
+                        style: TextStyle(
+                          color: LocalColors.textColorLight,
+                          fontSize: 14,
+                          fontFamily: Variables.fontName,
+                        ),
+                        children: <TextSpan>[
+
+                          isResending? TextSpan(text: 'Resending OTP\n', style: TextStyle(fontFamily: Variables.fontName, color: LocalColors.secondaryColor.withOpacity(0.9),
+                           fontSize: 15, ),           
+                         ):TextSpan(text: 'Resend\n', style: TextStyle(fontFamily: Variables.fontName, color: LocalColors.secondaryColor,
+                            fontSize: 15, ),           recognizer: new TapGestureRecognizer()..onTap = () {
+                            resendOtp();
+                          },
+                          ),
+                          attempts>2 ?TextSpan(text: (5-attempts).toString() + " attempts left",  style: TextStyle(
+                            color: Colors.redAccent,
                             fontSize: 14,
                             fontFamily: Variables.fontName,
-                          ),
-                          children: <TextSpan>[
-                            TextSpan(text: ' Resend', style: TextStyle(fontFamily: Variables.fontName, color: LocalColors.secondaryColor,
-                              fontSize: 15,)),
-                          ],
-                        ),
+                          ), ):TextSpan(text:  "",  style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 14,
+                            fontFamily: Variables.fontName,
+                          ), )
+
+                        ],
                       ),
-                      padding: EdgeInsets.only(left: 5, right: 8),
-                      onPressed: (){
-
-                        verifyOtp();
-                        //Navigator.push(context, MaterialPageRoute(builder: (context) =>  Login()));
-
-                      },
                     ),
 
                     Container(height: 20,),
@@ -295,14 +395,8 @@ class _MyHomePageState extends State<Verify> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Text(
-                          "Sign in", style: TextStyle(
-                          fontSize: 27,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: Variables.fontName,
-                        ),
-                        ),
-                        //Spacer(),
+
+                        Spacer(),
                         Stack(
                           children: <Widget>[
                             Container(

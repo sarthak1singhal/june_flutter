@@ -65,10 +65,10 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
           print(url);
       Functions fx = Functions();
 
-      var res = await fx.postReq(url, jsonEncode({
+      var res = await Functions.unsignPostReq(url, jsonEncode({
             "type" : tab == 0? "video" : "users",
             "keyword" : v.length == 0? " " : v
-          }), context);
+          }));
 
           var data  = jsonDecode(res.body);
           print(data);
@@ -164,15 +164,16 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
     return DefaultTabController(
        length: 2,
       child: Scaffold(
+        backgroundColor: bottomNavColor,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           bottom: PreferredSize(
-            preferredSize: Size.fromHeight(66.0),
-            child: Column(
-              children: <Widget>[
-                Container(
+            preferredSize: Size.fromHeight(30),
+            child:Container(
+             // color: bottomNavColor,
+              child:  Container(
                   margin:
-                      EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
                   decoration: BoxDecoration(
                     color: darkColor,
                     borderRadius: BorderRadius.circular(25.0),
@@ -189,7 +190,7 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
                           onChanged: (v){
 
                             if(v.length>2 && v.length<23)
-                            search(v);
+                              search(v);
                           },
                           decoration: InputDecoration(
                             icon: IconButton(
@@ -215,78 +216,83 @@ class _SearchUsersState extends State<SearchUsers>  with SingleTickerProviderSta
 
                     ],
                   )
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TabBar(
-                    controller: primaryTC,
-
-                    indicator: BoxDecoration(color: transparentColor),
-                    isScrollable: true,
-                    labelColor: mainColor,
-                    labelStyle: Theme.of(context).textTheme.headline6,
-                    unselectedLabelColor: disabledTextColor,
-                    tabs: <Widget>[
-                      Tab(text: local.video),
-                      Tab(text: local.users),
-                    ],
-                  ),
-                )
-              ],
+              ),
             ),
           ),
         ),
-        body: TabBarView(
-          controller: primaryTC,
+        body: Column(
+          children: [
+            Container(height: 6,),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+              child: TabBar(
+                controller: primaryTC,
 
-          children: <Widget>[
-            SearchGrid(
-              videos, _controller.text,
-              onTap: () =>
-                  Navigator.pushNamed(context, PageRoutes.videoOptionPage),
+                indicator: BoxDecoration(color: transparentColor),
+                isScrollable: true,
+                labelColor: Colors.white,
 
-            ),
-            ListView.builder(
-                physics: BouncingScrollPhysics(),
-                itemCount: users.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: <Widget>[
+                 labelStyle: Theme.of(context).textTheme.headline6.copyWith(
+                    fontSize: 18.7,  fontWeight: FontWeight.bold
+                ),unselectedLabelStyle: Theme.of(context).textTheme.headline6.copyWith(fontWeight: FontWeight.w400),
+                unselectedLabelColor: disabledTextColor,
+                tabs: <Widget>[
+                  Tab(text: local.video),
+                  Tab(text: local.users),
+                ],
+              ),)
+            )
+,
+            Expanded(
+              child: TabBarView(
+                controller: primaryTC,
 
-                      Container(height: 5,),
+                children: <Widget>[
+                  SearchGrid(
+                    videos, _controller.text,
+                    onTap: () =>
+                        Navigator.pushNamed(context, PageRoutes.videoOptionPage),
 
-                      ListTile(
-                        leading: Container(
-                          child: CircleAvatar(
-                            backgroundColor: darkColor,
-                            backgroundImage: !Functions.isNullEmptyOrFalse(users[index]["profile_pic"])? NetworkImage(users[index]["profile_pic"]) : Functions.defaultProfileImage(),
-                          ),
-                          height: 55,
-                          width: 55,
-                        ),
-                        title: Padding(padding: EdgeInsets.only(left: 5),child: Text(
-                          Functions.capitalizeFirst(users[index]["first_name"]),
-                          style: TextStyle(color: Colors.white),
-                        ),),
-                        subtitle: Padding(padding: EdgeInsets.only(left: 5,top: 4),
-                        child: Text(Functions.isNullEmptyOrFalse(users[index]["username"]) ? "" : users[index]["username"]),
-                        ),
-                        onTap: () async{
+                  ),
+                  ListView.builder(
+                      physics: BouncingScrollPhysics(),
+                      itemCount: users.length,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: <Widget>[
+
+                            Container(height: 5,),
+
+                            ListTile(
+                                leading: Functions.showProfileImage(users[index]["profile_pic"] , 55, users[index]["verified"] ),
+
+                                title: Padding(padding: EdgeInsets.only(left: 5),child: Text(
+                                  Functions.capitalizeFirst(users[index]["first_name"]),
+                                  style: TextStyle(color: Colors.white),
+                                ),),
+                                subtitle: Padding(padding: EdgeInsets.only(left: 5,top: 4),
+                                  child: Text(Functions.isNullEmptyOrFalse(users[index]["username"]) ? "" : users[index]["username"]),
+                                ),
+                                onTap: () async{
 
 
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) =>   UserProfilePage(fb_id: users[index]["fb_id"],)),
-                          );
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) =>   UserProfilePage(fb_id: users[index]["fb_id"],)),
+                                  );
 
-                        }
+                                }
 
 
-                          ),
-                    ],
-                  );
-                })
+                            ),
+                          ],
+                        );
+                      })
+                ],
+              ),
+            )
           ],
         ),
       ),

@@ -21,7 +21,7 @@ class CustomButton extends StatelessWidget {
             style: Theme.of(context)
                 .textTheme
                 .caption
-                .copyWith(color: secondaryColor),
+                .copyWith(color: secondaryColor, inherit: false, letterSpacing: 0),
           )
         ],
       ),

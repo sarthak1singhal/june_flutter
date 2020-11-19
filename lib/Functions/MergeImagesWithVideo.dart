@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:gallery_saver/gallery_saver.dart';
@@ -17,7 +18,7 @@ class MergeImagesWithVideo{
   static String outputPath;
   static List<String> queue = [];
 
-  static mergeImages(String videoPath, String op, List<OverlayDetails> l) async
+  static mergeImages(String videoPath, String op, List<OverlayDetails> l, Size size ) async
   {
 
 
@@ -40,15 +41,15 @@ class MergeImagesWithVideo{
       queue.add(outputPath);
 
       String command = "-i $videoPath -i ${l[0]
-          .path} -filter_complex \"[0:v][1:v] overlay=0:0:enable='between(t,0,3)'[out]\" -map [out] -pix_fmt yuv420p -c:a copy $outputPath";
+          .path} -filter_complex \"[0:v][1:v] overlay=0:0:enable='between(t,0,3)'[out]\" -map [out] -pix_fmt yuv420p -preset ultrafast -c:a copy $outputPath";
 
 
       String inputs = "-i $videoPath -i ${l[0].path} ";
       String lstart = l[0].start.toStringAsFixed(3);
       String lend = l[0].end.toStringAsFixed(3);
-      String last = "-filter_complex \"[0:v][1:v] overlay=0:0:enable='between(t,$lstart,$lend)'[v1]";
+      String last = "-filter_complex \"[1:v] scale=${size.width}:-1 [d]; [0:v][d] overlay=0:0:enable='between(t,$lstart,$lend)'[v1]";
 
-      String end = "\" -map [v${l.length}] -pix_fmt yuv420p -c:a copy $outputPath";
+      String end = "\" -map [v${l.length}] -map 0:a -c:v libx264 -crf 28 -preset ultrafast -r 23 -c:a copy $outputPath";
 
       if (l.length > 1)
       {
@@ -58,19 +59,19 @@ class MergeImagesWithVideo{
           String end = l[i].end.toStringAsFixed(3);
           if(l.length == 2)
             {
-              last = last + ";[v${i.toString()}][${(i + 1).toString()}:v] overlay=0:0:enable='between(t,$start,$end)'[v${(i+1).toString()}]";
+              last = last + ";[${(i + 1).toString()}:v] scale=${size.width}:-1 [d$i]; [v${i.toString()}][d$i] overlay=0:0:enable='between(t,$start,$end)'[v${(i+1).toString()}]";
 
               break;
             }
              if(i==1){
-            last = last + ";[v${i.toString()}][${(i + 1).toString()}:v] overlay=0:0:enable='between(t,$start,$end)'[v${(i+1).toString()}];";
+            last = last + ";[${(i + 1).toString()}:v] scale=${size.width}:-1 [d$i]; [v${i.toString()}][d$i] overlay=0:0:enable='between(t,$start,$end)'[v${(i+1).toString()}];";
 
           }else if (i == l.length - 1) {
-               last = last + "[v${i.toString()}][${(i + 1).toString()}:v] overlay=0:0:enable='between(t,$start,$end)'[v${(i +1).toString()}]";
+               last = last + "[${(i + 1).toString()}:v] scale=${size.width}:-1 [d$i]; [v${i.toString()}][d$i] overlay=0:0:enable='between(t,$start,$end)'[v${(i +1).toString()}]";
              }
 
              else{
-            last = last + "[v${i.toString()}][${(i + 1).toString()}:v] overlay=0:0:enable='between(t,$start,$end)'[v${(i+1).toString()}];";
+            last = last + "[${(i + 1).toString()}:v] scale=${size.width}:-1 [d$i]; [v${i.toString()}][d$i] overlay=0:0:enable='between(t,$start,$end)'[v${(i+1).toString()}];";
           }
         }
       }

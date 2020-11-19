@@ -21,6 +21,8 @@ class NewScreenGrid extends StatefulWidget {
   final Function onTap;
   final IconData viewIcon;
   final bool isLoading;
+
+    double errorHeight;
   final String views;
   final GlobalKey<ScaffoldState> _scaffoldkey ;
 
@@ -40,10 +42,15 @@ class NewScreenGrid extends StatefulWidget {
       this.onTap,
       this.viewIcon,
       this.views,
+        this.errorHeight,
       this.scrollController});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(list);
+  _MyHomePageState createState() {
+
+    if(errorHeight == null) errorHeight = 180;
+    return _MyHomePageState(list);
+  }
 }
 
 class _MyHomePageState extends State<NewScreenGrid> {
@@ -73,14 +80,15 @@ class _MyHomePageState extends State<NewScreenGrid> {
 
       try {
 
-        Functions fx = Functions();
 
-        var res = await fx.postReq(widget.type == 3 ? Variables.showVideoByHashtag : Variables.showVideosBySound, jsonEncode({
-          "hashtag": widget.hashtag,
+        var res = await Functions.unsignPostReq(widget.type == 3 ? Variables.showVideoByHashtag : Variables.showVideosBySound, jsonEncode({
+          "hashtag": Functions.isNullEmptyOrFalse(widget.hashtag)?"": widget.hashtag.replaceAll("#", ""),
           "sound_id" : widget.soundId,
           "offset" : offset,
-          "limit" : 21
-        }), context);
+          "limit" : 21,
+          "fb_id" : Functions.isNullEmptyOrFalse(Variables.fb_id) ?"" : Variables.fb_id
+
+        }));
 
 
         var data = jsonDecode(res.body);
@@ -95,8 +103,15 @@ class _MyHomePageState extends State<NewScreenGrid> {
                 isExistMore = false;
               }
 
-            list.addAll(Functions.parseVideoList(data["msg"], context));
 
+            List<Videos> l = Functions.parseVideoList(data["msg"], context);
+
+            for(int i =0;i<l.length;i++)
+              {
+                if(!map.containsKey(l[i].id)){
+                  list.add(l[i]);
+                }
+              }
 
           }else{
           isError = true;
@@ -122,6 +137,8 @@ class _MyHomePageState extends State<NewScreenGrid> {
     }
   }
 
+  Map<int, bool> map = Map();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -129,7 +146,20 @@ class _MyHomePageState extends State<NewScreenGrid> {
     if(list == null)
       list = [];
 
-    offset = list.length;
+    for(int i=0; i<list.length;i++)
+      {
+        map.putIfAbsent(list[i].id, () => true);
+      }
+
+    if(widget.type==3)
+      {
+        offset = list.length;
+        if(offset<21)
+          {
+            isExistMore = false;
+          }
+      }
+
     if(!(widget.type ==3 ||widget.type==4) )
       {
         print(widget.type);
@@ -156,10 +186,11 @@ class _MyHomePageState extends State<NewScreenGrid> {
           return;
         },
         child: CustomScrollView(
+          physics: BouncingScrollPhysics(),
           slivers: <Widget>[
             isError? SliverToBoxAdapter(
               child: Container(
-                height: MediaQuery.of(context).size.height-180,
+                height: MediaQuery.of(context).size.height-widget.errorHeight,
                 width: MediaQuery.of(context).size.width,
                 child: Center(
                   child: Functions.showError(errorMessage),
@@ -168,7 +199,7 @@ class _MyHomePageState extends State<NewScreenGrid> {
             ): SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
-                  childAspectRatio: 2 / 2.5,
+                  childAspectRatio: 2 / 3,
                   crossAxisSpacing: 3,
                   mainAxisSpacing: 3,
                 ),
@@ -180,12 +211,11 @@ class _MyHomePageState extends State<NewScreenGrid> {
                         MaterialPageRoute(
                             builder: (context) => FollowingTabPage(list, index, widget.type, widget.type == 3 ? Variables.showVideoByHashtag : Variables.showVideosBySound,
                                 widget.type == 3 ? widget.hashtag : widget.soundId,
-                                videos1, imagesInDisc1, false,
-                                variable: 1))),
+                                 false, offset))),
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: NetworkImage(list[index].thumb_url), fit: BoxFit.fill),
+                            image: NetworkImage(list[index].thumb_url), fit: BoxFit.cover),
                         borderRadius: BorderRadius.circular(5),
                       ),
                       padding: EdgeInsets.all(8),

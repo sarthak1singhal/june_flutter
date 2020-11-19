@@ -87,12 +87,19 @@ class _MyHomePageState extends State<MyBottomSheet> {
       ],
     );
     return  Container(
+        decoration: BoxDecoration(
+            color: Colors.transparent,
+            boxShadow:  [  BoxShadow(
+                color:  Colors.black.withOpacity(0.14),
+                blurRadius: 14,
 
+                offset: Offset(0, -6))    ]
+        ),
         child: ClipRRect(
 
             borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
             child: widget.enableBackDropFilter == null ? new BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0),
+              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
               child:w,):   w)
     );
   }
@@ -125,7 +132,7 @@ class BottomSheetButton extends StatelessWidget {
     return    Container(height: 48,width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withOpacity(0.08),
       ),
       child:
 

@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qvid/Components/entry_field.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:qvid/Functions/Variables.dart';
@@ -17,7 +20,9 @@ import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as Im;
+import 'dart:math' as Math;
 class EditProfile extends StatefulWidget {
 
 
@@ -221,17 +226,30 @@ class _EditProfileState extends State<EditProfile> {
     return DefaultTabController(
         length: 2,
         child:Scaffold(
+          backgroundColor: bottomNavColor,
           key: _scaffoldKey,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(280.0),
         child: AppBar(
-          leading: Functions.backButtonMain(context),
+          leading: Functions.backButtonMain(context, function: () async{
+             await DefaultCacheManager().removeFile(Variables.user_pic);
+            await CachedNetworkImage.evictFromCache(Variables.user_pic);
+            final NetworkImage provider = NetworkImage(Variables.user_pic);
+
+             imageCache.clear();
+
+             provider.evict().then<void>((bool success) {
+              if (success)
+                debugPrint('removed image!');
+            });
+            Navigator.pop(context);
+          }),
           flexibleSpace: Column(
             children: <Widget>[
 
               Spacer(),
               Padding(padding: EdgeInsets.only(top: 50),
-                child: Functions.showProfileImage(Variables.user_pic, 120,0)
+                child: Functions.showProfileImage(Variables.user_pic, 120,0, isCache: false)
               ),
               FlatButton(onPressed: (){
 
@@ -316,8 +334,7 @@ class _EditProfileState extends State<EditProfile> {
 
                style: TextStyle(color: secondaryColor),
 
-               obscureText: true,
-               decoration: InputDecoration(
+                decoration: InputDecoration(
 
                    labelText: "Username",
                    labelStyle: TextStyle(color: Colors.white70, fontFamily: Variables.fontName ),
@@ -398,7 +415,8 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Widget buildAccountInfo(var locale) {
-    return ListView(
+
+     return ListView(
       physics: BouncingScrollPhysics(),
       children: <Widget>[
 
@@ -421,7 +439,7 @@ class _EditProfileState extends State<EditProfile> {
 
                 width: MediaQuery.of(context).size.width,
                 child: DropdownButton<String>(
-                  value: Functions.isNullEmptyOrFalse(gender) ? "1" : gender,
+                  value: Functions.isNullEmptyOrFalse(gender) ? "1" : Functions.isNullEmptyOrFalse(gender.trim()) ?"1":gender,
                   icon: null,
                   elevation: 16,
                   style: TextStyle(color: Colors.white),
@@ -436,8 +454,7 @@ class _EditProfileState extends State<EditProfile> {
                   dropdownColor: darkColor,
                   items:Variables.genders
                       .map<DropdownMenuItem<String>>((String value) {
-                    print(value);
-                    if(value == "1")
+                     if(value == "1")
                     {
                       return DropdownMenuItem<String>(
                         value: value,
@@ -545,9 +562,9 @@ class _EditProfileState extends State<EditProfile> {
 
 
     File croppedFile = await ImageCropper.cropImage(
-        compressQuality: 80,
-        maxWidth: 800,
-        maxHeight: 800,
+        compressQuality: 70,
+        maxWidth: 200,
+        maxHeight: 200,
         sourcePath: compressedImage.path,
         aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
         aspectRatioPresets: [
@@ -584,57 +601,59 @@ class _EditProfileState extends State<EditProfile> {
   bool isLoading = false;
   submitForm(String link, File _image, name) async {
 
-    Dio dio = new Dio();
+
+
 
     isLoading = true;
     setState(() {
 
     });
-    FormData formdata = new  FormData.fromMap({"file":  base64Encode(_image.readAsBytesSync()), "name" :name  });
-    //formdata.files.add(MapEntry("file",new MultipartFile.fromBytes(bytes)));
 
-    dio.post(link, data: formdata, options: Options(
-      method: 'POST',
-      responseType: ResponseType.json,
-      headers: {
-        "token": Variables.token,
-         'refresh_token' : Variables.refreshToken
-      },
+    Functions fx  =Functions();
+    var req = await fx.postReq(Variables.get_profile_picture_url, jsonEncode({}), context);
 
-    ))
-        .then((response) async {
 
-      print(response.data.toString());
-      if(!response.data["isError"])
-      {
-        if(response.data["data"]!=null)
-          Variables.user_pic = response.data["data"];
-
-        String s = Variables.user_pic;
-        print(s);
-        if(s.contains("/local/"))
-          {
-             List l = s.split("local/");
-           print(l);
-            Variables.user_pic = l[1];
-          }
-
-        SharedPreferences preferences = await SharedPreferences.getInstance();
-        preferences.setString(Variables.picString, Variables.user_pic);
-      }
-      setState(() {
-        isLoading = false;
-      });
-
-    }
-    )
-        .catchError((error) {
-      setState(() {
-
-        isLoading = false;
-      });
+    var r = jsonDecode(req.body);
+    await DefaultCacheManager().removeFile(Variables.user_pic);
+    await CachedNetworkImage.evictFromCache(Variables.user_pic);
+     final NetworkImage provider = NetworkImage(Variables.user_pic);
+    provider.evict().then<void>((bool success) {
+      if (success)
+        debugPrint('removed image!');
     });
 
+
+
+     //formdata.files.add(MapEntry("file",new MultipartFile.fromBytes(bytes)));
+    String uploadBinaryURL = r["url"];
+    await http.put(
+      Uri.parse(uploadBinaryURL),
+      headers: {
+        "Content-Type": "application/octet-stream",
+        'x-amz-acl': 'public',
+        'Connection': 'keep-alive',
+      },
+      body: _image.readAsBytesSync(),
+    );
+
+
+
+await fx.postReq(Variables.on_profile_img_upload, jsonEncode({
+  "path" : r["fileName"]
+}), context);
+
+
+    Variables.user_pic = r["cdnurl"];
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+      preferences.setString(Variables.picString, Variables.user_pic);
+
+
+
+
+    setState(() {
+      isLoading = false;
+    });
 
 
 
@@ -647,7 +666,7 @@ class _EditProfileState extends State<EditProfile> {
     bio = Variables.bio;
     username= Variables.username;
     full_name = Variables.f_name + " " + Variables.l_name;
-    gender= Variables.gender;
+    gender= Variables.gender==null?"1":Variables.gender;
     dob = Variables.dob;
     phoneNumber = Variables.phoneNumber;
   }

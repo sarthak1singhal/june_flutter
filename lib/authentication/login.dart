@@ -8,8 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:qvid/Auth/login_navigator.dart';
-import 'package:qvid/Components/continue_button.dart';
+ import 'package:qvid/Components/continue_button.dart';
 import 'package:qvid/Functions/LocalColors.dart';
 import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
@@ -18,7 +17,6 @@ import 'package:qvid/Theme/colors.dart';
 import 'package:qvid/authentication/enterEmail.dart';
 import 'package:qvid/authentication/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'enterPassword.dart';
 import 'forgotPassword.dart';
@@ -196,8 +194,11 @@ class _MyHomePageState extends State<Login> {
   Widget build(BuildContext context) {
 
       return Scaffold(
+
+
       backgroundColor: LocalColors.backgroundLight,
       appBar: AppBar(
+
         leading: Functions.backButton(context),
       ),
       key: _scaffoldKey,
@@ -401,10 +402,13 @@ Spacer(),
                         ),
                         color: fbColor,
                         onPressed: () async {
+                          if(isLoadingFacebook) return;
+                          isLoadingFacebook = true;
                           final facebookLogin = FacebookLogin();
                           final result = await facebookLogin.logIn(['email']);
                           dynamic profile = "";
                           // print(result.accessToken.token);
+                          if(result.accessToken!=null)
                           if(result.accessToken.isValid()) {
                             final token = result.accessToken.token;
                             final graphResponse = await http.get(
@@ -425,19 +429,104 @@ Spacer(),
                               );
                               break;
                             case FacebookLoginStatus.cancelledByUser:
+                              isLoadingFacebook = false;
 
-                              Functions.showToast("Login cancellled by the user");
+                              Functions.showSnackBar(_scaffoldKey,"Login cancellled by the user");
 
                               break;
                             case FacebookLoginStatus.error:
-                              Functions.showToast("Some error occured");
+                              isLoadingFacebook = false;
+
+                              Functions.showSnackBar(_scaffoldKey,"Some error occured");
 
                               break;
                           }
+
+//                          isLoadingFacebook = false;
+
                         },
                       ),
                     ),
+                    FlatButton(
+                      padding: EdgeInsets.only(left: 0, right: 5),
+                      child: Text("Forgot Password?", style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.black45,
+                        inherit: false,
+                        fontFamily: Variables.fontName,
+                        decoration: TextDecoration.underline,
 
+                      ),),
+                      onPressed: () async{
+
+
+                        if(!_formKey.currentState.validate())
+                          {
+                            return;
+                          }
+
+                        if(isLoading) return;
+                        setState(() {
+                          isLoading = true;
+                        });
+
+
+                        try{
+                          var res =  await Functions.unsignPostReq(Variables.forgortPasswordSendOtp, jsonEncode({
+                            "email" : number.trim()
+
+                          }));
+
+                          var s = jsonDecode(res.body);
+                          print(s);
+
+
+                          if(s["isError"]) {
+
+                            if(!Functions.isNullEmptyOrFalse(s["message"]))
+                            {
+                              Functions.showSnackBar(_scaffoldKey, s["message"]);
+                            }
+
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            return;
+
+                          }
+                          var isLoggedIn = await Navigator.push(context, MaterialPageRoute(builder: (context) =>  Verify(
+                            usernameOrEmail: number.trim(),
+                            hashKey: s["key"],
+                          )));
+
+
+
+
+                          if(isLoggedIn != null)
+                          {
+                            if(isLoggedIn)
+                            {
+                              Navigator.pop(context);
+                            }
+                          }
+
+
+
+                        }catch(e){
+                          setState(() {
+                            isLoading = false;
+                          });
+                        }
+
+                        setState(() {
+                          isLoading = false;
+                        });
+
+
+
+                      },
+                    ),
                     Spacer(flex: 6,),
 
 

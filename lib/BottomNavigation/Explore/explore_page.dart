@@ -75,7 +75,7 @@ class _ExploreBodyState extends State<ExploreBody> {
     ];
     return Padding(
       padding: EdgeInsets.only(bottom: 60.0, top: 20.0),
-      child: Scaffold(
+      child:  Scaffold(
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(72.0),
           child: Container(

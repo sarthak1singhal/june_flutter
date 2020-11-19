@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -9,7 +10,8 @@ import 'package:flutter_web_view/flutter_web_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:qvid/Functions/LocalColors.dart';
+ import 'package:qvid/Functions/LocalColors.dart';
+import 'package:qvid/Functions/SwipeUpHeader.dart';
 import 'package:qvid/authentication/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -36,6 +38,7 @@ class Functions {
              context, MaterialPageRoute(builder: (context) => Login()));
          print("SIGN IN");
          print(Variables.token);
+         if(isIdChange == null) isIdChange = false;
          if (isIdChange) {
            var m = jsonDecode(params);
            m["fb_id"] = Variables.fb_id;
@@ -60,21 +63,20 @@ class Functions {
     );
     print("KADLKDNSLKAN");
 
+    var as = jsonDecode(res.body);
     print(res.body);
 
     if (res.statusCode == 403) {
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
 
       //  Navigator.pop(context);
-
       Navigator.push(context, MaterialPageRoute(builder: (context) => Login()));
-
       prefs.setString(Variables.tokenString, "");
       prefs.setString(Variables.refreshTokenString, "");
       Variables.refreshToken = "";
       Variables.token = "";
-
       return null;
+
     }
 
     var l = res.headers["set-cookie"].split("HttpOnly,");
@@ -128,20 +130,15 @@ class Functions {
 
 
 
-  static Widget showProfileImage (String url, double size, int isVerified) {
-    bool _validURL = Uri.parse(url).isAbsolute;
-
-    String u = url;
-    print(url);
-    if (!_validURL) {
-      url = Variables.base_url + "local/?p=" + url;
-
-//      return Image.asset("assets/user/user1.png");
-    }
-
+  static Widget showProfileImage (String url, double size, int isVerified, {bool isCache}) {
+    if(url == null) url = "";
+    bool
     _validURL = Uri.parse(url).isAbsolute;
 
-    if (!_validURL || u.contains("assets")) {
+
+    if(isCache ==null) isCache = false;
+
+    if (!_validURL  ) {
       return
         Stack(
           children: [Container(
@@ -153,14 +150,18 @@ class Functions {
 
                   child:Image.asset("assets/user/user1.png")
               )),
-            isVerified==1?  Positioned(child: Container(
-              height: 15,
-              width: 15,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(20)),
-                  color: Colors.pink
+            isVerified==1? Positioned(child: Container(
+              child: Center(
+                child: Image(image: AssetImage(
+                    "assets/icons/ic_verified.png"
+                ),),
               ),
-            ), right: 0,bottom: 0,):Container(height: 0,width: 0,)
+              height: size <=38 ? 13 : size> 60 ?18 :15,
+              width: size <=38 ? 13 : size> 60 ?18 : 15,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+            ), right: size> 50 ? 2 : 0,bottom: size> 50 ? 2 : 0,):Container(height: 0,width: 0,)
 
           ],
         )
@@ -178,7 +179,7 @@ class Functions {
 
               borderRadius: BorderRadius.circular(60.0),
 
-              child:CachedNetworkImage(
+              child: isCache ? CachedNetworkImage(
                 imageUrl: url,
                 imageBuilder: (context, imageProvider) => Container(
                   decoration: BoxDecoration(
@@ -189,20 +190,25 @@ class Functions {
                     ),
                   ),
                 ),
-                placeholder: (context, url) => Functions.profileImageLoadEffect(),
+                placeholder: (context, url) => Functions.profileImageLoadEffect(size),
                 errorWidget: (context, url, error) => Functions.profileImageErrorEffect(),
-              )
+              ): Image.network(url, fit: BoxFit.cover)
 
           ),
         ),
         isVerified==1?  Positioned(child: Container(
-          height: 15,
-          width: 15,
+
+          child: Center(
+            child: Image(image: AssetImage(
+              "assets/icons/ic_verified.png"
+            ),),
+          ),
+          height: size <=38 ? 13 : size> 60 ?18 :15,
+          width: size <=38 ? 13 : size> 60 ?18 : 15,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20)),
-            color: Colors.pink
-          ),
-        ), right: 0,bottom: 0,):Container(height: 0,width: 0,)
+           ),
+        ), right: size> 50 ? 2 : 0,bottom: size> 50 ? 2 : 0,):Container(height: 0,width: 0,)
       ],
     );
   }
@@ -247,6 +253,24 @@ class Functions {
     );
   }
 
+
+  static Widget swipeDownHeaderLoader(){
+      return ClassicHeader();
+  }
+
+
+  static List<String> getHashTags(String string){
+    List<String> h = [];
+      RegExp exp = new RegExp(r"\B#\w\w+");
+    exp.allMatches(string).forEach((match){
+
+       h.add(match.group(0).replaceAll("#", ""));
+    });
+
+
+    return h;
+  }
+
   static Widget showLoaderWhite() {
     return Center(
       child: Container(
@@ -260,8 +284,12 @@ class Functions {
     );
   }
 
-  static Widget showError(String message) {
-    return Center(
+  static Widget showError(String message, {int code}) {
+
+      //code == 0 for conntection error, 1 for NO FOLLOWER EXIST, START FOLLOWING NOW
+      if(code ==null) code =0;
+
+      return Center(
       child: Container(
         height: 40,
         width: 40,
@@ -270,11 +298,11 @@ class Functions {
     );
   }
 
-  static Widget profileImageLoadEffect() {
+  static Widget profileImageLoadEffect(double s) {
     return Container(
       color: Colors.white38,
-      height: 20,
-      width: 20,
+      height: s,
+      width: s,
     );
   }
 
@@ -310,18 +338,40 @@ class Functions {
     return s;
   }
 
-  static bool isNullEmptyOrFalse(Object o) =>
-      o == null || false == o || "" == o || 0 == o;
+  static bool isNullEmptyOrFalse(Object o){
+    bool d =  o == null || false == o || "" == o || 0 == o;
 
-  static void showToast(message) {
-    Fluttertoast.showToast(
-        msg: message,
-        toastLength: Toast.LENGTH_SHORT,
+    return d;
+
+    }
+
+  static void showToast(message, context) {
+    FToast fToast = FToast();
+    fToast.init(context);
+
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(7.0),
+        color: LocalColors.blue,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+
+          Text(message, style: TextStyle(
+            inherit: false,
+            height: 1.5,
+            fontSize: 14
+          ),),
+        ],
+      ),
+    );
+
+    fToast.showToast(
+        child: toast,
         gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+        toastDuration: Duration(seconds: 2),);
   }
 
   static Future<void> showMyDialog(context, String title, String message,
@@ -347,7 +397,7 @@ class Functions {
                            decoration: new BoxDecoration(
                               color: Colors.white10,//black.withOpacity(0.5),
                              borderRadius: BorderRadius.circular(20)
-                                  
+
 
                            ),
 
@@ -443,6 +493,8 @@ class Functions {
                   left: offset.dx,
                   top: offset.dy,
                   child: Container(
+
+
                     child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                       child: new BackdropFilter(
@@ -563,7 +615,7 @@ class Functions {
     return IconButton(
       icon: Icon(
         Icons.arrow_back_ios,
-        color: Colors.white60,
+        color: Colors.white.withOpacity(0.85),
         size: 20,
       ),
       onPressed: function == null
@@ -573,19 +625,50 @@ class Functions {
           : function,
     );
   }
-
-  static Widget backButton2(context) {
-    return IconButton(
-      icon: Icon(
-        Icons.arrow_back_ios,
-        color: LocalColors.textColorDark,
-        size: 20,
-      ),
-      onPressed: () {
+ static Widget backButtonWithGlassEffect(context, {Function function}) {
+    return  GestureDetector(
+      onTap: function == null
+          ? () {
         Navigator.pop(context);
-      },
+      }
+          : function,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: new BackdropFilter(
+          filter: new ImageFilter.blur(sigmaX: 15.0, sigmaY:15.0),
+          child:   new Container(
+            width: 38,
+            height: 38,
+            decoration: new BoxDecoration(
+                color: Colors.black.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(30)
+
+
+            ),
+
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 9.8,
+                  left: 12.5,
+                  child: Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                  size: 18,
+                ),)
+              ],
+            )
+
+          ),
+
+
+        ),
+
+      ),
     );
   }
+
+
 
   static openWebView(String url, Map<String, String> header) async {
     FlutterWebView flutterWebView = new FlutterWebView();
@@ -635,7 +718,7 @@ class Functions {
 
       _formattedNumber =
           _formattedNumber.substring(0, _formattedNumber.length - 1) +
-              " " +
+              "" +
               _formattedNumber.substring(
                   _formattedNumber.length - 1, _formattedNumber.length);
     } else
@@ -650,40 +733,43 @@ class Functions {
     }
 
     for (int i = 0; i < data.length; i++) {
-      var s = data["sound"];
+      var s = data[i]["sound"];
       Sounds sound;
-      if (s == null) {
+
+       if (s == null) {
         sound = null;
-      } else if (s["id"] == null) {
-        sound = null;
-      } else {
-        sound = Sounds(
+      }
+      /*else if (s["id"] == null) {
+        //sound = null;
+      }*/ //else {
+         sound = Sounds(
             s["id"],
-            s["audio_path"],
-            s["audio_path"],
+             s["audio_path"][1],
+            s["audio_path"][0],
             s["sound_name"],
             s["description"],
             s["thum"],
             s["section"],
             s["created"]);
-      }
+    //  }
+      print(data[i]["fb_id"]);
 
-      list.add(Videos(
-          data["id"],
-          data["video"],
-          data["thum"],
-          data["fb_id"],
-          data["liked"],
-          data["user_info"]["first_name"],
-          data["user_info"]["last_name"],
-          data["user_info"]["profile_pic"],
-          data["user_info"]["username"],
-          data["user_info"]["verified"],
-          data["count"]["like_count"],
-          data["count"]["video_comment_count"],
-          data["count"]["view"],
-          data["description"],
-          data["created"],
+       list.add(Videos(
+          data[i]["id"],
+          data[i]["video"],
+          data[i]["thum"],
+          data[i]["fb_id"],
+          data[i]["liked"],
+          data[i]["user_info"]["first_name"],
+          data[i]["user_info"]["last_name"],
+          data[i]["user_info"]["profile_pic"],
+          data[i]["user_info"]["username"],
+          data[i]["user_info"]["verified"],
+          data[i]["count"]["like_count"],
+          data[i]["count"]["video_comment_count"],
+          data[i]["count"]["view"],
+          data[i]["description"],
+          data[i]["created"],
           sound,
           context
       ));
@@ -691,4 +777,9 @@ class Functions {
 
     return list;
   }
+   static String generateRandomString(int len) {
+      var r = Random();
+      const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+      return List.generate(len, (index) => _chars[r.nextInt(_chars.length)]).join();
+    }
 }

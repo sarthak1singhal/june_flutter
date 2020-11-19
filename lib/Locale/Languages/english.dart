@@ -101,7 +101,7 @@ Map<String, String> english() {
     'comment12': 'Hey, Wassup?',
     'comment13': 'How you doing?',
     'comment14': 'Hello, there?',
-    'verifiedBadgeRequest': 'Verified Badge Request',
+    'verifiedBadgeRequest': 'Verification',
     'provide': 'Provide valid identification for verification',
     'clickCurrent': 'Click Current Selfie',
     'clickNow': 'CLICK NOW',

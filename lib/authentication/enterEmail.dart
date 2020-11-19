@@ -13,7 +13,6 @@ import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:qvid/authentication/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'enterPassword.dart';
 import 'forgotPassword.dart';

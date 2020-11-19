@@ -14,25 +14,7 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     var locale = AppLocalizations.of(context);
     List<Help> helps = [
-      Help(locale.howToCreateAccount,
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin magna velit, posuere eu consequat id, fermentum in ex. Phasellus imperdiet, ante sit amet rhoncus mattis, quam dolor venenatis felis, vitae mollis sapien lorem a justo.\n\nVestibulum ut nunc et tortor porta blandit. Sed tincidunt urna eu urna bibendum iaculis. Duis porttitor ac dui ac mattis. Aenean eu nulla ut dolor accumsan tincidunt. Aliquam viverra mattis arcu.'),
-      Help(locale.howToChangePassword,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howToPostVideo,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howToDeleteVideo,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howToChangeProfileInfo,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howCanIShare,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howToChangeProfileInfo,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howToPostVideo,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-      Help(locale.howToDeleteVideo,
-          'Nulla facilisi. Ut in sapien et risus ullamcorper vestibulum ut eget leo.'),
-    ];
+        ];
     return Scaffold(
       appBar: AppBar(
         title: Text(locale.help),

@@ -17,6 +17,7 @@ class EntryField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final Color fillColor;
   final EdgeInsets padding;
+  final EdgeInsets contentPadding;
   Function onChanged;
   Function onSubmitted;
   Function validator;
@@ -26,6 +27,7 @@ class EntryField extends StatelessWidget {
 
    EntryField({
 
+     this.contentPadding,
      this.onChanged,
     this.obscureText,
     this.focusNode,
@@ -70,6 +72,7 @@ class EntryField extends StatelessWidget {
         autofocus: false,
 
 
+
         controller: controller,
         initialValue: initialValue,
         readOnly: readOnly ?? false,
@@ -80,7 +83,7 @@ class EntryField extends StatelessWidget {
         decoration: InputDecoration(
 
 
-            contentPadding: EdgeInsets.all(16.0),
+            contentPadding: contentPadding == null ?EdgeInsets.all(16.0) : contentPadding,
             filled: true,
             fillColor: fillColor ?? Colors.transparent,
             prefixIcon: prefix,

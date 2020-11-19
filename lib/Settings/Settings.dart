@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:qvid/BottomNavigation/MyProfile/edit_profile.dart';
    import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Functions/functions.dart';
@@ -25,9 +26,9 @@ class _MyHomePageState extends State<Settings > {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: bottomNavColor,
       appBar: AppBar(
-        backgroundColor: backgroundColor,
+        backgroundColor: bottomNavColor,
 
         leading: Functions.backButtonMain(context),
         elevation: 0,
@@ -92,10 +93,13 @@ class _MyHomePageState extends State<Settings > {
                SharedPreferences pref = await SharedPreferences.getInstance();
                pref.setString(Variables.tokenString, "");
                pref.setString(Variables.refreshTokenString, "");
+               pref.setString(Variables.fbid_String, "");
                Navigator.pop(context);
                Navigator.pop(context);
+
              }, secondary: (){
                Navigator.pop(context);
+
              }, secondaryText: "Cancel");
 
 

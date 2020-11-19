@@ -22,7 +22,6 @@ class SearchGrid extends StatefulWidget {
   final String views;
   final String keyword;
   ScrollController scrollController;
-  int type; // 1 for videos by hashtag, 2 for my liked soundVideos, 3 for by searchVideos and keyword
 
 
   SearchGrid(this.list, this.keyword, {this.isLoading, this.icon, this.onTap, this.viewIcon, this.views, this.scrollController});
@@ -71,7 +70,7 @@ class _MyHomePageState extends State<SearchGrid>  {
           slivers: <Widget>[
             SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,
-                  childAspectRatio: 2 / 2.5,
+                  childAspectRatio: 2 / 3,
                   crossAxisSpacing: 3,
                   mainAxisSpacing: 3,
                 ),
@@ -83,12 +82,12 @@ class _MyHomePageState extends State<SearchGrid>  {
                             MaterialPageRoute(
                                 builder: (context) => FollowingTabPage(
                                   list, index, 5, Variables.search, widget.keyword,
-                                    videos1, imagesInDisc1, false,
-                                    variable: 1))),
+                                   false,
+                                    list.length))),
                         child: Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                                image: NetworkImage(list[index].thumb_url), fit: BoxFit.fill),
+                                image: NetworkImage(list[index].thumb_url), fit: BoxFit.cover),
                             borderRadius: BorderRadius.circular(5),
                           ),
                           padding: EdgeInsets.all(8),

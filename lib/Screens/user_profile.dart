@@ -69,7 +69,9 @@ List<Videos> listMyVideos = [];
   @override
   void initState() {
     // TODO: implement initState
+
     super.initState();
+    fb_id = widget.userFb_id;
     getData();
     scrollController.addListener(() {
       print(scrollController.position.extentAfter );
@@ -98,7 +100,7 @@ List<Videos> listMyVideos = [];
         Functions fx = Functions();
 
         var res = await fx.postReq(Variables.videosByUserId , jsonEncode({
-          "fb_id" : fb_id,
+          "fb_id" : widget.userFb_id,
           "my_fb_id" : Variables.fb_id,
           "limit" : 21,
           "offset" : offset1
@@ -220,6 +222,19 @@ List<Videos> listMyVideos = [];
           following = data["userData"]["total_following"];
           //preferences.setString(Variables.picString, user["bio"]);
         }
+        if(!Functions.isNullEmptyOrFalse(data["userData"]["follow_Status"]))
+          {
+
+            if(!Functions.isNullEmptyOrFalse(data["userData"]["follow_Status"]["follow"]))
+            {
+
+              if(data["userData"]["follow_Status"]["follow"]=="0")
+                {
+                  isFollow = false;
+                }else
+                  isFollow = true;
+            }
+          }
 
         if(data["msg"]!=null)
           listMyVideos = Functions.parseVideoList(data["msg"], context,list: listMyVideos);
@@ -258,19 +273,19 @@ List<Videos> listMyVideos = [];
 
   }
 
+  bool isFollow = false;
+
 
   RefreshController _refreshController =
   RefreshController(initialRefresh: false);
 
-  void _onRefresh() async {
-    // monitor network fetch
-    //  pageNo = 0;
-    //  isMore = true;
+
+  onRefresh()async {
     await getData();
-    // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
-    setState(() {});
+
   }
+
 
   double width;
 
@@ -286,11 +301,22 @@ List<Videos> listMyVideos = [];
         .top;
     return Scaffold(
       appBar: AppBar(
-
+        title: (!isLoading && !isError)? Text(
+          username == null ? "" : username, style: TextStyle(
+            color: Colors.white, fontSize: 18
+        ),
+        ): Container(),
         leading: Functions.backButtonMain(context),
       ),
-      body: isLoading   ?
-      Functions.showLoader()
+      body:   SmartRefresher(
+          enablePullDown: true,
+          physics: BouncingScrollPhysics(),
+
+          header: Functions.swipeDownHeaderLoader(),
+          controller: _refreshController,
+          onRefresh: onRefresh,
+          child: isLoading   ?
+      Functions.showLoaderSmall()
           :   isError? Functions.showError(errorMessage) :
       NestedScrollView(
           controller: scrollController,
@@ -300,68 +326,98 @@ List<Videos> listMyVideos = [];
 
 
               SliverToBoxAdapter(child: Padding(
-                padding: EdgeInsets.only(left: 20, right: 22,top: 16),
+                padding: EdgeInsets.only(left: 20, right: 22,top: 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Row(
                       children: <Widget>[
 
-                        Functions.showProfileImage(profile_pic, 65, isVerified)
+                        Functions.showProfileImage(profile_pic, 75, isVerified)
                         ,
+                        Container(
+                          width: MediaQuery.of(context).size.width - 22-20-75-22,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: <Widget>[
+                              RowItem(
+                                  Functions.getRedableNumber(likes),
+                                  locale.liked,
+                                  null),
+                              RowItem(
 
+                                  Functions.getRedableNumber(followers),locale.followers, FollowersPage(fb_id)),
+                              RowItem(
+
+                                  Functions.getRedableNumber(following), locale.following, FollowingPage(fb_id)),
+                            ],
+                          ),
+                          height: 120,
+                        ),
 
                         Container(width: 22,),
 
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                              f_name + " "  + l_name,
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                            ),
-
-                            Container(height: 8,),
-                            Text(
-                              Functions.isNullEmptyOrFalse(username) ? "" : username,
-                              style: TextStyle(
-                                  fontSize: 14, color: disabledTextColor),
-                            ),
-
-                          ],
-                        )],
+                        ],
                     ),
 
-                    Container(height: 22,),
+                    Container(height: 2,),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          f_name + " "  + l_name,
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
 
+                        Container(height: 6,),
+
+
+                      ],
+                    ),
                     Wrap(
                       children: <Widget>[
                         Text(
                           bio,
                           textAlign: TextAlign.left,
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w400),
                         ),
                       ],
                     ),
+                    Container(height:  !Functions.isNullEmptyOrFalse(bio) ? bio.trim().length>0 ?14 : 0:0,),
+                  Variables.fb_id!=widget.userFb_id?  Container(
 
-                    Container(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          RowItem(
-                              Functions.getRedableNumber(likes),
-                              locale.liked,
-                              null),
-                          RowItem(
 
-                              Functions.getRedableNumber(followers),locale.followers, FollowersPage()),
-                          RowItem(
+                    width: MediaQuery.of(context).size.width,
+                      child: RaisedButton(onPressed: () async{
 
-                              Functions.getRedableNumber(following), locale.following, FollowingPage()),
-                        ],
+                           isFollow = !isFollow;
+                           setState(() {
+
+                           });
+
+
+                           Functions fx = Functions();
+                           var t = await fx.postReq(
+                               Variables.follow_users, jsonEncode({
+                             "other_userid":widget.userFb_id,
+                             "status" : isFollow ? 1 :0
+                           }), context);
+
+                      },
+                        color: mainColor,
+
+                        child: Text(isFollow ? "Unfollow" : "Follow", style: TextStyle(
+                          color: Colors.white,
+                          inherit: false,
+                          fontFamily: Variables.fontName
+
+                        ),),
+
                       ),
-                      height: 120,
-                    )
+                    ) : Container(),
+                    Container(height: Variables.fb_id!=widget.userFb_id?  21:17,)
+
+
                   ],
                 ),
               ),),
@@ -390,7 +446,7 @@ List<Videos> listMyVideos = [];
               );
             },
           )
-      ),);
+      )),);
   }
 
 

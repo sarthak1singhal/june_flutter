@@ -26,7 +26,7 @@ class ProfilePageButton extends StatelessWidget {
           text,
           style: TextStyle(
               fontSize: 12,
-              color: textColor ?? mainColor,
+              color: textColor ?? mainColor.withOpacity(0.9),
               fontWeight: FontWeight.w500),
         ),
       ),

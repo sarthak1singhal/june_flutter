@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:qvid/BottomNavigation/Home/following_tab.dart';
 import 'package:qvid/BottomNavigation/Home/home_page.dart';
@@ -22,10 +23,9 @@ class TabGrid extends StatefulWidget {
   final IconData viewIcon;
   final String userId;
   final bool isLoading;
-  final bool isRequestMade;
+   final bool isRequestMade;
    ScrollController scrollController;
-  int type; // 1 for videos by userID, 2 for my liked videos, 3 for by search videos
-
+  int type; // 1 for videos by userID, 2 for my liked videos
 
   TabGrid(this.list, this.userId, this.type, {this.isLoading, this.icon, this.onTap, this.viewIcon,  this.scrollController, this.isRequestMade});
 
@@ -62,55 +62,83 @@ class _MyHomePageState extends State<TabGrid> with
 
   @override
   Widget build(BuildContext context) {
-
     return NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (OverscrollIndicatorNotification overscroll) {
           overscroll.disallowGlow();
           return;
         },
         child: CustomScrollView(
+
             slivers: <Widget>[
               widget.isRequestMade && list.length == 0? Functions.noVideoByUser(context): SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,
-                  childAspectRatio: 2 / 2.5,
+                  childAspectRatio: 2 / 3,
                   crossAxisSpacing: 3,
                   mainAxisSpacing: 3,
                 ),
                 delegate: SliverChildBuilderDelegate(
+
                         (BuildContext context, int index) {
                       return      GestureDetector(
-                        onTap: () => Navigator.push(
+                        onTap: () {
+
+                           Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => FollowingTabPage(
                                   list, index, widget.type, widget.type==1 ? Variables.videosByUserId : Variables.my_liked_video,null,
-                                    videos1, imagesInDisc1, false,
-                                    variable: 1))),
+                                     false, list.length, userId: widget.userId)));},
                         child: Container(
+
+                          clipBehavior: Clip.hardEdge,
                           decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: NetworkImage(list[index].thumb_url), fit: BoxFit.fill),
+                             image: DecorationImage(
+                                image: CachedNetworkImageProvider(list[index].thumb_url), fit: BoxFit.cover),
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          padding: EdgeInsets.all(8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Icon(
-                                widget.viewIcon,
-                                color: secondaryColor,
-                                size: 15,
-                              ) ??
-                                  SizedBox.shrink(),
-                              !Functions.isNullEmptyOrFalse(list[index].views.toString()) ? Text(' ' + list[index].views.toString()) : SizedBox.shrink(),
-                              Spacer(),
-                              Icon(
-                                widget.icon,
-                                color: mainColor,
-                              ) ??
-                                  SizedBox.shrink(),
+                           child: Stack(
+                            children: [
+
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(height: 35, width: double.maxFinite,
+
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(width: 8,),
+
+                                          !Functions.isNullEmptyOrFalse(list[index].views.toString()) ? Text(Functions.getRedableNumber(list[index].views)) : SizedBox.shrink(),
+                                         Container(width: 4,),
+                                          Icon(
+                                            Variables.viewIcon,
+                                            color: Colors.white,
+                                            size: 12,
+                                          )
+                                        ],
+                                      ),
+
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.bottomCenter,
+                                          end: Alignment.topCenter,
+                                            colors: [
+                                                Colors.black.withOpacity(0.3),
+
+                                              Colors.black.withOpacity(0.0),
+
+                                            ],
+                                            stops: [0, 1],
+
+                                        ),
+                                      ),                                    ),
+
+                                  )
+
+
                             ],
-                          ),
+                          )
                         ),
                       );
                     },

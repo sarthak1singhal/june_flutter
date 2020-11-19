@@ -120,28 +120,27 @@ class MyHomePageState  extends State<TextOverlay> {
 
      t.add(TextStyle(
         wordSpacing: 2,
-        height: 2,
+        height:2,
         color: Colors.white,
         fontWeight: FontWeight.bold,
         fontSize: fontSize,
         background: Paint()
           ..color = Colors.blue
           ..style = PaintingStyle.stroke
-          ..strokeWidth = fontSize+5
+          ..strokeWidth = fontSize+9
           ..strokeJoin = StrokeJoin.miter
 
     ), );
     t.add(TextStyle(
         wordSpacing: 2,
-        height: 1.5,
+        height: 1,
         color: Colors.white,
         fontWeight: FontWeight.bold,
         fontSize: fontSize,
         background: Paint()
           ..color = Colors.blue
           ..style = PaintingStyle.stroke
-          ..strokeWidth = fontSize+5
-          ..strokeMiterLimit = 100
+          ..strokeWidth = fontSize+8
           ..strokeJoin = StrokeJoin.round
 
     ), );

@@ -9,7 +9,7 @@ import '../Functions/functions.dart';
 
 class Videos{
 
-  String id, vid_url, thumb_url, fb_id, first_name, last_name, profile_pic, username;
+  int id;String vid_url, thumb_url, fb_id, first_name, last_name, profile_pic, username;
   int verified, likeCount, commentCount, isLiked ;
   String  description, created;
   int views;
@@ -31,25 +31,34 @@ class Videos{
 
 
 
-  likeUnlikeVideo(){
+  likeUnlikeVideo() async{
 
     if(isLiked==1)
       {
         isLiked = 0;
+        if(likeCount>0)
+          {
+            likeCount--;
+          }
       }
     else{
       isLiked = 1;
+      likeCount ++;
     }
 
     try{
       Functions fx = Functions();
-      fx.postReq(Variables.likeDislikeVideo, jsonEncode({
-        "action" : isLiked,
-        "video_id": id
-      }), context);
+
+     if(!Functions.isNullEmptyOrFalse(Variables.token))
+       var r = await  fx.postReq(Variables.likeDislikeVideo, jsonEncode({
+          "action" : isLiked,
+          "video_id": id
+        }), context);
+
 
     }catch(e){
 
+      debugPrint(e);
     }
 
     return;
@@ -82,6 +91,9 @@ class Videos{
 
 
   updateView(){
+
+    print(Variables.fb_id);
+    print(fb_id);
     if(isViewed)
       return;
 
@@ -90,6 +102,7 @@ class Videos{
         return;
 
     isViewed = true;
+
 
     try{
 
@@ -178,7 +191,7 @@ class Sounds{
 
   String streamPath, audioPath, sound_name, description, thum, section, created;
 
-  int id;
+  var id;
   bool isPlaying = false;
   var player = AudioPlayer();
 
@@ -187,17 +200,17 @@ class Sounds{
       this.description, this.thum, this.section, this.created);
 
 
-  bool changeAndTellPlayStatus(){
+  Future<bool> changeAndTellPlayStatus() async{
 
     if(isPlaying)
     {
       isPlaying  = false ;
-      pause();
+       pause();
     }
     else
     {
       isPlaying = true;
-      play();
+      await play();
     }
 
     return isPlaying;
@@ -212,19 +225,33 @@ class Sounds{
   }
 
   play() async{
+    isDownloading = true;
+
     await player.setUrl(this.streamPath);
     isPlaying = true;
+    if(isDownloading)
     player.play();
+    else {
+      player.pause();
+      isPlaying = false;
+    }
+      isDownloading = false;
+
   }
 
 
 
+  bool isDownloading = false;
   playAud()async{
+
+    isDownloading = true;
     var duration = await player.setUrl(this.streamPath);
     player.play();
 
     print(duration);
     print("duration");
+
+    isDownloading = false;
     // HlsAudioSource(Uri.parse(this.streamPath));
 
   }

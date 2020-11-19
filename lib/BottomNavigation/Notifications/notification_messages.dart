@@ -1,6 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:qvid/Functions/Variables.dart';
+import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Locale/locale.dart';
 import 'package:qvid/Routes/routes.dart';
+import 'package:qvid/Screens/user_profile.dart';
 import 'package:qvid/Theme/colors.dart';
 
 class NotificationMessages extends StatefulWidget {
@@ -10,197 +16,253 @@ class NotificationMessages extends StatefulWidget {
 
 class Notif {
   final String name;
+  final String username;
+  final String fb_id;
   final String desc;
   final String time;
   final String image;
   final String notifImage;
+  final int videoId;
   final IconData icon;
 
-  Notif(
-      this.name, this.desc, this.time, this.image, this.notifImage, this.icon);
+  Notif(this.name, this.desc, this.time, this.image, this.notifImage, this.icon, this.username, this.fb_id, this.videoId);
 }
 
-class _NotificationMessagesState extends State<NotificationMessages> {
+class _NotificationMessagesState extends State<NotificationMessages>  with AutomaticKeepAliveClientMixin<NotificationMessages>{
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  List<Notif> notification =[];
+  bool isLoading = false;
+  bool isError = false;
+  String errorMessage = "";
+  bool doesExist = true;
+  int offset = 0;
+  ScrollController scrollController = new ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+    scrollController.addListener(() {
+      if (scrollController.position.extentAfter < 300){
+        getData();
+      }
+    });
+  }
+
+ Future<void> getData({bool isRefresh}) async{
+    if(isRefresh == null) isRefresh = false;
+
+    if(!isRefresh)
+    if(!doesExist)
+    {
+      return;
+    }
+
+
+    if(!isLoading)
+    {
+      isLoading = true;
+
+      if(!isRefresh)
+        setState(() {
+        });
+
+      try{
+
+
+        Functions fx= Functions();
+        var res = await fx.postReq( Variables.getNotifications, jsonEncode({
+          "offset" :isRefresh?0: offset
+        }), context);
+
+        var data = jsonDecode(res.body);
+        if(!isRefresh)
+
+        if(data["isError"])
+        {
+          Functions.showSnackBar(_scaffoldKey, "Some error occured");
+          isError = true;
+          errorMessage = "Some error occured";
+          setState(() {
+            isLoading = false;
+          });
+          return;
+        }
+        isError = false;
+        if(isRefresh){
+          notification = [];
+          offset = 0;
+        }
+
+        if(data["msg"].length <30){
+          doesExist = false;
+        }
+        else {
+          offset = offset + 30;
+        }
+
+
+        for(int i=0;i<data["msg"].length; i++)
+        {
+          var d = data["msg"][i];
+          String fb_id = "";
+          if(!Functions.isNullEmptyOrFalse(d["fb_id"]))
+          {
+            fb_id = d["fb_id"];
+          }
+          String name = "";
+          var userDetails = d["fb_id_details"];
+          if(!Functions.isNullEmptyOrFalse(userDetails["first_name"]))
+          {
+            name = Functions.capitalizeFirst(userDetails["first_name"]);
+          }
+          if(!Functions.isNullEmptyOrFalse(userDetails["last_name"]))
+          {
+            name = name+ " " +Functions.capitalizeFirst(userDetails["last_name"]);
+          }
+
+          DateTime dateTime = DateTime.parse(d["created"]);
+
+          String desc = "";
+          if(d["type"]=="video_like")
+          {
+            desc = "liked your video";
+          }
+          if(d["type"].toString().contains("comment"))
+          {
+            desc = "commented on your video";
+          }
+          if(d["type"].toString().contains("follo"))
+          {
+            desc = "followed you";
+          }
+          notification.add(Notif(name, desc,Functions.dateToReadableString(dateTime), userDetails["profile_pic"], d["value_data"]["thum"], Icons.message, userDetails["username"], fb_id, d["id"]));
+        }
+
+
+
+      }catch(e){
+        isError = true;
+        errorMessage = Variables.connErrorMessage;
+        isLoading = false;
+        setState(() {
+
+        });
+       }
+
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+
+  RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
+
+
+  onRefresh()async {
+    await getData(isRefresh: true);
+    _refreshController.refreshCompleted();
+
+  }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
-    var locale = AppLocalizations.of(context);
-    List<Notif> notification = [
-      Notif(
-          "Emili Williamson",
-          locale.likedYourVideo,
-          "5 " + locale.minAgo,
-          "assets/user/user1.png",
-          "assets/thumbnails/dance/Layer 951.png",
-          Icons.favorite),
-      Notif(
-          "Kesha Taylor",
-          locale.commentedOnYour,
-          "5 " + locale.minAgo,
-          "assets/user/user2.png",
-          "assets/thumbnails/dance/Layer 952.png",
-          Icons.message),
-      Notif(
-          "Ling Tong",
-          locale.commentedOnYour,
-          "5 " + locale.minAgo,
-          "assets/user/user3.png",
-          "assets/thumbnails/food/Layer 783.png",
-          Icons.message),
-      Notif(
-          "Linda Johnson",
-          locale.likedYourVideo,
-          "5 " + locale.minAgo,
-          "assets/user/user4.png",
-          "assets/thumbnails/food/Layer 786.png",
-          Icons.favorite),
-      Notif("George Smith", locale.startedFollowing, "5 " + locale.minAgo,
-          "assets/user/user1.png", "assets/images/user.webp", Icons.add),
-    ];
+    super.build(context);
 
-    List<String> messages = [
-      locale.heyILikeYourVideos,
-      locale.yesIUse,
-      locale.noWorries,
-      locale.ohThank,
-      locale.alreadyLikedIt,
-    ];
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          titleSpacing: 0.0,
-          title: Align(
-            alignment: Alignment.centerLeft,
-            child: TabBar(
-              indicator: BoxDecoration(color: transparentColor),
-              isScrollable: true,
-              labelColor: mainColor,
-              labelStyle: Theme.of(context).textTheme.headline6,
-              unselectedLabelColor: disabledTextColor,
-              tabs: <Widget>[
-                Tab(text: locale.notifications),
-                Tab(text: locale.messages),
-              ],
-            ),
-          ),
-        ),
-        body: TabBarView(
-          children: <Widget>[
-            NotificationPage(notification: notification),
-            MessagesPage(notification: notification, messages: messages),
-          ],
+    var locale = AppLocalizations.of(context);
+
+
+
+    return Scaffold(
+      appBar: AppBar(
+
+        titleSpacing: 0.0,
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(child: Text(locale.notifications, style: TextStyle(fontSize: 21, fontFamily: Variables.fontName),),
+          padding: EdgeInsets.only(left: 16,top: 3),
+          )
         ),
       ),
+      body: Padding(
+      padding: EdgeInsets.only(bottom: 60),
+    child: SmartRefresher(
+          enablePullDown: true,
+          physics: BouncingScrollPhysics(),
+
+          header: Functions.swipeDownHeaderLoader(),
+          controller: _refreshController,
+          onRefresh: onRefresh,
+          child:  (isLoading && notification.length==0)? Functions.showLoaderSmall() : isError ? Functions.showError(errorMessage) : ListView.builder(
+            controller: scrollController,
+            itemCount: (isLoading && notification.length!=0) ? notification.length +1:notification.length,
+            itemBuilder: (context, index) {
+
+              if(isLoading && notification.length!=0)
+              {
+                if(index == notification.length)
+                  return Container(width: MediaQuery.of(context).size.width, height: 50, child: Functions.showLoaderSmall(),);
+              }
+
+              return  ListTile(
+                leading: Functions.showProfileImage(notification[index].image, 43, 0),
+
+                /*CircleAvatar(
+                  backgroundImage: AssetImage(notification[index].image)),*/
+                title: RichText(
+                    text: TextSpan(children: [
+                      TextSpan(
+                        text: notification[index].username + ' ',
+                        style: TextStyle(color: secondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                      TextSpan(
+                          text: notification[index].desc,
+                          style: TextStyle(color: lightTextColor.withOpacity(0.7),fontSize: 14, fontWeight: FontWeight.w400))
+                    ])),
+                subtitle: Text(
+                    notification[index].time,
+                    style: TextStyle(color: lightTextColor.withOpacity(0.35), fontSize: 12)),
+                trailing: Container(
+                  width: 40,
+                  //height: 45,
+                  child: notification[index].notifImage != null
+                      ? Container(
+                      width: 35,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(2),
+                          image: DecorationImage(
+
+                              image:
+                              NetworkImage(notification[index].notifImage),
+                              fit: BoxFit.cover)))
+                      : Container(),
+                ),
+
+
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>   UserProfilePage(fb_id: notification[index].fb_id,)),
+                  );
+                },
+              );
+            })
+        ,
+      ))
     );
   }
-}
-
-class NotificationPage extends StatelessWidget {
-  const NotificationPage({
-    Key key,
-    @required this.notification,
-  }) : super(key: key);
-
-  final List<Notif> notification;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: notification.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return Stack(children: <Widget>[
-            ListTile(
-              leading: CircleAvatar(
-                  backgroundImage: AssetImage(notification[index].image)),
-              title: Text(
-                notification[index].name,
-                style: TextStyle(color: secondaryColor),
-              ),
-              subtitle: RichText(
-                  text: TextSpan(children: [
-                TextSpan(
-                  text: notification[index].desc + ' ',
-                  style: TextStyle(color: lightTextColor),
-                ),
-                TextSpan(
-                    text: notification[index].time,
-                    style: TextStyle(color: lightTextColor.withOpacity(0.15)))
-              ])),
-              trailing: Container(
-                width: 50,
-                //height: 45,
-                child: notification[index].icon == Icons.add
-                    ? CircleAvatar(
-                        radius: 25.0,
-                        backgroundImage: AssetImage('assets/images/user.webp'),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            image: DecorationImage(
-                                image:
-                                    AssetImage(notification[index].notifImage),
-                                fit: BoxFit.fill))),
-              ),
-              onTap: () =>
-                  Navigator.pushNamed(context, PageRoutes.userProfilePage),
-            ),
-            Positioned.directional(
-                textDirection: Directionality.of(context),
-                end: 55,
-                bottom: 10,
-                child: CircleAvatar(
-                  backgroundColor: mainColor,
-                  child: Icon(
-                    notification[index].icon,
-                    color: Colors.white,
-                    size: 10,
-                  ),
-                  radius: 10,
-                )),
-          ]);
-        });
-  }
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
-class MessagesPage extends StatelessWidget {
-  const MessagesPage({
-    Key key,
-    @required this.notification,
-    @required this.messages,
-  }) : super(key: key);
 
-  final List<Notif> notification;
-  final List<String> messages;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: notification.length,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return ListTile(
-            leading: CircleAvatar(
-                backgroundImage: AssetImage(notification[index].image)),
-            title: Text(
-              notification[index].name,
-              style: TextStyle(color: secondaryColor),
-            ),
-            subtitle: Row(
-              children: <Widget>[
-                Text(
-                  messages[index],
-                  style: TextStyle(color: lightTextColor),
-                ),
-              ],
-            ),
-            trailing: Text(
-              notification[index].time,
-              style: TextStyle(color: lightTextColor.withOpacity(0.15)),
-            ),
-            onTap: () => Navigator.pushNamed(context, PageRoutes.chatPage),
-          );
-        });
-  }
-}

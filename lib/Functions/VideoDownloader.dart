@@ -1,9 +1,14 @@
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import 'package:path_provider/path_provider.dart';
+ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:qvid/Functions/Toast.dart';
+import 'package:tapioca/tapioca.dart';
 
 import 'functions.dart';
 
@@ -13,7 +18,8 @@ class MyVideoDownloader{
 
   static List<String> inQueue = [];
 
-  static downloadAndSaveHls(String url, String id) async {
+  static downloadAndSaveHls(String url, String id, String userId, BuildContext context) async {
+    toast("Video downloading");
 
     inQueue.add(id);
 
@@ -45,10 +51,12 @@ class MyVideoDownloader{
 
       String fileName =
           "vid${DateTime.now().millisecondsSinceEpoch.toString()}.mp4";
+      String finalPath =
+          "june_${DateTime.now().millisecondsSinceEpoch.toString()}.mp4";
 
 
       file = new File(value.path + "/" + fileName);
-
+      finalPath = value.path + "/" +finalPath;
 
 
       print(value.path);
@@ -59,12 +67,32 @@ class MyVideoDownloader{
       int r = await _flutterFFmpeg.execute(c);
 
       print(r);
+      final imageBitmap =
+      (await rootBundle.load("assets/others/watermarkw.png"))
+          .buffer
+          .asUint8List();
+      final tapiocaBalls = [
 
-      GallerySaver.saveVideo(file.path).then((bool success) {
+         TapiocaBall.imageOverlay(imageBitmap, 20, 5),
+        TapiocaBall.textOverlay(
+            "@$userId", 20, 93, 36, Color(0xffffffff)),
+      ];
 
-        inQueue.removeAt(0);
+
+      final cup = Cup(Content(file.path), tapiocaBalls);
+      cup.suckUp(finalPath).then((_) async {
+        print("finished");
+
+        GallerySaver.saveVideo(finalPath, albumName: "Junes").then((bool success) {
+          inQueue.removeAt(0);
+          toast("Video Saved");
+          file.delete();
+          File(finalPath).delete();
+        });
+
 
       });
+
 
 
 

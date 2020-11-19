@@ -43,27 +43,21 @@ class _PostInfoState extends State<PostInfo> {
        countDownTimer= new Timer.periodic(
         Duration(milliseconds: 500),
             (Timer timer) {
-
-
-
              if(controller==null)
                {
                  if(!MergeImagesWithVideo.isWorking) {
                    isLoading = false;
                    videoPath = MergeImagesWithVideo.outputPath;
-                   print("VIDEOOOOOOPATHHHHHHHHHH   " +  videoPath);
                    if (videoPath != null) {
                      controller = VideoPlayerController.file(File(videoPath));
+                     controller.setLooping(true);
                      controller.initialize();
                      countDownTimer.cancel();
                      controller.play();
-                     setState(() {
-
-                     });
+                     setState(() {});
                    }
                  }
                }
-
 
         },
       );
@@ -88,6 +82,7 @@ class _PostInfoState extends State<PostInfo> {
   String description = "";
   @override
   Widget build(BuildContext context) {
+
     return WillPopScope(
       child: Scaffold(
           key: _scaffoldKey,
@@ -112,7 +107,9 @@ Navigator.pop(context);
                       Container(
                         height: 200,
                         width: MediaQuery.of(context).size.width/1.5 - 14,
-                        child: TextField(
+                        child: TextFormField(
+
+
 
                           style: TextStyle(
                               color: Colors.white54
@@ -162,7 +159,13 @@ Navigator.pop(context);
 ,Spacer(),
                             ],
                           ),
-                        ) : AspectRatio(aspectRatio: controller.value.aspectRatio,child: VideoPlayer(controller),),
+                        ) : Transform.scale(
+                            scale: controller.value.aspectRatio / (( MediaQuery.of(context).size.width/3)/200),
+
+                            child:AspectRatio(aspectRatio: controller.value.aspectRatio,
+
+                              child:  VideoPlayer(controller),
+                          ),),
 
                          width: MediaQuery.of(context).size.width/3 ,
                       ),
@@ -243,7 +246,13 @@ Navigator.pop(context);
                         });
                         Functions fx = Functions();
                         var res = await fx.postReq(
-                            Variables.base_url + "getUploadUrl", jsonEncode({}),
+                            Variables.base_url + "getUploadUrl", jsonEncode({
+
+                          "description" : description,
+                          "sound_id":widget.soundId,
+                          "hashtags" : Functions.getHashTags(Functions.isNullEmptyOrFalse(description)?"":description)
+
+                        }),
                             context);
 
                         var body = jsonDecode(res.body);
@@ -259,36 +268,32 @@ Navigator.pop(context);
                           isGettingUrl = false;
                         });
 
-                        Functions.showSnackBar(
-                            _scaffoldKey, "Video upload started");
-                      //  Phoenix.rebirth(context);
+                        Functions.showToast(
+                             "Video upload started", context);
                         String uploadBinaryURL = body["url"];
-                        VideoUploader.uploadVideo(
+                         VideoUploader.uploadVideo(
                             video: File(videoPath),
                             headers: headers,
                             url: uploadBinaryURL,
                             binary: true
 
                         );
-                      }
+                         Navigator.pop(context);
+                         Navigator.pop(context);
+                         Navigator.pop(context);
+                       }
                     }
 
                     else{
-                      Functions.showSnackBar(
-                          _scaffoldKey, "Video upload starting soon");
+                      Functions.showToast(
+                          "Video upload will start soon", context);
                       MergeImagesWithVideo.uploadAfterProcessing();
-                  //    Phoenix.rebirth(context);
+
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      Navigator.pop(context);
 
                     }
-
-
-
-
-
-
-
-
-
 
 
 

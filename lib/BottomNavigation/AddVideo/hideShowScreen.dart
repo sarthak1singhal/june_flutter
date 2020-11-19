@@ -31,36 +31,8 @@ class _MyHomePageState extends State<ShowHideScreen> {
   @override
   void initState() {
     super.initState();
-    if (countDownTimer == null) {
-     /* countDownTimer= new Timer.periodic(
-        Duration(milliseconds: 500),
-            (Timer timer) {
-
-
-          if(widget.isPlaying)
-            {
-
-              time = time+0.5;
-              if(time >= widget.endTime.floor().toDouble())
-              {
-                time=0;
-              }
-
-              for(int i=0;i<widget.list.length;i++)
-              {
-
-                    widget.list[i].changeVisibility(time);
-               }
-              print(time);
-
-            }
-
-        },
-      );*/
-    }
 
     widget.controller.addListener(() {
-       //print("LSITENING");
 
        if(widget.controller.value.isPlaying)
         {

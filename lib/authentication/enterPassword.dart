@@ -13,7 +13,6 @@ import 'package:qvid/Functions/functions.dart';
 import 'package:qvid/Theme/colors.dart';
 import 'package:qvid/authentication/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 import 'forgotPassword.dart';
 
@@ -37,11 +36,6 @@ class _MyHomePageState extends State<EnterPassword> {
 
 
   }
-
-
-
-
-
 
 
   @override
@@ -77,8 +71,8 @@ class _MyHomePageState extends State<EnterPassword> {
 
 
         var res = await  Functions.unsignPostReq(Variables.loginUrl, jsonEncode({
-          "email" : number.trim(),
-          //  "password" : password.trim(),
+          "email" : widget.email.trim().toLowerCase(),
+          "password" : password.trim(),
 
 
         }));
@@ -141,6 +135,8 @@ class _MyHomePageState extends State<EnterPassword> {
 
 
 
+          Navigator.pop(context);
+          Navigator.pop(context);
 
         }
 
@@ -228,6 +224,7 @@ class _MyHomePageState extends State<EnterPassword> {
 
                     Spacer(),
                     TextFormField(
+                      obscureText: true,
                       decoration: InputDecoration(
 
                           labelText: "Password",
@@ -238,7 +235,7 @@ class _MyHomePageState extends State<EnterPassword> {
 
                       ),
                       onChanged: (s){
-                        number = s;
+                        password = s;
                       },
                       validator: (s){
                         if(s.isEmpty){

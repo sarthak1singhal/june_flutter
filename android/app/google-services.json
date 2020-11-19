@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "714229111689",
+    "firebase_url": "https://june-social-media.firebaseio.com",
+    "project_id": "june-social-media",
+    "storage_bucket": "june-social-media.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714229111689:android:2c06b359c3a70ef6a45f58",
+        "android_client_info": {
+          "package_name": "com.elysion.june"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "714229111689-0aa3jpffggd1rijuk01h313rje9e7dnj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKsu8LjIAIr8XDQY_o3vWUNJWVIUQTWSU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "714229111689-0aa3jpffggd1rijuk01h313rje9e7dnj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -27,7 +27,7 @@ class ProgressBar extends StatefulWidget {
     progress.start();
   }
 
-  changeSpeed(int speed){
+  changeSpeed(double speed){
     progress.changeSpeed(speed);
   }
 
@@ -50,6 +50,10 @@ class ProgressBar extends StatefulWidget {
 
   bool isCompleted(){
     return progress.isCompleted();
+  }
+
+  setTime(double d){
+    progress.setTime(d);
   }
 }
 
@@ -84,6 +88,9 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
    List<double> stops = [];
    List<double> stopDurations = [];
+
+
+
 
  @override
   void initState() {
@@ -148,10 +155,29 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
    double getTime(){
    if(controller==null) return 0;
      if(controller.isAnimating)
-       return time + controller.lastElapsedDuration.inMilliseconds;
+       if(controller.lastElapsedDuration.inMilliseconds!=null) {
+         print("SPEEEEEEEEEEEEED  $speed");
+         print("SPEEEEEEEEEEEEED  ${controller.lastElapsedDuration.inMilliseconds} ");
+         print((controller.lastElapsedDuration.inMilliseconds /speed)/1000);
+         return time + (controller.lastElapsedDuration.inMilliseconds / speed);
+       }
+       else {
+         return time;
+       }
      else{
+       print("returning time = " + (time/1000).toString());
        return time;
      }
+   }
+
+   setTime(double d){
+      controller.value = ((time/1000)+ d )* secondEquivalent;
+      time = time + d*1000;
+      stops.add(controller.value);
+      stopDurations.add(time);
+      setState(() {
+
+});
    }
 
    start(){
@@ -178,7 +204,7 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
    pause() {
      if (!controller.isCompleted) {
-       time = time + controller.lastElapsedDuration.inMilliseconds.toDouble();
+       time = time +  (controller.lastElapsedDuration.inMilliseconds / speed);
        stopDurations.add(time);
        controller.stop();
        isPaused = true;
@@ -220,24 +246,29 @@ class Progress extends State<ProgressBar>  with SingleTickerProviderStateMixin {
 
   }
 
+  double speed = 1;
 
-   changeSpeed(int speed){
+   changeSpeed(double s){
 
+     speed = s;
    //0.3, 0.5, 1, 2, 3
-   if(speed==2)
-     controller.duration = Duration(seconds: 60);
+   if(s==2)
+    {
+      controller.duration = Duration(seconds: 60);
+    }
 
-   else if(speed == 3)
-
+   else if(s == 3) {
      controller.duration = Duration(seconds: 90);
-
-    else if(speed == 0.5)
-
-      controller.duration = Duration(seconds: 15);
-
-   else if(speed == 0.3)
-
+   }
+    else if(s == 0.5) {
+     controller.duration = Duration(seconds: 15);
+   }
+   else if(s == 0.3) {
      controller.duration = Duration(seconds: 9);
+   }
+   else{
+     controller.duration = Duration(seconds: 30);
+   }
 
 
 

@@ -24,7 +24,7 @@ class ShareSheet extends StatefulWidget {
 
   Videos video;
   BuildContext context;
-  ShareSheet(this.context, this.video);
+   ShareSheet(this.context, this.video, );
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -34,9 +34,7 @@ class _MyHomePageState extends State<ShareSheet> {
 
   var locale;
   bool showDelete = false;
-  String link = "https://multiplatform-f.akamaihd.net/i/multi/april11/sintel/sintel-hd_,512x288_450_b,640x360_700_b,768x432_1000_b,1024x576_1400_m,.mp4.csmil/master.m3u8";
 
-  String id = "1";
 
     @override
   void initState() {
@@ -47,9 +45,10 @@ class _MyHomePageState extends State<ShareSheet> {
       {
         if(widget.video!=null)
           {
+
             if(Variables.fb_id == widget.video.fb_id )
             {
-              showDelete = true;
+               showDelete = true;
             }
           }
       }
@@ -63,15 +62,20 @@ class _MyHomePageState extends State<ShareSheet> {
   @override
   Widget build(BuildContext context) {
     return  Container(
-/*
-        height: MediaQuery.of(context).viewInsets.bottom >10?MediaQuery.of(context).size.height
-            :
-        MediaQuery.of(context).size.height / 2.5,*/
+        decoration: BoxDecoration(
+            color: Colors.transparent,
+            boxShadow:  [  BoxShadow(
+                color:  Colors.black.withOpacity(0.14),
+                blurRadius: 14,
+
+                offset: Offset(0, -6))    ]
+        ),
+
         child: ClipRRect(
 
             borderRadius: BorderRadius.vertical(top: Radius.circular(35.0)),
             child: new BackdropFilter(
-              filter: new ImageFilter.blur(sigmaX: 30.0, sigmaY: 30.0),
+              filter: new ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
               child:Stack(
                 children: <Widget>[
                   Column(
@@ -101,6 +105,7 @@ class _MyHomePageState extends State<ShareSheet> {
                           showDelete?   BottomSheetButton(
                             title: "Delete Video",
                             onTap: (){
+
                               Navigator.pop(context, "delete");
 
                             },
@@ -136,20 +141,21 @@ class _MyHomePageState extends State<ShareSheet> {
 
 
                           BottomSheetButton(
-                            onTap: MyVideoDownloader.inQueue.contains(id) ? null :(){
+                            onTap: MyVideoDownloader.inQueue.contains(widget.video.id.toString()) ? null :(){
 
 
-                              MyVideoDownloader.downloadAndSaveHls(link, id);
+                              MyVideoDownloader.downloadAndSaveHls(widget.video.vid_url, widget.video.id.toString(), widget.video.username, widget.context);
 
 
                               setState(() {
 
                               });
 
+                              Navigator.pop(context);
 
 
                             },
-                              titleWidget: MyVideoDownloader.inQueue.contains(id) ?
+                              titleWidget: MyVideoDownloader.inQueue.contains(widget.video.id.toString()) ?
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children:

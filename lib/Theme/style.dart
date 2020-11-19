@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qvid/Functions/Variables.dart';
 import 'package:qvid/Theme/colors.dart';
 
 final BorderRadius radius = BorderRadius.circular(6.0);
@@ -17,13 +18,13 @@ final ThemeData appTheme = ThemeData.light().copyWith(
 
   ///text theme
   textTheme: GoogleFonts.openSansTextTheme().copyWith(
-    subtitle1: TextStyle(color: disabledTextColor),
-    caption: TextStyle(color: disabledTextColor),
-    bodyText1: TextStyle(fontSize: 16.0),
-    headline6: TextStyle(fontSize: 18.0),
-    button: TextStyle(fontSize: 16.0, letterSpacing: 1),
-    subtitle2: TextStyle(),
-    bodyText2: TextStyle(),
+    subtitle1: TextStyle(color: disabledTextColor ),
+    caption: TextStyle(color: disabledTextColor, fontFamily: Variables.fontName),
+    bodyText1: TextStyle(fontSize: 16.0, fontFamily: Variables.fontName),
+    headline6: TextStyle(fontSize: 18.0, fontFamily: Variables.fontName),
+    button: TextStyle(fontSize: 16.0, letterSpacing: 1 ),
+    subtitle2: TextStyle( fontFamily: Variables.fontName),
+    bodyText2: TextStyle(fontFamily: Variables.fontName),
   ),
 );
 
